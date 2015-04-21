@@ -18,9 +18,16 @@
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var userID = prompt("Your name");
-          var socket = io({query: 'userID='+String(userID),path:"/_ws/socket.io/"});
-        <!--  var socket = io({ path: "/_ws/socket.io/"});-->
-         <!--  var socket = io({ path: "/_ws/socket.io/"});-->
+
+         var socket;
+        
+        if(window.location.hostname == "127.0.0.1"){
+           socket = io({query: 'userID='+String(userID)});
+        }else{
+           socket = io({query: 'userID='+String(userID),path:"/_ws/socket.io/"});
+        }
+     
+     
   <!-- var socket = io("http://nodejs-data.kermit.rd.francetelecom.fr",{ path: "/_ws/socket.io/"},{query: 'userID='+String(userID)});-->
  <!-- var socket = io.connect({query: 'userID='+String(userID)});-->
         
@@ -47,6 +54,7 @@
         });
       });
     </script>
+
     
     
 </html>

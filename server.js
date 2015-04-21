@@ -11,6 +11,7 @@ app.get('/', function(req, res){
   res.sendfile('index.html');
 });
 
+
 //retrieve Kermit variables
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
 var port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
@@ -35,8 +36,16 @@ var onlineUsers = function(){
 io.on('connection', function (socket){
 
   socket.userID = socket.handshake.query.userID;
-  connections[socket.userID] = socket;
+  
+  connections[socket.id] = socket;
   console.log('New User! ', socket.userID);
+      console.log('with id ! ', socket.id);
+    app.get('/'+socket.id, function(req, res){
+            res.sendfile('index.html');
+    });
+    
+    
+    
 
   io.emit('onlineUsers', onlineUsers());
 
