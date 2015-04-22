@@ -18,6 +18,9 @@ app.get('/', function(req, res){
 
 app.use('/js', express.static(__dirname + '/public/js'));
 
+app.get('/thankyou', function(req, res){
+  res.send('<h1>Thank you!</h1>');
+});
 
 //retrieve Kermit variables
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
@@ -60,11 +63,7 @@ io.on('connection', function (socket){
      socket.emit('receive_url_ready',newReceiverUrl)
      console.log('receive_url_ready emitted');
      
-    socket.on('disconnect', function() {
-        delete senders[socket.id];
-        delete routeMap[socket.id];
-        console.log("sender " , socket.userName, " has left!");   
-    });
+   
      
       ss(socket).on('send_file', function(stream, data) {
         console.log("someone is sending a file (",data.name,") size:",data.size);
@@ -80,11 +79,7 @@ io.on('connection', function (socket){
                 console.error('Error: routing error')
                 socket.emit('alert','routing error');  
             }else{
-                // upload a file to other browser
-                //console.log("Try to pass the stream as is to the other browser")
-               // ss(receivers[recSocketId]).emit('forward_file', stream, data);
-               // ss.createBlobReadStream(file).pipe(stream);
-                
+
                //other way: expose stream 
                 console.log("Expose stream for receiver ",recSocketId);
                 var streamUrl = socket.id+'data';
@@ -97,8 +92,19 @@ io.on('connection', function (socket){
                 });
                  console.log(" warning receiver");
                 receivers[recSocketId].emit('stream_ready', streamUrl);
-                // receivers[recSocketId].emit('alert', "file is coming");
+  
             }
+    });
+     
+      socket.on('transfert_in_progress', function(progress) {
+           console.log("transfering progress", progress);
+           receivers[routeMap[socket.id]].emit('transfert_in_progress',progress);
+    });
+     
+      socket.on('disconnect', function() {
+        delete senders[socket.id];
+        delete routeMap[socket.id];
+        console.log("sender " , socket.userName, " has left!");   
     });
      
  }else if(socket.handshake.query.role == 'receiver'){
@@ -121,6 +127,7 @@ io.on('connection', function (socket){
           console.log('telling the sender that the receiver is ready');
           senderSocket.emit('receiver_ready',socket.userName);
       }
+     
      
     socket.on('disconnect', function() {
         delete receivers[socket.id];

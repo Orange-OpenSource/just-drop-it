@@ -56,7 +56,13 @@
             blobStream.on('data', function(chunk) {
                 size += chunk.length;
                 //console.log(Math.floor(size / file.size * 100) + '%');
-                $('#waitcontent').html(Math.floor(size / file.size * 100) + '%');
+                var progress = Math.floor(size / file.size * 100);
+                $('#waitcontent').html( progress+ '%');
+                socket.emit('transfert_in_progress',progress);
+                
+                if(progress == 100){
+                    window.location.href="thankyou"
+                }
             });
 
             blobStream.pipe(stream);
