@@ -7,12 +7,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var ss = require('socket.io-stream');
 
-//TODO check if necessary once the server doesn't write the file
-var path = require('path');
-var fs = require("fs");
-
 app.get('/', function(req, res){
-    // res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Content-Type', 'text/html');
   res.sendfile('send.html');
 });
 
@@ -67,13 +63,7 @@ io.on('connection', function (socket){
      
       ss(socket).on('send_file', function(stream, data) {
         console.log("someone is sending a file (",data.name,") size:",data.size);
-        /* var filename = path.basename(data.name);
-          console.log("Apparently the file is named ",filename);
-        stream.pipe(fs.createWriteStream(filename));
-           console.log("streaming..");*/
-          
-          
-          console.log("searching for the right receiver socket");
+        console.log("searching for the right receiver socket");
            var recSocketId = routeMap[socket.id]
             if(recSocketId == undefined){
                 console.error('Error: routing error')
