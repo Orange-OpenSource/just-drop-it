@@ -1,5 +1,5 @@
 #!/bin/env node
-//  OpenShift sample Node application
+"use strict";
 
 
 var app = require('express')();
@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 
 app.get('/', function(req, res){
     // res.setHeader('Content-Type', 'text/html');
-  res.sendfile('index.html');
+  res.sendfile('send.html');
 });
 
 
@@ -23,10 +23,12 @@ if (typeof ipaddress === "undefined") {
 };
 
 //------------------------
-var connections = {}
+var connections = {};
+
+var senders = {};
 
 var onlineUsers = function(){
-  users = [];
+  var users = [];
   for(var userID in connections) users.push(userID);
 
   return users;
@@ -36,13 +38,30 @@ var onlineUsers = function(){
 io.on('connection', function (socket){
 
   socket.userID = socket.handshake.query.userID;
-  
-  connections[socket.id] = socket;
-  console.log('New User! ', socket.userID);
-      console.log('with id ! ', socket.id);
-    app.get('/'+socket.id, function(req, res){
-            res.sendfile('index.html');
+    
+    
+ if(socket.handshake.query.role == undefined){
+     var errorMsg = 'Erreur, pas de rôle transmis';
+     console.log(errorMsg);
+     io.emit('error',errorMsg);
+ }else if(socket.handshake.query.role == 'sender'){
+     senders[socket.id] = socket;
+     console.log('New sender! ', socket.userID);
+    console.log('with id : ', socket.id);
+     
+     var newReceiverUrl = '/'+socket.id;
+    
+    app.get(newReceiverUrl, function(req, res){
+       res.send('<h1>Hello world</h1>');
     });
+     
+     io.emit('receive_url_ready',newReceiverUrl)
+     console.log('receive_url_ready emitted');
+     
+ }
+  
+ 
+    
     
     
     
