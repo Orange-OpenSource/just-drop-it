@@ -43,7 +43,7 @@ io.on('connection', function (socket){
  if(socket.handshake.query.role == undefined){
      var errorMsg = 'Error, no profile transmitted';
      console.log(errorMsg);
-     io.emit('error',errorMsg);
+     socket.emit('error',errorMsg);
  }else if(socket.handshake.query.role == 'sender'){
      senders[socket.id] = socket;
      console.log('New sender! ', socket.userID);
@@ -55,8 +55,14 @@ io.on('connection', function (socket){
        res.sendfile('receive.html');
     });
      
-     io.emit('receive_url_ready',newReceiverUrl)
+     socket.emit('receive_url_ready',newReceiverUrl)
      console.log('receive_url_ready emitted');
+     
+    socket.on('disconnect', function() {
+    delete senders[socket.userID];
+    console.log("sender " , socket.userID, " has left!");
+        
+  });
      
  }else if(socket.handshake.query.role == 'receiver'){
      var senderID = socket.handshake.query.senderID;
@@ -73,6 +79,10 @@ io.on('connection', function (socket){
           senderSocket.emit('receiver_ready',socket.userID);
       }
      
+    socket.on('disconnect', function() {
+    console.log("receiver ", socket.userID, " has left!");
+        
+  });
      
  }else{
     var errorMsg = 'Error, unknown profile';
@@ -88,11 +98,7 @@ io.on('connection', function (socket){
 
   io.emit('onlineUsers', onlineUsers());
 
-  socket.on('disconnect', function() {
-    delete connections[socket.userID];
-    io.emit('onlineUsers', onlineUsers());
-    console.log(socket.userID, " has left!");
-  });
+ 
 
   socket.on('message', function(msg){
     var outgoingSocket = connections[msg.to]
