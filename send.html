@@ -43,25 +43,26 @@
  <!-- var socket = io.connect({query: 'userID='+String(userID)});-->
 
       $('#file').change(function(e) {
-            alert("file changed");
+            $('#myform').hide();
             var file = e.target.files[0];
             var stream = ss.createStream();
 
             // upload a file to the server.
             ss(socket).emit('send_file', stream, {size: file.size ,name : file.name});
-            ss.createBlobReadStream(file).pipe(stream);
+     
+            var blobStream = ss.createBlobReadStream(file);
+            var size = 0;
+
+            blobStream.on('data', function(chunk) {
+                size += chunk.length;
+                //console.log(Math.floor(size / file.size * 100) + '%');
+                $('#waitcontent').html(Math.floor(size / file.size * 100) + '%');
+            });
+
+            blobStream.pipe(stream);
+          
         });
 
-      $('form').submit(function(){
-        var message = {
-          to: $('#users').val(),
-          from: userID,
-          message: $('#m').val()
-        }
-        socket.emit('message', message);
-        $('#m').val('');
-        return false;
-      });
         
         <!-- when connection is confirmed-->
       socket.on('receive_url_ready', function(url){
@@ -74,7 +75,7 @@
           $('#myform').show();
       });
         
-       socket.on('error', function(errorMsg){
+       socket.on('alert', function(errorMsg){
           $('#error').html("Error: "+errorMsg);
       });
         

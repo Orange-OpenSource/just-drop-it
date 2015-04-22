@@ -12,6 +12,7 @@
 </body>
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="js/socket.io-stream.js"></script>
 
     
     
@@ -35,15 +36,27 @@
       socket.on('connection_ready', function(senderName){
            $('#consigne').html(senderName+" has been notified of your connection. Please wait while he select his file.");
       });  
+        
+
+      ss(socket).on('forward_file', function(stream, data) {
+           $('#consigne').html("Receiving file");
+           //stream.pipe(this);
+      });  
+        
+     socket.on('stream_ready', function(url){
+          $('#consigne').html("Begining download");
+         //window.open(url);
+         //window.location.href = url;
+         
+         var popup = window.open(url);
+         popup.blur();
+         window.focus();     
+         
+           //$('#error').load(url);
+      });  
+        
           
-      socket.on('onlineUsers', function(users){
-        $('#users').empty();
-        $.each(users, function(i, user){
-          if (user != userID){
-            $('#users').append($('<option>').text(user));
-          };
-        });
-      });
+
     </script>
 
     

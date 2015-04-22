@@ -32,19 +32,14 @@ if (typeof ipaddress === "undefined") {
 //------------------------
 var connections = {};
 
-var senders = {};
-
-var onlineUsers = function(){
-  var users = [];
-  for(var userID in connections) users.push(userID);
-
-  return users;
-};
+var senders = {}; // socketId -> socket
+var receivers = {}; // socketId -> socket
+var routeMap = {}; //sendersocketID->receiversocketID
 
 
 io.on('connection', function (socket){
 
-  socket.userID = socket.handshake.query.userID;
+  socket.userName = socket.handshake.query.userID;
     
     
  if(socket.handshake.query.role == undefined){
@@ -53,7 +48,7 @@ io.on('connection', function (socket){
      socket.emit('error',errorMsg);
  }else if(socket.handshake.query.role == 'sender'){
      senders[socket.id] = socket;
-     console.log('New sender! ', socket.userID);
+     console.log('New sender! ', socket.userName);
     console.log('with id : ', socket.id);
      
      var newReceiverUrl = '/'+socket.id;
@@ -66,21 +61,55 @@ io.on('connection', function (socket){
      console.log('receive_url_ready emitted');
      
     socket.on('disconnect', function() {
-        delete senders[socket.userID];
-        console.log("sender " , socket.userID, " has left!");   
+        delete senders[socket.id];
+        delete routeMap[socket.id];
+        console.log("sender " , socket.userName, " has left!");   
     });
      
       ss(socket).on('send_file', function(stream, data) {
-        console.log("someone is sending a file");
-         var filename = path.basename(data.name);
+        console.log("someone is sending a file (",data.name,") size:",data.size);
+        /* var filename = path.basename(data.name);
           console.log("Apparently the file is named ",filename);
         stream.pipe(fs.createWriteStream(filename));
-           console.log("streaming..");
+           console.log("streaming..");*/
+          
+          
+          console.log("searching for the right receiver socket");
+           var recSocketId = routeMap[socket.id]
+            if(recSocketId == undefined){
+                console.error('Error: routing error')
+                socket.emit('alert','routing error');  
+            }else{
+                // upload a file to other browser
+                //console.log("Try to pass the stream as is to the other browser")
+               // ss(receivers[recSocketId]).emit('forward_file', stream, data);
+               // ss.createBlobReadStream(file).pipe(stream);
+                
+               //other way: expose stream 
+                console.log("Expose stream for receiver ",recSocketId);
+                var streamUrl = socket.id+'data';
+                 console.log(" url: ",streamUrl);
+                  app.get('/'+streamUrl, function(req, res){
+                    res.setHeader('Content-Type', 'application/octet-stream');
+                        res.setHeader('Content-Length', data.size);
+                      res.setHeader('Content-Disposition','attachment; filename="'+data.name+'"');
+                    stream.pipe(res);
+                });
+                 console.log(" warning receiver");
+                receivers[recSocketId].emit('stream_ready', streamUrl);
+                // receivers[recSocketId].emit('alert', "file is coming");
+            }
     });
      
  }else if(socket.handshake.query.role == 'receiver'){
+     receivers[socket.id] = socket
+    
      var senderID = socket.handshake.query.senderID;
-     console.log('New receiver ',socket.userID,'/',socket.id);
+     
+     //save mapping between sender socket id and receiver socket id
+     routeMap[senderID] = socket.id
+      
+     console.log('New receiver ',socket.userName,'/',socket.id);
      console.log('Is waiting for sender',senderID)
       var senderSocket = senders[senderID]
       if(senderSocket == undefined){
@@ -88,13 +117,14 @@ io.on('connection', function (socket){
           socket.emit('alert','unkown senderID');  
       }else{
           console.log('telling receiver that the connection was established');
-          socket.emit('connection_ready',senderSocket.userID);
+          socket.emit('connection_ready',senderSocket.userName);
           console.log('telling the sender that the receiver is ready');
-          senderSocket.emit('receiver_ready',socket.userID);
+          senderSocket.emit('receiver_ready',socket.userName);
       }
      
     socket.on('disconnect', function() {
-        console.log("receiver ", socket.userID, " has left!");    
+        delete receivers[socket.id];
+        console.log("receiver ", socket.userName, " has left!");    
     });
      
    
@@ -111,7 +141,7 @@ io.on('connection', function (socket){
     
     
 
-  io.emit('onlineUsers', onlineUsers());
+ 
 
  
 
