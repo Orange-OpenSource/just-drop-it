@@ -41,7 +41,7 @@ io.on('connection', function (socket){
     
     
  if(socket.handshake.query.role == undefined){
-     var errorMsg = 'Erreur, pas de rôle transmis';
+     var errorMsg = 'Error, no profile transmitted';
      console.log(errorMsg);
      io.emit('error',errorMsg);
  }else if(socket.handshake.query.role == 'sender'){
@@ -52,12 +52,32 @@ io.on('connection', function (socket){
      var newReceiverUrl = '/'+socket.id;
     
     app.get(newReceiverUrl, function(req, res){
-       res.send('<h1>Hello world</h1>');
+       res.sendfile('receive.html');
     });
      
      io.emit('receive_url_ready',newReceiverUrl)
      console.log('receive_url_ready emitted');
      
+ }else if(socket.handshake.query.role == 'receiver'){
+     var senderID = socket.handshake.query.senderID;
+     console.log('New receiver ',socket.userID,'/',socket.id);
+     console.log('Is waiting for sender',senderID)
+      var senderSocket = senders[senderID]
+      if(senderSocket == undefined){
+          console.error('Error: unkown senderID')
+          socket.emit('alert','unkown senderID');  
+      }else{
+          console.log('telling receiver that the connection was established');
+          socket.emit('connection_ready',senderSocket.userID);
+          console.log('telling the sender that the receiver is ready');
+          senderSocket.emit('receiver_ready',socket.userID);
+      }
+     
+     
+ }else{
+    var errorMsg = 'Error, unknown profile';
+     console.error(errorMsg);
+     io.emit('error',errorMsg);  
  }
   
  

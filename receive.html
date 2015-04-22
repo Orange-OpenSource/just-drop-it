@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <title>Receive</title>
+</head>
+
+<body>
+    <div id='error'></div>
+    <div id="consigne">Searching for sender id...</div>
+</body>
+  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+    
+    
+    <script>
+
+        var socket;
+        var userID = prompt("Your name");
+        //pour l'instant le senderID est directement dans l'URL
+        var senderID = window.location.pathname.replace('/', '');
+        if(window.location.hostname == "127.0.0.1"){
+           socket = io({query: 'userID='+userID+'&senderID='+senderID+'&role=receiver'});
+        }else{
+           socket = io({query: 'userID='+userID+'&senderID='+senderID+'&role=receiver',path:"/_ws/socket.io/"});
+        }
+
+
+      socket.on('alert', function(errorMsg){
+          $('#error').html("Error: "+errorMsg);
+      });
+        
+      socket.on('connection_ready', function(senderName){
+           $('#consigne').html(senderName+" has been notified of your connection. Please wait while he select his file.");
+      });  
+          
+      socket.on('onlineUsers', function(users){
+        $('#users').empty();
+        $.each(users, function(i, user){
+          if (user != userID){
+            $('#users').append($('<option>').text(user));
+          };
+        });
+      });
+    </script>
+
+    
+    
+</html>

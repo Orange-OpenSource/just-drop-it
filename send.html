@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <title>Socket.IO peers</title>
+</head>
+
+<body>
+
+    <div id="waitcontent"></div>
+    <div id='error'></div>
+    <form id="myform" action="">
+      <select id="users"></select>
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+</body>
+  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+    
+    
+    <script>
+     $('#myform').hide();
+     $('#waitcontent').hide();
+        
+      var userID = prompt("Your name");
+
+         var socket;
+        
+        if(window.location.hostname == "127.0.0.1"){
+           socket = io({query: 'userID='+String(userID)+'&role=sender'});
+        }else{
+           socket = io({query: 'userID='+String(userID)+'&role=sender',path:"/_ws/socket.io/"});
+        }
+        
+      
+     
+     
+  <!-- var socket = io("http://nodejs-data.kermit.rd.francetelecom.fr",{ path: "/_ws/socket.io/"},{query: 'userID='+String(userID)});-->
+ <!-- var socket = io.connect({query: 'userID='+String(userID)});-->
+        
+
+      $('form').submit(function(){
+        var message = {
+          to: $('#users').val(),
+          from: userID,
+          message: $('#m').val()
+        }
+        socket.emit('message', message);
+        $('#m').val('');
+        return false;
+      });
+        
+        <!-- when connection is confirmed-->
+      socket.on('receive_url_ready', function(url){
+          $('#waitcontent').html("<p>Tell your friend to go to "+window.location.host+url+"<p><br>Waiting....");
+          $('#waitcontent').show();
+      });
+        
+      socket.on('receiver_ready', function(receiverName){
+          $('#waitcontent').html("Congratulation! "+receiverName+" is connected and ready to receive your file")
+          $('#myform').show();
+      });
+        
+       socket.on('error', function(errorMsg){
+          $('#error').html("Error: "+errorMsg);
+      });
+        
+    </script>
+
+    
+    
+</html>
