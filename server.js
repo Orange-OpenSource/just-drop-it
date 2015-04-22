@@ -1,15 +1,22 @@
 #!/bin/env node
 "use strict";
 
-
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var ss = require('socket.io-stream');
+
+//TODO check if necessary once the server doesn't write the file
+var path = require('path');
+var fs = require("fs");
 
 app.get('/', function(req, res){
     // res.setHeader('Content-Type', 'text/html');
   res.sendfile('send.html');
 });
+
+app.use('/js', express.static(__dirname + '/public/js'));
 
 
 //retrieve Kermit variables
@@ -59,10 +66,17 @@ io.on('connection', function (socket){
      console.log('receive_url_ready emitted');
      
     socket.on('disconnect', function() {
-    delete senders[socket.userID];
-    console.log("sender " , socket.userID, " has left!");
-        
-  });
+        delete senders[socket.userID];
+        console.log("sender " , socket.userID, " has left!");   
+    });
+     
+      ss(socket).on('send_file', function(stream, data) {
+        console.log("someone is sending a file");
+         var filename = path.basename(data.name);
+          console.log("Apparently the file is named ",filename);
+        stream.pipe(fs.createWriteStream(filename));
+           console.log("streaming..");
+    });
      
  }else if(socket.handshake.query.role == 'receiver'){
      var senderID = socket.handshake.query.senderID;
@@ -80,9 +94,10 @@ io.on('connection', function (socket){
       }
      
     socket.on('disconnect', function() {
-    console.log("receiver ", socket.userID, " has left!");
-        
-  });
+        console.log("receiver ", socket.userID, " has left!");    
+    });
+     
+   
      
  }else{
     var errorMsg = 'Error, unknown profile';

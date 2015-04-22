@@ -11,13 +11,14 @@
     <div id="waitcontent"></div>
     <div id='error'></div>
     <form id="myform" action="">
-      <select id="users"></select>
-      <input id="m" autocomplete="off" /><button>Send</button>
+      Please specify a file, or a set of files:<br>
+      <input type="file" id="file"  size="40">
     </form>
 
 </body>
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="js/socket.io-stream.js"></script>
 
     
     
@@ -40,7 +41,16 @@
      
   <!-- var socket = io("http://nodejs-data.kermit.rd.francetelecom.fr",{ path: "/_ws/socket.io/"},{query: 'userID='+String(userID)});-->
  <!-- var socket = io.connect({query: 'userID='+String(userID)});-->
-        
+
+      $('#file').change(function(e) {
+            alert("file changed");
+            var file = e.target.files[0];
+            var stream = ss.createStream();
+
+            // upload a file to the server.
+            ss(socket).emit('send_file', stream, {size: file.size ,name : file.name});
+            ss.createBlobReadStream(file).pipe(stream);
+        });
 
       $('form').submit(function(){
         var message = {
