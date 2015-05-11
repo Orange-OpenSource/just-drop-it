@@ -1,1 +1,4 @@
+factoriser entetes/pieds?
+gérer les annulations
+about/contact
 mettre une lib common pour gérer au moins les constantes

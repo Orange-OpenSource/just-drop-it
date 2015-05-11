@@ -13,8 +13,11 @@ app.get('/', function(req, res){
   res.sendfile('send.html');
 });
 
-//expose JS libraries
+//expose public directories 
 app.use('/js', express.static(__dirname + '/public/js'));
+app.use('/css', express.static(__dirname + '/public/css'));
+app.use('/fonts', express.static(__dirname + '/public/fonts'));
+app.use('/images', express.static(__dirname + '/public/images'));
 
 //expose exit page
 app.get('/thankyou', function(req, res){
