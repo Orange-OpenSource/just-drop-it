@@ -91,26 +91,15 @@
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="js/boost.js"></script>
-    
-    
   <script src="js/socket.io-stream.js"></script>
 
     
     
     <script>
     $('#error').hide();
-
-
     $('#step4-outro').hide();
     var socket;
-       
-        
 
-
-         
-
-         
-         
           //pour l'instant le senderID est directement dans l'URL
         var senderID = window.location.pathname.replace('/', '');
         if(window.location.hostname == "127.0.0.1"){
@@ -124,30 +113,21 @@
           });
 
           socket.on('connection_ready', function(senderName){
-              // $('#step2-consigne').html(senderName+" has been notified of your connection. Please wait while he selects his file.");
+              console.log('connection ready');
           });  
 
 
           ss(socket).on('forward_file', function(stream, data) {
-               $('#step2-consigne').html("Receiving file");
-               //stream.pipe(this);
+               console.log('forward file');
           });  
 
          socket.on('stream_ready', function(url,filename,filesize){
               $('.filename').html(filename+" ("+filesize/1000+" ko)");
-             //window.open(url);
-             //window.location.href = url;
-
-             var popup = window.open(url);
-             popup.blur();
-             window.focus();     
-
-               //$('#error').load(url);
+             window.location.href = url;
           });  
 
         socket.on('transfert_in_progress', function(progress){
-            
-                console.log("transfert in progress "+progress);
+
               //update progress bar
                 $("#transfertpb").attr('aria-valuenow',progress);
                 $("#transfertpb").width(progress + '%');
