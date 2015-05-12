@@ -18,6 +18,18 @@
   border-color: #222;
 }
 
+/* dont close windows warning
+-------------------------------------------------- */
+#warning-window {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 30%;
+}
+#inner-message {
+    margin: 0 auto;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
@@ -36,3 +48,9 @@ body {
   background-color: #f5f5f5;
 }
 
+/* Remove "no file selected" on file input
+--------- */
+input[type='file'] {
+  color: transparent;
+    display: inline;
+}

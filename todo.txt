@@ -15,3 +15,7 @@ Bugs: multiple copy
 transfert optimisé:
 - zip
 - découpage, multistream, réassemblage
+
+
+- chrono
+- logs serveur
