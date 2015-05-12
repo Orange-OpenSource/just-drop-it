@@ -30,11 +30,16 @@ ss(socket).on('forward_file', function (stream, data) {
 });
 
 socket.on('stream_ready', function (url, filename, filesize) {
-	$('.filename').html(filename + " (" + filesize / 1000 + " ko)");
-	window.location.href = url;
+	$('.filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
+	window.open(url, '_blank');
+	//meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us) window.location.href = url;
+	/** autre :         var popup = window.open(url);
+-         popup.blur();
+-         window.focus();   */
 });
 
 socket.on('transfert_in_progress', function (progress) {
+	console.log('progress file ' + progress);
 	//update progress bar
 	$("#transfertpb").attr('aria-valuenow', progress);
 	$("#transfertpb").width(progress + '%');
