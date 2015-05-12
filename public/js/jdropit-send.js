@@ -10,7 +10,7 @@ var clip = new ZeroClipboard(document.getElementById("copy-button"));
 clip.on("ready", function (readyEvent) {
 	clip.on("copy", function (event) {
 		var clipboard = event.clipboardData;
-		clipboard.setData("text/plain", receiverUrl);
+		clipboard.setData("text/plain", "http://" + receiverUrl);
 	});
 	clip.on("aftercopy", function (event) {
 		$("#clipboardcopyok").show(300);

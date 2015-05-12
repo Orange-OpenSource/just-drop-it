@@ -11,3 +11,6 @@ transfert optimisé:
 - découpage, multistream, réassemblage
 - chrono
 - logs serveur
+
+
+ajouter http:// dans le copy content
