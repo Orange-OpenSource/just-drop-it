@@ -122,6 +122,7 @@ var startUpload = function (file) {
 
 		if (progress == 100) {
 			$('#step4-outro').show(500);
+			$('#step3').hide(500);
 			$('#warning-window').hide(500);
 		}
 	});

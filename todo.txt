@@ -1,10 +1,10 @@
 factoriser entetes/pieds?
 gérer les annulations
-bips?
+
+
 mettre une lib common pour gérer au moins les constantes
 
 Bugs: multiple copy
-
 
 transfert optimisé:
 - zip

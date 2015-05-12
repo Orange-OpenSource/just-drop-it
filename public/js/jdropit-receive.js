@@ -35,13 +35,14 @@ socket.on('stream_ready', function (url, filename, filesize) {
 	//meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us) 
 	//window.location.href = url;
 	window.location.assign(url)
-		/** autre :         var popup = window.open(url);
+		//non testé, au cas ou : setTimeout(function(){document.location.href = "page.html;"},500);
+		/** autre popup :         var popup = window.open(url);
 -         popup.blur();
 -         window.focus();   */
 });
 
 socket.on('transfert_in_progress', function (progress) {
-	console.log('progress file ' + progress);
+	//console.log('progress file ' + progress);
 	//update progress bar
 	$("#transfertpb").attr('aria-valuenow', progress);
 	$("#transfertpb").width(progress + '%');
