@@ -1,4 +1,17 @@
+finir la partie receive simplified
+faire cohabiter les deux versions? -> différents namespaces?
+sortir le js
+indent
 factoriser entetes/pieds?
 gérer les annulations
+bips?
 about/contact
 mettre une lib common pour gérer au moins les constantes
+
+
+Bugs: multiple copy
+
+
+transfert optimisé:
+- zip
+- découpage, multistream, réassemblage

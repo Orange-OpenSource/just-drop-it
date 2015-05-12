@@ -90,7 +90,7 @@ io.on('connection', function (socket){
                 stream.pipe(res);
             });
             //warning receiver
-            receivers[recSocketId].emit('stream_ready', streamUrl);
+            receivers[recSocketId].emit('stream_ready', streamUrl,data.name,data.size);
         }
     });
      

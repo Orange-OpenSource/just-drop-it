@@ -42,54 +42,47 @@
             <div class="row marketing" >
                <div class="col-lg-10" id="step0">
                   <h3>Hello <span class="username"></span></h3>
-                  <p>Apparently someone wants to send you a file</p>
+                  <p>Someone just dropped you a file</p>
 
              </div>  
-            
-            <div class="list-group">
-            
-             <div class="col-lg-8  col-md-offset-1 list-group-item" id="step1-name" >
-                  <h4>Step 1</h4>
-                  <p>First, tell us your name:</p>
-                  <form class="form-inline" id="nameForm" action="">
-                          <fieldset>
-                              <p>
-                        <!--<label for="cname">Name (required, at least 2 characters)</label>-->
-                        <input id="cname" class="form-control"  name="name" minlength="2" type="text" required placeholder="your name">
-
-						<button type="submit" class="btn  btn-lg btn-success" >go!</button>
-                                  </p>
-                                </fieldset>
-					</form>
-                 <p id="nameconfirm">Hello <span class="username"></span></p>
-             </div> 
                 
-                 <div class="col-lg-8  col-md-offset-1 list-group-item" id="step2-transfert" >
-                  <h4>Step 2</h4>
-                  <p id="step2-consigne"></p>
+                 <br>
+            
+             <div class="col-lg-10 " id="transfertdiv">
                   <div class="progress ">
-                        <div id="transfertpb" class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 60%;"> 5%</div>
-                </div>    
+                        <div id="transfertpb" class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 0%;"> 0%</div>
+                      
+                </div> 
+                 <p>File: <span class="filename"></span></p>
                  
-             </div> 
-                
-            </div>
-                
-                          <div class="col-lg-10" id="step4-outro">
-                  <h4>Done</h4>
-                  <p> The file is downloaded. You can close this page now. </p>
-                <h3>Thank you!</h3>
+            </div> 
+
+                   
+                   <div id="warning-window" class="alert alert-warning" role="alert">
+  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+  Don't close this windows!
+</div>
+         
+          <div class="col-lg-10" id="step4-outro">
+                   <h3>Thank you!</h3>
+                  <p> <span id="colleaguename">You can close this page now. <br></p>
+               
                 </div>
+                
+                
+    
+                
          </div>
          
          
       </div> <!-- /container -->
-    <br>
    <footer class="footer">
       <div class="container">
+        <p class="text-muted">This page allows you to simply beam a file to a colleague. You and your correspondant must be in front of yours browsers at the same time. Nothing is stored on any server.</p>
         <p class="text-muted">&copy; Arnaud Ruffin 2015</p>
       </div>
-    </footer>   
+    </footer>
          
          
     <div id='error'></div>
@@ -106,33 +99,24 @@
     
     <script>
     $('#error').hide();
-    $('.progress').hide();
-    $('#step2-transfert').hide();
-         $("#nameconfirm").hide();
-        $('#step4-outro').hide();
+
+
+    $('#step4-outro').hide();
     var socket;
        
         
-        
-    //à la soumission du nom, on init tout ce qui concerne les sockets
-     $("#nameForm").on("submit", function (e) {
 
-          e.preventDefault();
-          var userID = $('#cname').val();
+
          
-          $("#nameForm").hide();
-          $(".username").html(userID);
-           $("#nameconfirm").show(300);
-           $("#step2-transfert").show(300);
-         
+
          
          
           //pour l'instant le senderID est directement dans l'URL
         var senderID = window.location.pathname.replace('/', '');
         if(window.location.hostname == "127.0.0.1"){
-           socket = io({query: 'userID='+userID+'&senderID='+senderID+'&role=receiver'});
+           socket = io({query: 'userID=undefReceiver&senderID='+senderID+'&role=receiver'});
         }else{
-           socket = io({query: 'userID='+userID+'&senderID='+senderID+'&role=receiver',path:"/_ws/socket.io/"});
+           socket = io({query: 'userID=undefReceiver&senderID='+senderID+'&role=receiver',path:"/_ws/socket.io/"});
         }
          
           socket.on('alert', function(errorMsg){
@@ -140,7 +124,7 @@
           });
 
           socket.on('connection_ready', function(senderName){
-               $('#step2-consigne').html(senderName+" has been notified of your connection. Please wait while he selects his file.");
+              // $('#step2-consigne').html(senderName+" has been notified of your connection. Please wait while he selects his file.");
           });  
 
 
@@ -149,9 +133,8 @@
                //stream.pipe(this);
           });  
 
-         socket.on('stream_ready', function(url){
-              $('#step2-consigne').html("Begining download");
-             $('.progress').show();
+         socket.on('stream_ready', function(url,filename,filesize){
+              $('.filename').html(filename+" ("+filesize/1000+" ko)");
              //window.open(url);
              //window.location.href = url;
 
@@ -164,18 +147,20 @@
 
         socket.on('transfert_in_progress', function(progress){
             
-            
+                console.log("transfert in progress "+progress);
               //update progress bar
                 $("#transfertpb").attr('aria-valuenow',progress);
                 $("#transfertpb").width(progress + '%');
                 $('#transfertpb').html( progress+ '%');
 
                 if(progress == 100){
-                   $('#step4-outro').show(300);
+                   $('#step4-outro').show(500);
+                    $('#transfertdiv').hide(500);
+                    $("#warning-window").hide(500);
                 }
   
         });
-     });
+
 
 
      

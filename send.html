@@ -36,48 +36,17 @@
         <h3 class="text-muted">Just drop it</h3>
       </div>
          <br>
-     <div class="jumbotron" id="intro">
-        <p class="lead">This page allows you to simply beam a file to a colleague. You and your correspondant must be in front of yours browsers at the same time. Nothing is stored on any server.</p>
-  
-					<form class="form-inline" id="nameForm" action="">
-                          <fieldset>
-                              <p>
-                        <!--<label for="cname">Name (required, at least 2 characters)</label>-->
-                        <input id="cname" class="form-control"  name="name" minlength="2" type="text" required placeholder="your name">
-
-						<button type="submit" class="btn  btn-lg btn-success" >Start now!</button>
-                                  </p>
-                                </fieldset>
-					</form>
-
-      </div>
          
 
          <div class="alert alert-danger" role="alert"  id='error'>...</div>
          
         <div class="row marketing" >
                <div class="col-lg-10" id="step0">
-                  <h3>Hello <span id="username">you</span></h3>
-                  <p>Let's follow some simple step to transfer your file.</p>
-
-             </div>  
-            
-            <div class="list-group">
-            
-             <div class="col-lg-8  col-md-offset-1 list-group-item" id="step1-wait" >
-                  <h4>Step 1</h4>
-                  <p>First, you will need to tell your friend to go to this url:</p>
-                  <div class="row">
-                      <div class="col-md-4" id="generatedurl"></div>
-                 </div>
-                  <button id="copy-button" data-clipboard-text="Copy Me!" title="Click to copy url to clipboard">Copy to clipoard</button>
-                  <span class=warning id="clipboardcopyok"> successfully copied to clipboard!</span>
-                  <h4 id="status_connection"></h4>
-             </div>  
-            
-              <div class="col-lg-8 col-md-offset-1 list-group-item" id="step2-selectfile">
-                  <h4>Step 2</h4>
-                  <p>Your friend is now in front of his browser, waiting for its file. Please select one:</p>
+                <h3>Hello </h3>
+                   
+                   
+                <div class="col-lg-10  col-md-offset-0" id="step1" >
+                     <p>Please select a file:</p>
                   
                    <div class="upload-drop-zone" id="drop-zone">
                         Just drag and drop a file here
@@ -87,25 +56,46 @@
                         or select a file below:<br>
                  <input type="file" id="file"  size="40">
                </form>
+                    </div>
+                   
+
+
+             <div class="col-lg-10 jumbotron" id="step2" >
+                  <h4>Ready to transfert!</h4>
+                  
+                  
+                  <p class="lead">Tell your friend to go to this url:</p>
+                  <div class="text-muted" id="generatedurl"></div>
+                  <button class="btn" id="copy-button" data-clipboard-text="Copy Me!" title="Click to copy url to clipboard">Copy to clipoard</button>
               
-         
-             </div>    
+                        <span id="clipboardcopyok" class="glyphicon glyphicon-check" aria-hidden="true"></span>
+                
+               
+
+             </div>  
+    <br><br>
             
-             <div class="col-lg-8  col-md-offset-1 list-group-item " id="step3-transfert">
-                  <h4>Step 3</h4>
-                  <p>Transfert in progress...</p>
-                    <div class="progress ">
-                        <div id="transfertpb" class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 60%;"> 5%</div>
-                </div>       
-            </div> 
+             <div class="col-lg-10 " id="step3">
+                 <p id="transfertMessage">The transfert will start as soon as you friend open the link.</p>
+                  <div class="progress ">
+                        <div id="transfertpb" class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 0%;"> 0%</div>
+                      
+                </div> 
+                 <p>File: <span class="filename"></span></p>
                  
-           
-            </div> <!--div listgroup-->
+            </div> 
+
+                   
+                   <div id="warning-window" class="alert alert-warning" role="alert">
+  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+  Don't close this windows!
+</div>
          
           <div class="col-lg-10" id="step4-outro">
-                  <h4>Done</h4>
-                  <p> <span id="colleaguename">Your friend</span> did receive the file. You can close this page now. </p>
-                <h3>Thank you!</h3>
+                   <h3>Thank you!</h3>
+                  <p> <span id="colleaguename">Your friend did receive the file. You can close this page now. <br></p>
+               
                 </div>
 </div>
                
@@ -119,6 +109,7 @@
 <br>
    <footer class="footer">
       <div class="container">
+        <p class="text-muted">This page allows you to simply beam a file to a colleague. You and your correspondant must be in front of yours browsers at the same time. Nothing is stored on any server.</p>
         <p class="text-muted">&copy; Arnaud Ruffin 2015</p>
       </div>
     </footer>
@@ -128,28 +119,23 @@
  
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
-     $('#step0').hide();
-     $('#step1-wait').hide();
-     $('#step2-selectfile').hide();
      $("#clipboardcopyok").hide();
-    $('#step3-transfert').hide();
-     $('#step4-outro').hide();
+    $('#step3').hide();
+    $('#step2').hide();
+    $('#step4-outro').hide();
+    $('#warning-window').hide();
    $('#error').hide();
     
     
 </script>
 <!-- jQuery validate -->
- <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
- <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-  <script src="js/socket.io-stream.js"></script>
-  <script src="js/boost.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script src="js/socket.io-stream.js"></script>
+<script src="js/boost.js"></script>
 <script src="js/ZeroClipboard.min.js"></script>
 
-    
-    
-    <script>
+<script>
 
-        
         //____ Handling of copy to clipboard with zeroclipboard
         var client = new ZeroClipboard( document.getElementById("copy-button") );
         client.on( "ready", function( readyEvent ) {
@@ -159,12 +145,8 @@
         } );
         
         var socket;
-
-       
+   
         //----- Handling drag and drop zone style
-      
-
-
         $('#drop-zone').on('dragover',  function(e) {
             this.className = 'upload-drop-zone drop';
             return false;
@@ -176,48 +158,36 @@
         });
 
 
-        
-     $("#nameForm").validate();
-      
-        //soumission du nom
-     $("#nameForm").on("submit", function (e) {
-          e.preventDefault();
-          var userID = $('#cname').val();
-         
-          $('#intro').hide(100);
-          $('#step0').show(100);
-          $('#step1-wait').show(300);
-          $('#username').html(userID);
-          
-          //init du socket vers le serveur
-           if(window.location.hostname == "127.0.0.1"){
-           socket = io({query: 'userID='+String(userID)+'&role=sender'});
+        //init du socket vers le serveur
+        if(window.location.hostname == "127.0.0.1"){
+           socket = io({query: 'userID=undefined&role=sender'});
         }else{
-           socket = io({query: 'userID='+String(userID)+'&role=sender',path:"/_ws/socket.io/"});
+           socket = io({query: 'userID=undefined&role=sender',path:"/_ws/socket.io/"});
         }
          
-          <!-- when connection is confirmed-->
+    <!-- when connection is confirmed-->
       socket.on('receive_url_ready', function(url){
           $('#generatedurl').html("<p>"+window.location.host+url+"<p>");
           ZeroClipboard.setData( "text/plain", window.location.host+url );
-          $('#status_connection').html("Waiting for connection...")
       });
         
       socket.on('receiver_ready', function(receiverName){
-          $('#status_connection').html("Congratulation! "+receiverName+" is connected!")
-          $('#step2-selectfile').show();
+             $('#step2').hide(500);
+         startUpload(fileToTransfert);
       });
         
-       socket.on('alert', function(errorMsg){
+      socket.on('alert', function(errorMsg){
           $('#error').html("Error: "+errorMsg);
       });
-     });
+   
         
-
+var fileToTransfert ;
 
         //soumission du fichier via formulaire
           $('#file').change(function(e) {
-              startUpload(e.target.files);
+              fileToTransfert=e.target.files[0];
+              fileIsReady();
+              //startUpload(e.target.files);
         });
         
         //soumission du fichier via drag and drop
@@ -228,21 +198,25 @@
                     e.stopPropagation();
                     /*UPLOAD FILES HERE*/
                     this.className = 'upload-drop-zone';
-                    startUpload(e.originalEvent.dataTransfer.files);
+                     fileToTransfert = e.originalEvent.dataTransfer.files[0];
+                     fileIsReady();
                 }   
             } 
         });
+    
+      var fileIsReady = function(){
+          $('.filename').html(fileToTransfert.name+" ("+fileToTransfert.size/1000+" ko)");
+         $('#step2').show(500);
+         $('#step3').show(500);
+            $('#warning-window').show(500);
+         $('#step1').hide(500);
+      }
         
         //fonction d'upload du fichier
-        var startUpload = function(files) {
-            //pour l'instant on se limite au premier si plusieurs
-            var file = files[0];
+        var startUpload = function(file) {
             console.log(file);
-            
-             $('#myform').hide(100);
-             $('#drop-zone').hide(100);
-             $('#step3-transfert').show(300);
-            
+
+            $('#transfertMessage').html("Transfert in progress...");
             var stream = ss.createStream();
 
             // upload a file to the server.
@@ -264,7 +238,8 @@
                 $('#transfertpb').html( progress+ '%');
 
                 if(progress == 100){
-                   $('#step4-outro').show(300);
+                   $('#step4-outro').show(500);
+                    $('#warning-window').hide(500);
                 }
             });
 
