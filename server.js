@@ -32,7 +32,7 @@ if (typeof ipaddress === "undefined") {
             //  allows us to run/test the app locally.
             console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
             ipaddress = "127.0.0.1";
-};
+        };
 
 //------------------------
 
@@ -45,25 +45,25 @@ io.on('connection', function (socket){
 
   //retrieve username
   socket.userName = socket.handshake.query.userID;
-    
-    
- if(socket.handshake.query.role == undefined){
-     
-     var errorMsg = 'Error, no profile transmitted';
-     console.log(errorMsg);
-     socket.emit('error',errorMsg);
-     
+  
+  
+  if(socket.handshake.query.role == undefined){
+   
+   var errorMsg = 'Error, no profile transmitted';
+   console.log(errorMsg);
+   socket.emit('error',errorMsg);
+   
  }else if(socket.handshake.query.role == 'sender'){   // SENDER ---------------------------------
-     
+   
     senders[socket.id] = socket;
     console.log('New sender! ', socket.userName, 'with id : ', socket.id);
-     
+    
     //generate new unique url 
     var newReceiverUrl = '/'+socket.id;
     //expose receiver webpage at this url
     app.get(newReceiverUrl, function(req, res){
-       res.sendfile('receive.html');
-    });
+     res.sendfile('receive.html');
+ });
     //warn sender that the receiver page is ready 
     socket.emit('receive_url_ready',newReceiverUrl)
     console.log('receive_url_ready emitted');
@@ -93,26 +93,26 @@ io.on('connection', function (socket){
             receivers[recSocketId].emit('stream_ready', streamUrl,data.name,data.size);
         }
     });
-     
+
     // TRANSFERT_IN_PROGRESS event 
     socket.on('transfert_in_progress', function(progress) {
         //simple routing on the other socket
         receivers[routeMap[socket.id]].emit('transfert_in_progress',progress);
     });
-     
+    
     // DISCONNECT event  
     socket.on('disconnect', function() {
         delete senders[socket.id];
         delete routeMap[socket.id];
         console.log("sender " , socket.userName, " has left!");   
     });
-     
+    
  }else if(socket.handshake.query.role == 'receiver'){  // RECEIVER ---------------------------------
     var senderID = socket.handshake.query.senderID;
     receivers[socket.id] = socket
     //save mapping between sender socket id and receiver socket id
     routeMap[senderID] = socket.id
-      
+    
     console.log('New receiver ',socket.userName,'/',socket.id);
     console.log('Is waiting for sender',senderID)
     var senderSocket = senders[senderID]
@@ -131,14 +131,14 @@ io.on('connection', function (socket){
         delete receivers[socket.id];
         console.log("receiver ", socket.userName, " has left!");    
     });
-        
-     
- }else{
+    
+    
+}else{
     var errorMsg = 'Error, unknown profile';
-     console.error(errorMsg);
-     io.emit('error',errorMsg);  
- }
-  
+    console.error(errorMsg);
+    io.emit('error',errorMsg);  
+}
+
 
 });
 
@@ -147,5 +147,5 @@ io.on('connection', function (socket){
 
 //  Start the app on the specific interface (and port).
 http.listen(port, ipaddress, function() {
-     console.log('%s: Node server started on %s:%d ...', Date(Date.now() ), ipaddress, port);
+   console.log('%s: Node server started on %s:%d ...', Date(Date.now() ), ipaddress, port);
 });
