@@ -28,7 +28,6 @@
     "express": "~3.4.4",
     "socket.io": "1.3.5",
     "socket.io-stream":"0.6.1"
-
   },
   "devDependencies": {},
   "bundleDependencies": [],
