@@ -31,9 +31,11 @@ ss(socket).on('forward_file', function (stream, data) {
 
 socket.on('stream_ready', function (url, filename, filesize) {
 	$('.filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
-	window.open(url, '_blank');
-	//meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us) window.location.href = url;
-	/** autre :         var popup = window.open(url);
+	//window.open(url, '_blank');
+	//meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us) 
+	//window.location.href = url;
+	window.location.assign(url)
+		/** autre :         var popup = window.open(url);
 -         popup.blur();
 -         window.focus();   */
 });
