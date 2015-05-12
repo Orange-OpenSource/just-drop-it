@@ -1,56 +1,64 @@
 /* drag and drop style
 -------------------------------------------------- */
+
 .upload-drop-zone {
-  height: 200px;
-  border-width: 2px;
-  margin-bottom: 20px;
+	height: 200px;
+	border-width: 2px;
+	margin-bottom: 20px;
 }
 
 .upload-drop-zone {
-  color: #ccc;
-  border-style: dashed;
-  border-color: #ccc;
-  line-height: 200px;
-  text-align: center
+	color: #ccc;
+	border-style: dashed;
+	border-color: #ccc;
+	line-height: 200px;
+	text-align: center
 }
+
 .upload-drop-zone.drop {
-  color: #222;
-  border-color: #222;
+	color: #222;
+	border-color: #222;
 }
-
 /* dont close windows warning
 -------------------------------------------------- */
+
 #warning-window {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 30%;
-}
-#inner-message {
-    margin: 0 auto;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 20%;
+	z-index: 10;
 }
 
+#inner-message {
+	margin: 0 auto;
+}
 /* Sticky footer styles
 -------------------------------------------------- */
+
 html {
-  position: relative;
-  min-height: 100%;
-}
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  background-color: #f5f5f5;
+	position: relative;
+	min-height: 100%;
 }
 
+body {
+	/* Margin bottom by footer height */
+	
+	margin-bottom: 60px;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	
+	background-color: #f5f5f5;
+}
 /* Remove "no file selected" on file input
 --------- */
+
 input[type='file'] {
-  color: transparent;
-    display: inline;
+	color: transparent;
+	display: inline;
 }
