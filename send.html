@@ -7,6 +7,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Just drop it</title>
 
+	<!--[if lt IE 9]>
+      <script>
+			window.location.assign(noie)
+		</script>
+    <![endif]-->
+
 	<!-- Boost -->
 	<link rel="stylesheet" href="css/bootstrap-orange.css" />
 	<link rel="stylesheet" href="css/bootstrap-orange-theme.css" />
@@ -71,6 +77,8 @@
 				<h4>Ready to transfert!</h4>
 				<p class="lead">Tell your friend to go to this url:</p>
 				<div class="text-muted" id="generatedurl"></div>
+
+
 				<button class="btn" id="copy-button" title="Click to copy url to clipboard">Copy to clipoard</button>
 
 				<span id="clipboardcopyok" class="glyphicon glyphicon-check" aria-hidden="true"></span>

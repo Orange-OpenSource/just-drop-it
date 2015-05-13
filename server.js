@@ -21,8 +21,10 @@ app.use('/fonts', express.static(__dirname + '/public/fonts'));
 app.use('/images', express.static(__dirname + '/public/images'));
 
 //expose exit page
-app.get('/thankyou', function (req, res) {
-	res.send('<h1>Thank you!</h1>');
+app.get('/noie', function (req, res) {
+	//res.send('<h1>Thank you!</h1>');
+	res.setHeader('Content-Type', 'text/html');
+	res.sendfile('noie.html');
 });
 
 //retrieve Kermit variables
