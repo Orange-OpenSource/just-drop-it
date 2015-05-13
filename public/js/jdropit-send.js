@@ -10,7 +10,7 @@ var clip = new ZeroClipboard(document.getElementById("copy-button"));
 clip.on("ready", function (readyEvent) {
 	clip.on("copy", function (event) {
 		var clipboard = event.clipboardData;
-		clipboard.setData("text/plain", "http://" + receiverUrl);
+		clipboard.setData("text/plain", 'http://' + receiverUrl);
 	});
 	clip.on("aftercopy", function (event) {
 		$("#clipboardcopyok").show(300);
@@ -47,7 +47,7 @@ if (window.location.hostname == "127.0.0.1") {
 
 socket.on('receive_url_ready', function (url) {
 	receiverUrl = window.location.host + url;
-	$('#generatedurl').html("<p>" + receiverUrl + "<p>");
+	$('#generatedurl').html("<p>http://" + receiverUrl + " </p> ");
 
 });
 
@@ -129,3 +129,7 @@ var startUpload = function (file) {
 
 	blobStream.pipe(stream);
 }
+
+$('#generatedurl').click(function () {
+	$('#generatedurl').select();
+});
