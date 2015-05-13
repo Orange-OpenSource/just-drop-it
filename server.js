@@ -1,159 +1,152 @@
 #!/bin/env node
-//  OpenShift sample Node application
+
+"use strict";
+
 var express = require('express');
-var fs      = require('fs');
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var ss = require('socket.io-stream');
+
+//expose root
+app.get('/', function (req, res) {
+	res.setHeader('Content-Type', 'text/html');
+	res.sendfile('send.html');
+});
+
+//expose public directories 
+app.use('/js', express.static(__dirname + '/public/js'));
+app.use('/css', express.static(__dirname + '/public/css'));
+app.use('/fonts', express.static(__dirname + '/public/fonts'));
+app.use('/images', express.static(__dirname + '/public/images'));
+
+//expose exit page
+app.get('/thankyou', function (req, res) {
+	res.send('<h1>Thank you!</h1>');
+});
+
+//retrieve Kermit variables
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+if (typeof ipaddress === "undefined") {
+	//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
+	//  allows us to run/test the app locally.
+	console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
+	ipaddress = "127.0.0.1";
+};
+
+//------------------------
+
+var senders = {}; // socketId -> socket
+var receivers = {}; // socketId -> socket
+var routeMap =   {}; //sendersocketID->receiversocketID
+
+// on socket connections
+io.on('connection', function (socket) {
+
+	//retrieve username
+	socket.userName = socket.handshake.query.userID;
 
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
+	if (socket.handshake.query.role == undefined) {
 
-    //  Scope.
-    var self = this;
+		var errorMsg = 'Error, no profile transmitted';
+		console.log(errorMsg);
+		socket.emit('error', errorMsg);
 
+	} else if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
+		senders[socket.id] = socket;
+		console.log('New sender! ', socket.userName, 'with id : ', socket.id);
 
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+		//generate new unique url 
+		var newReceiverUrl = '/' + socket.id;
+		//expose receiver webpage at this url
+		app.get(newReceiverUrl, function (req, res) {
+			res.sendfile('receive.html');
+		});
+		//warn sender that the receiver page is ready 
+		socket.emit('receive_url_ready', newReceiverUrl)
+		console.log('receive_url_ready emitted');
 
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
+		//ON SEND_FILE EVENT (stream) 
+		ss(socket).on('send_file', function (stream, data) {
 
+			console.log("someone is sending a file (", data.name, ") size:", data.size);
 
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
-        }
+			//searching for the right receiver socket
+			var recSocketId = routeMap[socket.id];
+			if (recSocketId == undefined) {
+				console.error('Error: routing error')
+				socket.emit('alert', 'routing error');
+			} else {
+				//directly expose stream 
+				console.log("Expose stream for receiver ", recSocketId);
+				var streamUrl = socket.id + 'data';
+				console.log(" url: ", streamUrl);
+				app.get('/' + streamUrl, function (req, res) {
+					res.setHeader('Content-Type', 'application/octet-stream');
+					res.setHeader('Content-Length', data.size);
+					res.setHeader('Content-Disposition', 'attachment; filename="' + data.name + '"');
+					stream.pipe(res);
+				});
+				//warning receiver
+				receivers[recSocketId].emit('stream_ready', streamUrl, data.name, data.size);
+			}
+		});
 
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
+		// TRANSFERT_IN_PROGRESS event 
+		socket.on('transfert_in_progress', function (progress) {
+			//simple routing on the other socket
+			receivers[routeMap[socket.id]].emit('transfert_in_progress', progress);
+		});
 
+		// DISCONNECT event  
+		socket.on('disconnect', function () {
+			delete senders[socket.id];
+			delete routeMap[socket.id];
+			console.log("sender ", socket.userName, " has left!");
+		});
 
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
+	} else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
+		var senderID = socket.handshake.query.senderID;
+		receivers[socket.id] = socket
+			//save mapping between sender socket id and receiver socket id
+		routeMap[senderID] = socket.id
 
+		console.log('New receiver ', socket.userName, '/', socket.id);
+		console.log('Is waiting for sender', senderID)
+		var senderSocket = senders[senderID]
+		if (senderSocket == undefined) {
+			console.error('Error: unkown senderID')
+			socket.emit('alert', 'unkown senderID');
+		} else {
+			console.log('telling receiver that the connection was established');
+			socket.emit('connection_ready', senderSocket.userName);
+			console.log('telling the sender that the receiver is ready');
+			senderSocket.emit('receiver_ready', socket.userName);
+		}
 
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
-        }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
-
-
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
-
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
-        });
-    };
-
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
-
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
+		// DISCONNECT event  
+		socket.on('disconnect', function () {
+			delete receivers[socket.id];
+			console.log("receiver ", socket.userName, " has left!");
+		});
 
 
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
-        }
-    };
+	} else {
+		var errorMsg = 'Error, unknown profile';
+		console.error(errorMsg);
+		io.emit('error', errorMsg);
+	}
 
 
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
-
-        // Create the express server and routes.
-        self.initializeServer();
-    };
-
-
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
-
-};   /*  Sample Application.  */
+});
 
 
 
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
 
+//  Start the app on the specific interface (and port).
+http.listen(port, ipaddress, function () {
+	console.log('%s: Node server started on %s:%d ...', Date(Date.now()), ipaddress, port);
+});
