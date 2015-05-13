@@ -5,17 +5,22 @@ $('#step4-outro').hide();
 $('#warning-window').hide();
 $('#error').hide();
 
-//____ Handling of copy to clipboard with zeroclipboard
-var clip = new ZeroClipboard(document.getElementById("copy-button"));
-clip.on("ready", function (readyEvent) {
-	clip.on("copy", function (event) {
-		var clipboard = event.clipboardData;
-		clipboard.setData("text/plain", 'http://' + receiverUrl);
+
+var isIE = /*@cc_on!@*/ false || !!document.documentMode; // At least IE6
+
+if (!isIE) {
+	//____ Handling of copy to clipboard with zeroclipboard
+	var clip = new ZeroClipboard(document.getElementById("copy-button"));
+	clip.on("ready", function (readyEvent) {
+		clip.on("copy", function (event) {
+			var clipboard = event.clipboardData;
+			clipboard.setData("text/plain", 'http://' + receiverUrl);
+		});
+		clip.on("aftercopy", function (event) {
+			$("#clipboardcopyok").show(300);
+		});
 	});
-	clip.on("aftercopy", function (event) {
-		$("#clipboardcopyok").show(300);
-	});
-});
+}
 
 
 //----- Handling drag and drop zone style
