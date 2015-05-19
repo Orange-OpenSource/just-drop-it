@@ -22,7 +22,7 @@
 /* dont close windows warning
 -------------------------------------------------- */
 
-/*
+
 #warning-window {
 	position: fixed;
 	top: 0;
@@ -30,7 +30,7 @@
 	width: 20%;
 	z-index: 10;
 }
-*/
+
 #inner-message {
 	margin: 0 auto;
 }
