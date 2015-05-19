@@ -2,27 +2,16 @@
 
 "use strict";
 
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var http = require('http');
+var io = require('socket.io');
+
 var ss = require('socket.io-stream');
 
-//expose root
-app.get('/', function (req, res) {
-	res.setHeader('Content-Type', 'text/html');
-	res.sendfile('send.html');
-});
+var app = require("./app");
 
-//expose public directories 
-app.use('/public', express.static(__dirname + '/public'));
 
-//expose exit page
-app.get('/noie', function (req, res) {
-	//res.send('<h1>Thank you!</h1>');
-	res.setHeader('Content-Type', 'text/html');
-	res.sendfile('noie.html');
-});
+
+var server = http.createServer(app);
 
 //retrieve Kermit variables
 var ipAddress = process.env.OPENSHIFT_NODEJS_IP;
@@ -30,10 +19,20 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 if (typeof ipAddress === "undefined") {
 	//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
 	//  allows us to run/test the app locally.
-	console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-	ipAddress = "127.0.0.1";
+	console.warn('No OPENSHIFT_NODEJS_IP var, using ANY');
+	ipAddress = null;
 }
 //------------------------
+
+//  Start the app on the specific interface (and port).
+server.listen(port, ipAddress, function () {
+	var mDate = new Date(Date.now());
+	console.log('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
+});
+io = io.listen(server);
+
+
+
 
 var senders = {}; // socketId -> socket
 var receivers = {}; // socketId -> socket
@@ -48,7 +47,7 @@ io.on('connection', function (socket) {
 	socket.userName = socket.handshake.query.userID;
 
 
-	if (socket.handshake.query.role == undefined) {
+	if (typeof socket.handshake.query.role === "undefined") {
 
         errorMsg = 'Error, no profile transmitted';
 		console.log(errorMsg);
@@ -61,13 +60,10 @@ io.on('connection', function (socket) {
 			console.log('New sender! ', socket.userName, 'with id : ', socket.id);
 
 			//generate new unique url
-			var newReceiverUrl = '/' + socket.id;
 			//expose receiver webpage at this url
-			app.get(newReceiverUrl, function (req, res) {
-				res.sendfile('receive.html');
-			});
+            app.registerFile(socket.id);
 			//warn sender that the receiver page is ready
-			socket.emit('receive_url_ready', newReceiverUrl);
+			socket.emit('receive_url_ready',  '/' + socket.id);
 			console.log('receive_url_ready emitted');
 
 			//ON SEND_FILE EVENT (stream)
@@ -85,14 +81,9 @@ io.on('connection', function (socket) {
 					console.log("Expose stream for receiver ", recSocketId);
 					var streamUrl = socket.id + 'data';
 					console.log(" url: ", streamUrl);
-					app.get('/' + streamUrl, function (req, res) {
-						res.setHeader('Content-Type', 'application/octet-stream');
-						res.setHeader('Content-Length', data.size);
-						res.setHeader('Content-Disposition', 'attachment; filename="' + data.name + '"');
-						stream.pipe(res);
-					});
+                    app.registerStream(streamUrl, stream, data.name, data.size);
 					//warning receiver
-					receivers[recSocketId].emit('stream_ready', streamUrl, data.name, data.size);
+					receivers[recSocketId].emit('stream_ready', "/"+streamUrl, data.name, data.size);
 				}
 			});
 
@@ -148,8 +139,3 @@ io.on('connection', function (socket) {
 
 
 
-//  Start the app on the specific interface (and port).
-http.listen(port, ipAddress, function () {
-    var mDate = new Date(Date.now());
-	console.log('%s: Node server started on %s:%d ...', mDate, ipAddress, port);
-});

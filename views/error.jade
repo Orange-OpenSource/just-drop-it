@@ -1,0 +1,10 @@
+extends layout
+block extra_scripts
+    script.
+        window.onload = function() {
+            $("#warning-window").hide();
+        }
+block content
+  h1= message
+  h2= error.status
+  pre #{error.stack}
