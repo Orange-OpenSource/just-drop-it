@@ -6,10 +6,11 @@ var http = require('http');
 var io = require('socket.io');
 
 var ss = require('socket.io-stream');
-
+var debug = require('debug')('app:server');
+var error = require('debug')('app:routes:receive');
 var app = require("./app");
 
-
+debug.log = console.log.bind(console);
 
 var server = http.createServer(app);
 
@@ -19,7 +20,7 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 if (typeof ipAddress === "undefined") {
 	//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
 	//  allows us to run/test the app locally.
-	console.warn('No OPENSHIFT_NODEJS_IP var, using ANY');
+    error('No OPENSHIFT_NODEJS_IP var, using ANY');
 	ipAddress = null;
 }
 //------------------------
@@ -27,7 +28,7 @@ if (typeof ipAddress === "undefined") {
 //  Start the app on the specific interface (and port).
 server.listen(port, ipAddress, function () {
 	var mDate = new Date(Date.now());
-	console.log('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
+    debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
 });
 io = io.listen(server);
 
@@ -50,33 +51,33 @@ io.on('connection', function (socket) {
 	if (typeof socket.handshake.query.role === "undefined") {
 
         errorMsg = 'Error, no profile transmitted';
-		console.log(errorMsg);
+        error(errorMsg);
 		socket.emit('error', errorMsg);
 
 	} else {
 		if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
 
 			senders[socket.id] = socket;
-			console.log('New sender! ', socket.userName, 'with id : ', socket.id);
+            debug('New sender! %s with id : %s', socket.userName, socket.id);
 
 			//generate new unique url
 			//warn sender that the receiver page is ready
 			socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id));
-			console.log('receive_url_ready emitted');
+            debug('receive_url_ready emitted');
 
 			//ON SEND_FILE EVENT (stream)
 			ss(socket).on('send_file', function (stream, data) {
 
-				console.log("someone is sending a file (", data.name, ") size:", data.size);
+                debug("someone is sending a file (%s) size:%d",data.name, data.size);
 
 				//searching for the right receiver socket
 				var recSocketId = routeMap[socket.id];
 				if (recSocketId == undefined) {
-					console.error('Error: routing error');
+                    error('Error: routing error');
 					socket.emit('alert', 'routing error');
 				} else {
 					//directly expose stream
-					console.log("Expose stream for receiver ", recSocketId);
+                    debug("Expose stream for receiver %s", recSocketId);
 					//notifying receiver
 					receivers[recSocketId].emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
 				}
@@ -92,7 +93,7 @@ io.on('connection', function (socket) {
 			socket.on('disconnect', function () {
 				delete senders[socket.id];
 				delete routeMap[socket.id];
-				console.log("sender ", socket.userName, " has left!");
+                debug("sender %s has left!", socket.userName);
 			});
 
 		} else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
@@ -101,16 +102,16 @@ io.on('connection', function (socket) {
 			//save mapping between sender socket id and receiver socket id
 			routeMap[senderID] = socket.id;
 
-			console.log('New receiver ', socket.userName, '/', socket.id);
-			console.log('Is waiting for sender', senderID);
+            debug('New receiver %s/%s', socket.userName, socket.id);
+            debug('Is waiting for sender %s', senderID);
 			var senderSocket = senders[senderID];
 			if (senderSocket == undefined) {
-				console.error('Error: unkown senderID');
+                error('Error: unkown senderID');
 				socket.emit('alert', 'unkown senderID');
 			} else {
-				console.log('telling receiver that the connection was established');
+                debug('telling receiver that the connection was established');
 				socket.emit('connection_ready', senderSocket.userName);
-				console.log('telling the sender that the receiver is ready');
+                debug('telling the sender that the receiver is ready');
 				senderSocket.emit('receiver_ready', socket.userName);
 			}
             socket.on('transfer_complete', function(){
@@ -120,13 +121,13 @@ io.on('connection', function (socket) {
 			// DISCONNECT event
 			socket.on('disconnect', function () {
 				delete receivers[socket.id];
-				console.log("receiver ", socket.userName, " has left!");
+				debug("receiver %s has left!", socket.userName);
 			});
 
 
 		} else {
             errorMsg = 'Error, unknown profile';
-			console.error(errorMsg);
+			error(errorMsg);
 			io.emit('error', errorMsg);
 		}
 	}
