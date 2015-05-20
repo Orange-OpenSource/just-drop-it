@@ -19,7 +19,7 @@ router.get(receivePrefix+':id', function(req, res, next){
         next(err);
     }else{
         debug('receive - rendering receive for file %s', fileId);
-        res.render('receive', {isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined", fileId : fileId});
+        res.render('receive', {isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined", senderId : fileId});
     }
 
 });

@@ -6,7 +6,7 @@ block extra_scripts
     script(src="/js/jdropit-receive.js")
     script.
         window.onload = function(){
-            receiveFile(#{isLocal});
+            receiveFile(#{isLocal},  "#{senderId}");
         }
 block content
     div(class="row" id="step0")

@@ -1,22 +1,12 @@
 "use strict";
-function receiveFile(isLocal) {
+function receiveFile(isLocal, senderId) {
 
     var socket;
-
-    //pour l'instant le senderID est directement dans l'URL
-    var uriSplitted = window.location.pathname.split('/');
-    var senderID = uriSplitted[uriSplitted.length -1];
-    if (isLocal) {
-        socket = io({
-            query: 'userID=undefReceiver&senderID=' + senderID + '&role=receiver'
-        });
-    } else {
-        socket = io({
-            query: 'userID=undefReceiver&senderID=' + senderID + '&role=receiver',
-            path: "/_ws/socket.io/"
-        });
+    var socketParams = { query: 'userID=undefReceiver&senderID=' + senderId + '&role=receiver' };
+    if (!isLocal) {//restriction on OPENSHIFT
+        socketParams.path = "/_ws/socket.io/";
     }
-
+    socket = io(socketParams);
     socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
     });
