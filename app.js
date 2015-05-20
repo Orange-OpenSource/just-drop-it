@@ -4,7 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var index = require('./routes/index');
+var send = require('./routes/send');
+var receive = require('./routes/receive')
 var javascript = require('./routes/javascript');
 
 
@@ -22,7 +23,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.receive_uri_path = '/receive';
+app.use('/', send);
+app.use(app.receive_uri_path, receive)
 app.use('/js', javascript);
 
 // catch 404 and forward to error handler
@@ -62,8 +65,9 @@ app.use(function(err, req, res, next) {
 });
 
 
-app.registerFile = index.registerFile;
-app.registerStream = index.registerStream;
+app.prepareStream = receive.prepareStream;
+app.setStreamInformation = receive.setStreamInformation;
+app.streamCompleted = receive.streamCompleted;
 
 
 module.exports = app;

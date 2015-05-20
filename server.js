@@ -60,10 +60,8 @@ io.on('connection', function (socket) {
 			console.log('New sender! ', socket.userName, 'with id : ', socket.id);
 
 			//generate new unique url
-			//expose receiver webpage at this url
-            app.registerFile(socket.id);
 			//warn sender that the receiver page is ready
-			socket.emit('receive_url_ready',  '/' + socket.id);
+			socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id));
 			console.log('receive_url_ready emitted');
 
 			//ON SEND_FILE EVENT (stream)
@@ -79,11 +77,8 @@ io.on('connection', function (socket) {
 				} else {
 					//directly expose stream
 					console.log("Expose stream for receiver ", recSocketId);
-					var streamUrl = socket.id + 'data';
-					console.log(" url: ", streamUrl);
-                    app.registerStream(streamUrl, stream, data.name, data.size);
-					//warning receiver
-					receivers[recSocketId].emit('stream_ready', "/"+streamUrl, data.name, data.size);
+					//notifying receiver
+					receivers[recSocketId].emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
 				}
 			});
 
@@ -118,7 +113,9 @@ io.on('connection', function (socket) {
 				console.log('telling the sender that the receiver is ready');
 				senderSocket.emit('receiver_ready', socket.userName);
 			}
-
+            socket.on('transfer_complete', function(){
+                app.streamCompleted(senderID);
+            });
 			// DISCONNECT event
 			socket.on('disconnect', function () {
 				delete receivers[socket.id];

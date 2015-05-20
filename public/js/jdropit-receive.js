@@ -4,7 +4,8 @@ function receiveFile(isLocal) {
     var socket;
 
     //pour l'instant le senderID est directement dans l'URL
-    var senderID = window.location.pathname.replace('/', '');
+    var uriSplitted = window.location.pathname.split('/');
+    var senderID = uriSplitted[uriSplitted.length -1];
     if (isLocal) {
         socket = io({
             query: 'userID=undefReceiver&senderID=' + senderID + '&role=receiver'
@@ -52,6 +53,7 @@ function receiveFile(isLocal) {
             $('#step4-outro').show(500);
             $('#transfertdiv').hide(500);
             $("#warning-window").hide(500);
+            socket.emit('transfer_complete');
         }
 
     });
