@@ -115,6 +115,7 @@ io.on('connection', function (socket) {
 			}
             socket.on('transfer_complete', function(){
                 app.streamCompleted(senderID);
+                senderSocket.emit('transfer_complete');
             });
 			// DISCONNECT event
 			socket.on('disconnect', function () {

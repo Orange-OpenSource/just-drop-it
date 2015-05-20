@@ -59,6 +59,8 @@ function sendFile(isLocal) {
         displayError("Error: " + errorMsg);
     });
 
+    socket.on('transfer_complete', uploadComplete);
+
 
     var fileToTransfert;
 
@@ -119,16 +121,17 @@ function sendFile(isLocal) {
             transfertPb.attr('aria-valuenow', progress);
             transfertPb.width(progress + '%');
             transfertPb.html(progress + '%');
-
-            if (progress == 100) {
-                $('#step4-outro').show(500);
-                $('#step3').hide(500);
-                $('#warning-window').hide(500);
-            }
         });
+
 
         blobStream.pipe(stream);
     };
+
+    function uploadComplete(){
+        $('#step4-outro').show(500);
+        $('#step3').hide(500);
+        $('#warning-window').hide(500);
+    }
 
     $('#generatedurl').click(function () {
         $('#generatedurl').select();
