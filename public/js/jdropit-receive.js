@@ -34,11 +34,15 @@ function receiveFile(isLocal) {
         //window.open(url, '_blank');
         //meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us)
         //window.location.href = url;
-        window.location.assign(url);
+        //window.location.assign(url);
         //non testé, au cas ou : setTimeout(function(){document.location.href = "page.html;"},500);
         /** autre popup :         var popup = window.open(url);
          -         popup.blur();
          -         window.focus();   */
+        //Tentative avec jquery.fileDownload
+        $.fileDownload(url).fail(function(){
+            displayError("Error while downloading file "+filename);
+        })
     });
 
     socket.on('transfert_in_progress', function (progress) {
@@ -48,13 +52,14 @@ function receiveFile(isLocal) {
         transfertPb.attr('aria-valuenow', progress);
         transfertPb.width(progress + '%');
         transfertPb.html(progress + '%');
-
-        if (progress == 100) {
-            $('#step4-outro').show(500);
-            $('#transfertdiv').hide(500);
-            $("#warning-window").hide(500);
-            socket.emit('transfer_complete');
-        }
-
+        if(progress == 100)
+            downloadComplete();
     });
+
+    function downloadComplete(){
+        $('#step4-outro').show(500);
+        $('#transfertdiv').hide(500);
+        $("#warning-window").hide(500);
+        socket.emit('transfer_complete');
+    }
 }
