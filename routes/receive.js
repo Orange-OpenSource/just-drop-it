@@ -1,37 +1,40 @@
 var express = require('express');
-var debug = require('debug')('app:receive');
+var debug = require('debug')('app:routes:receive');
 var router = express.Router();
-
+var error = require('debug')('app:routes:receive');
 
 var currentFiles = {};
 
 var receivePrefix = '/';
 var downloadPrefix ='/data/';
 
+debug.log = console.log.bind(console);
+
 router.get(receivePrefix+':id', function(req, res, next){
     var fileId = req.params.id;
-    debug('receive - %s', fileId);
     if(typeof currentFiles[fileId] === "undefined"){
-        debug('receive - file not found');
+        error('receive - file not found %s', fileId);
         var err = new Error('Not Found');
         err.status = 404;
         next(err);
-    }else
-        res.render('receive', {isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined"});
+    }else{
+        debug('receive - rendering receive for file %s', fileId);
+        res.render('receive', {isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined", senderId : fileId});
+    }
+
 });
 
 
 router.get(downloadPrefix+':id', function(req, res, next){
     var fileId = req.params.id;
-    debug('download - %s', fileId);
     var streamInformations =  currentFiles[fileId];
     if(typeof streamInformations === "undefined" || streamInformations == null){
-        debug('download - file not found or not prepared');
+        error('download - file not found or not prepared: %s', fileId);
         var err = new Error('Not Found');
         err.status = 404;
         next(err);
     }else{
-        debug('download - serving file');
+        debug('download - serving file %s', fileId);
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Content-Length', streamInformations.size);
         res.setHeader('Content-Disposition', 'attachment; filename="' + streamInformations.name + '"');

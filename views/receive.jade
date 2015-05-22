@@ -7,7 +7,7 @@ block extra_scripts
     script(src="/js/jquery.fileDownload.js")
     script.
         window.onload = function(){
-            receiveFile(#{isLocal});
+            receiveFile(#{isLocal},  "#{senderId}");
         }
 block content
     div(class="row" id="step0")
