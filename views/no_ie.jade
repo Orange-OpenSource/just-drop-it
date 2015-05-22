@@ -1,0 +1,13 @@
+extends layout
+block content
+    div(class="row")
+        div(class="col-xs-2 alert")
+            img(src="images/no_ie.jpg" width="100%" height="100%")
+        div(class="col-xs-10 alert h3")
+            span(class="glyphicon glyphicon-exclamation-sign" aria-hidden="true")
+                span(class="sr-only lead") Error
+                | This project hasn't been tested on IE. Please use one of the following browser:
+                ul
+                    li Firefox
+                    li Chrome
+                    li Safari

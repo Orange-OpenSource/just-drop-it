@@ -9,13 +9,13 @@ debug.log = console.log.bind(console);
 /* GET home page. */
 router.get('/', function(req, res) {
     debug('serving send');
-    res.render('send', {isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined"});
+    res.render('send', {title : "Just drop it", isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined"});
 });
 
 /* GET home page. */
-router.get('/noie', function(req, res) {
+router.get('/no_ie', function(req, res) {
     debug('serving no ie');
-    res.sendFile('noie.html', { root: path.join(__dirname, '../public') });
+    res.render('no_ie', {title : "You should be ashamed"});
 });
 
 

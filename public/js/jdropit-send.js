@@ -1,7 +1,7 @@
 function sendFile(isLocal) {
 
 
-    $('#warning-window').hide();
+
     $("#clipboardcopyok").hide();
 
 
