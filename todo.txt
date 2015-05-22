@@ -1,16 +1,9 @@
-factoriser entetes/pieds?
+localisation http://i18next.com/pages/doc_init.html
 gérer les annulations
-
-
-mettre une lib common pour gérer au moins les constantes
-
-Bugs: multiple copy
 
 transfert optimisé:
 - zip
 - découpage, multistream, réassemblage
-- chrono
-- logs serveur
+- chrono temps restant
+- multi fichier
 
-
-ajouter http:// dans le copy content
