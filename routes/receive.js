@@ -40,6 +40,7 @@ router.get(downloadPrefix+':id', function(req, res, next){
         res.setHeader('Content-Disposition', 'attachment; filename="' + streamInformations.name + '"');
         res.setHeader('Set-Cookie', 'fileDownload=true; path=/');
         streamInformations.stream.pipe(res);
+        streamInformations.response = res;
     }
 });
 
@@ -52,12 +53,20 @@ router.prepareStream = function(fileId){
 
 router.setStreamInformation = function(fileId, filename, size, stream){
     debug('setStreamInformation - %s', fileId);
-    currentFiles[fileId] = {name : filename, size : size, stream : stream};
+    currentFiles[fileId] = {name : filename, size : size, stream : stream, response : null};
     return downloadPrefix+fileId;
 }
 
-router.streamCompleted = function(fileId){
+router.streamCompleted = function(fileId, forceClosure){
     debug('streamCompleted - %s', fileId);
+    if(forceClosure){
+        var currentFile = currentFiles[fileId];
+        if(typeof currentFile != "undefined" && currentFile.response != null) {
+            debug('streamCompleted - forcing stream closure');
+            currentFile.stream.unpipe(currentFile.response);
+            currentFile.response.connection.destroy();
+        }
+    }
     delete currentFiles[fileId];
 }
 

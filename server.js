@@ -37,7 +37,6 @@ io = io.listen(server);
 
 var senders = {}; // socketId -> socket
 var receivers = {}; // socketId -> socket
-var routeMap =   {}; //sendersocketID->receiversocketID
 
 var errorMsg;
 
@@ -57,7 +56,7 @@ io.on('connection', function (socket) {
 	} else {
 		if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
 
-			senders[socket.id] = socket;
+			senders[socket.id] = {socket: socket, receiver: null};
             debug('New sender! %s with id : %s', socket.userName, socket.id);
 
 			//generate new unique url
@@ -71,60 +70,74 @@ io.on('connection', function (socket) {
                 debug("someone is sending a file (%s) size:%d",data.name, data.size);
 
 				//searching for the right receiver socket
-				var recSocketId = routeMap[socket.id];
-				if (recSocketId == undefined) {
+				var sender = senders[socket.id];
+				if (typeof sender == "undefined" ||typeof sender.receiver == "undefined") {
                     error('Error: routing error');
 					socket.emit('alert', 'routing error');
 				} else {
 					//directly expose stream
-                    debug("Expose stream for receiver %s", recSocketId);
+                    debug("Expose stream for receiver %s", sender.receiver.id);
 					//notifying receiver
-					receivers[recSocketId].emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
+					sender.receiver.emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
 				}
 			});
 
 			// TRANSFERT_IN_PROGRESS event
 			socket.on('transfert_in_progress', function (progress) {
 				//simple routing on the other socket
-				receivers[routeMap[socket.id]].emit('transfert_in_progress', progress);
+                senders[socket.id].receiver.emit('transfert_in_progress', progress);
 			});
 
 			// DISCONNECT event
 			socket.on('disconnect', function () {
+                var sender = senders[socket.id];
 				delete senders[socket.id];
-				delete routeMap[socket.id];
+                if( sender.receiver != null && typeof receivers[sender.receiver.id] != "undefined"){
+                    sender.receiver.emit('sender_left');
+                    //closing stream
+                    app.streamCompleted(socket.id, true);
+                }
                 debug("sender %s has left!", socket.userName);
 			});
 
 		} else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
 			var senderID = socket.handshake.query.senderID;
-			receivers[socket.id] = socket;
-			//save mapping between sender socket id and receiver socket id
-			routeMap[senderID] = socket.id;
+
 
             debug('New receiver %s/%s', socket.userName, socket.id);
             debug('Is waiting for sender %s', senderID);
-			var senderSocket = senders[senderID];
-			if (senderSocket == undefined) {
+			var sender = senders[senderID];
+			if (typeof sender == "undefined") {
                 error('Error: unkown senderID');
 				socket.emit('alert', 'unkown senderID');
 			} else {
+                //keeping reference between sender and receiver
+                receivers[socket.id] = {socket : socket, sender : sender.socket};
+                sender.receiver = socket;
+
+
                 debug('telling receiver that the connection was established');
-				socket.emit('connection_ready', senderSocket.userName);
+				socket.emit('connection_ready', sender.socket.userName);
                 debug('telling the sender that the receiver is ready');
-				senderSocket.emit('receiver_ready', socket.userName);
+
+				sender.socket.emit('receiver_ready', socket.userName);
+
+                socket.on('transfer_complete', function(){
+                    app.streamCompleted(senderID);
+                    sender.socket.emit('transfer_complete');
+                });
+                // DISCONNECT event
+                socket.on('disconnect', function () {
+                    var receiver = receivers[socket.id];
+                    delete receivers[socket.id];
+                    if(typeof senders[receiver.sender.id] != "undefined"){
+                        receiver.sender.emit('receiver_left');
+                        app.streamCompleted(senderID, true);
+                    }
+                    debug("receiver %s has left!", socket.userName);
+
+                });
 			}
-            socket.on('transfer_complete', function(){
-                app.streamCompleted(senderID);
-                senderSocket.emit('transfer_complete');
-            });
-			// DISCONNECT event
-			socket.on('disconnect', function () {
-				delete receivers[socket.id];
-				debug("receiver %s has left!", socket.userName);
-			});
-
-
 		} else {
             errorMsg = 'Error, unknown profile';
 			error(errorMsg);

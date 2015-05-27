@@ -33,6 +33,7 @@ function sendFile(isLocal) {
 
     var socket;
     var receiverUrl;
+
     //init du socket vers le serveur
     if (isLocal) {
         socket = io({
@@ -57,6 +58,11 @@ function sendFile(isLocal) {
 
     socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
+    });
+
+    socket.on('receiver_left', function(){
+        socket.close(true);
+        downloadError("Receiver left before the end of transfer");
     });
 
     socket.on('transfer_complete', uploadComplete);
@@ -92,6 +98,7 @@ function sendFile(isLocal) {
         $('#warning-window').show(500);
         $('#step1').hide(500);
     };
+
 
     //fonction d'upload du fichier
     function startUpload(file) {
@@ -132,6 +139,15 @@ function sendFile(isLocal) {
         $('#step3').hide(500);
         $('#warning-window').hide(500);
     }
+
+    function downloadError(message){
+        $("#error_message").html(message);
+        $('#step4-error').show(500);
+        $('#step3').hide(500);
+        $("#warning-window").hide(500);
+    }
+
+
 
     $('#generatedurl').click(function () {
         $('#generatedurl').select();

@@ -42,14 +42,29 @@ function receiveFile(isLocal, senderId) {
         transfertPb.attr('aria-valuenow', progress);
         transfertPb.width(progress + '%');
         transfertPb.html(progress + '%');
-        if(progress == 100)
+        if(progress == 100){
+            socket.emit('transfer_complete');
             downloadComplete();
+        }
+
+    });
+
+    socket.on('sender_left', function(){
+        socket.close(true);
+        downloadError("Sender left before the end of transfer");
     });
 
     function downloadComplete(){
         $('#step4-outro').show(500);
         $('#transfertdiv').hide(500);
         $("#warning-window").hide(500);
-        socket.emit('transfer_complete');
+    }
+
+
+    function downloadError(message){
+        $("#error_message").html(message);
+        $('#step4-error').show(500);
+        $('#transfertdiv').hide(500);
+        $("#warning-window").hide(500);
     }
 }
