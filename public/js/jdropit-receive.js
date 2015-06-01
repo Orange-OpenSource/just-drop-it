@@ -50,7 +50,6 @@ function receiveFile(isLocal, senderId) {
     });
 
     socket.on('sender_left', function(){
-        socket.close(true);
         downloadError("Sender left before the end of transfer");
     });
 
@@ -58,6 +57,7 @@ function receiveFile(isLocal, senderId) {
         $('#step4-outro').show(500);
         $('#transfertdiv').hide(500);
         $("#warning-window").hide(500);
+        socket.close(true);
     }
 
 
@@ -66,5 +66,6 @@ function receiveFile(isLocal, senderId) {
         $('#step4-error').show(500);
         $('#transfertdiv').hide(500);
         $("#warning-window").hide(500);
+        socket.close(true);
     }
 }
