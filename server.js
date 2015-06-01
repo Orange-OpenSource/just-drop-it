@@ -1,6 +1,14 @@
 #!/bin/env node
 
 "use strict";
+var defaultDebugMode =   "app:*";
+if(typeof process.env.DEBUG == "undefined"){
+    console.log("Adding DEBUG variable to "+defaultDebugMode);
+    process.env.DEBUG=defaultDebugMode;
+}else{
+    console.log("DEBUG already set to "+defaultDebugMode);
+}
+
 
 var http = require('http');
 var io = require('socket.io');
