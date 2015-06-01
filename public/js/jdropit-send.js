@@ -104,8 +104,10 @@ function sendFile(isLocal) {
     function startUpload(file) {
         console.log(file);
 
+        var readWriteOpts = {highWaterMark: Math.pow(2,21)};
+
         $('#transfertMessage').html("Transfert in progress...");
-        var stream = ss.createStream();
+        var stream = ss.createStream(readWriteOpts);
 
         // upload a file to the server.
         ss(socket).emit('send_file', stream, {
@@ -113,7 +115,7 @@ function sendFile(isLocal) {
             name: file.name
         });
 
-        var blobStream = ss.createBlobReadStream(file);
+        var blobStream = ss.createBlobReadStream(file,readWriteOpts);
         var size = 0;
 
         blobStream.on('data', function (chunk) {
