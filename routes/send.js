@@ -16,7 +16,7 @@ router.get('/', function(req, res) {
 /* GET home page. */
 router.get('/no_ie', function(req, res) {
     debug('serving no ie');
-    res.render('no_ie', {title : "You should be ashamed"});
+    res.render('no_ie', {title : "Sorry, your browser is not compatible"});
 });
 
 /* test download*/
