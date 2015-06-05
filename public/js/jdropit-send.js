@@ -140,6 +140,7 @@ function sendFile(isLocal) {
         $('#step4-outro').show(500);
         $('#step3').hide(500);
         $('#warning-window').hide(500);
+        socket.close(true);
     }
 
     function downloadError(message){
@@ -147,6 +148,7 @@ function sendFile(isLocal) {
         $('#step4-error').show(500);
         $('#step3').hide(500);
         $("#warning-window").hide(500);
+        socket.close(true);
     }
 
 

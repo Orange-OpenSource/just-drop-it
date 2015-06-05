@@ -1,6 +1,14 @@
 #!/bin/env node
 
 "use strict";
+var defaultDebugMode =   "app:*";
+if(typeof process.env.DEBUG == "undefined"){
+    console.log("Adding DEBUG variable to "+defaultDebugMode);
+    process.env.DEBUG=defaultDebugMode;
+}else{
+    console.log("DEBUG already set to "+defaultDebugMode);
+}
+
 
 var http = require('http');
 var io = require('socket.io');
@@ -15,14 +23,9 @@ debug.log = console.log.bind(console);
 var server = http.createServer(app);
 
 //retrieve Kermit variables
-var ipAddress = process.env.OPENSHIFT_NODEJS_IP;
+var ipAddress = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP var, using ANY') || null;
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-if (typeof ipAddress === "undefined") {
-	//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-	//  allows us to run/test the app locally.
-    error('No OPENSHIFT_NODEJS_IP var, using ANY');
-	ipAddress = null;
-}
+
 //------------------------
 
 //  Start the app on the specific interface (and port).
