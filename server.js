@@ -1,159 +1,156 @@
 #!/bin/env node
-//  OpenShift sample Node application
-var express = require('express');
-var fs      = require('fs');
+
+"use strict";
+var defaultDebugMode =   "app:*";
+if(typeof process.env.DEBUG == "undefined"){
+    console.log("Adding DEBUG variable to "+defaultDebugMode);
+    process.env.DEBUG=defaultDebugMode;
+}else{
+    console.log("DEBUG already set to "+defaultDebugMode);
+}
 
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
+var http = require('http');
+var io = require('socket.io');
 
-    //  Scope.
-    var self = this;
+var ss = require('socket.io-stream');
+var debug = require('debug')('app:server');
+var error = require('debug')('app:routes:receive');
+var app = require("./app");
 
+debug.log = console.log.bind(console);
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
+var server = http.createServer(app);
 
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+//retrieve Kermit variables
+var ipAddress = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP var, using ANY') || null;
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
+//------------------------
+
+//  Start the app on the specific interface (and port).
+server.listen(port, ipAddress, function () {
+    var mDate = new Date(Date.now());
+    debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
+});
+io = io.listen(server);
 
 
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
+
+
+var senders = {}; // socketId -> socket
+var receivers = {}; // socketId -> socket
+
+var errorMsg;
+
+// on socket connections
+io.on('connection', function (socket) {
+
+    //retrieve username
+    socket.userName = socket.handshake.query.userID;
+
+
+    if (typeof socket.handshake.query.role === "undefined") {
+
+        errorMsg = 'Error, no profile transmitted';
+        error(errorMsg);
+        socket.emit('error', errorMsg);
+
+    } else {
+        if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
+
+            senders[socket.id] = {socket: socket, receiver: null};
+            debug('New sender! %s with id : %s', socket.userName, socket.id);
+
+            //generate new unique url
+            //warn sender that the receiver page is ready
+            socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id));
+            debug('receive_url_ready emitted');
+
+            //ON SEND_FILE EVENT (stream)
+            ss(socket).on('send_file', function (stream, data) {
+
+                debug("someone is sending a file (%s) size:%d",data.name, data.size);
+
+                //searching for the right receiver socket
+                var sender = senders[socket.id];
+                if (typeof sender == "undefined" ||typeof sender.receiver == "undefined") {
+                    error('Error: routing error');
+                    socket.emit('alert', 'routing error');
+                } else {
+                    //directly expose stream
+                    debug("Expose stream for receiver %s", sender.receiver.id);
+                    //notifying receiver
+                    sender.receiver.emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
+                }
+            });
+
+            // TRANSFERT_IN_PROGRESS event
+            socket.on('transfert_in_progress', function (progress) {
+                //simple routing on the other socket
+                senders[socket.id].receiver.emit('transfert_in_progress', progress);
+            });
+
+            // DISCONNECT event
+            socket.on('disconnect', function () {
+                var sender = senders[socket.id];
+                delete senders[socket.id];
+                if( sender.receiver != null && typeof receivers[sender.receiver.id] != "undefined"){
+                    sender.receiver.emit('sender_left');
+                    //closing stream
+                    app.streamCompleted(socket.id, true);
+                }
+                debug("sender %s has left!", socket.userName);
+            });
+
+        } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
+            var senderID = socket.handshake.query.senderID;
+
+
+            debug('New receiver %s/%s', socket.userName, socket.id);
+            debug('Is waiting for sender %s', senderID);
+            var sender = senders[senderID];
+            if (typeof sender == "undefined") {
+                error('Error: unkown senderID');
+                socket.emit('alert', 'unkown senderID');
+            } else {
+                //keeping reference between sender and receiver
+                receivers[socket.id] = {socket : socket, sender : sender.socket};
+                sender.receiver = socket;
+
+
+                debug('telling receiver that the connection was established');
+                socket.emit('connection_ready', sender.socket.userName);
+                debug('telling the sender that the receiver is ready');
+
+                sender.socket.emit('receiver_ready', socket.userName);
+
+                socket.on('transfer_complete', function(){
+                    app.streamCompleted(senderID);
+                    sender.socket.emit('transfer_complete');
+                });
+                // DISCONNECT event
+                socket.on('disconnect', function () {
+                    var receiver = receivers[socket.id];
+                    delete receivers[socket.id];
+                    if(typeof senders[receiver.sender.id] != "undefined"){
+                        receiver.sender.emit('receiver_left');
+                        app.streamCompleted(senderID, true);
+                    }
+                    debug("receiver %s has left!", socket.userName);
+
+                });
+            }
+        } else {
+            errorMsg = 'Error, unknown profile';
+            error(errorMsg);
+            io.emit('error', errorMsg);
         }
-
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
+    }
 
 
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
-
-
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
-        }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
-
-
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
-
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
-        });
-    };
-
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
-
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
-
-
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
-        }
-    };
-
-
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
-
-        // Create the express server and routes.
-        self.initializeServer();
-    };
-
-
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
-
-};   /*  Sample Application.  */
+});
 
 
 
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
 

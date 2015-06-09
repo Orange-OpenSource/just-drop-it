@@ -1,0 +1,110 @@
+/* boost - version 2.0.0 - 20-02-2015
+Booststrap Open Orange Simplicity Toolkit
+ &#169 2015 EASE - accessibility.support@orange.com */
+
+/** Old values in BS 3.1.1
+@gray-darker: lighten(@brand-orange-black, 13.5%); // #222
+@gray-dark: lighten(@brand-orange-black, 26.75%); // #444
+@gray: lighten(@brand-orange-black, 33.5%); // #555
+@gray-before-light: lighten(@brand-orange-black, 40%); //#666
+@gray-light: lighten(@brand-orange-black, 80%); //#ccc
+@gray-lighter: lighten(@brand-orange-black, 93.5%);
+*/
+/** BS 3.3.2 values 
+@gray-base:              #000;
+
+@gray-darker:            lighten(@gray-base, 13.5%); // #222
+@gray-dark:              lighten(@gray-base, 20%);   // #333
+@gray:                   lighten(@gray-base, 33.5%); // #555
+@gray-light:             lighten(@gray-base, 46.7%); // #777
+@gray-lighter:           lighten(@gray-base, 93.5%); // #eee
+**/
+html {
+  font-size: 62.5%;
+}
+.btn:focus {
+  outline: dotted 2px black;
+}
+div.active:focus {
+  outline: dotted 1px black;
+}
+a:focus {
+  outline: dotted 1px black;
+}
+.close:hover,
+.close:focus {
+  outline: dotted 1px black;
+}
+.nav > li > a:hover,
+.nav > li > a:focus {
+  outline: dotted 1px black;
+}
+.carousel-inner > .item {
+  position: absolute;
+  top: -999999em;
+  display: block;
+  -webkit-transition: 0.6s ease-in-out left;
+  transition: 0.6s ease-in-out left;
+}
+.carousel-inner > .active {
+  top: 0;
+}
+.carousel-inner > .active,
+.carousel-inner > .next,
+.carousel-inner > .prev {
+  position: relative;
+}
+.carousel-inner > .next,
+.carousel-inner > .prev {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.glyphicon {
+  color: #f16e00;
+}
+/*
+// bootstrap theme ss overload //
+
+// blockquote //
+blockquote footer, blockquote small {
+    background-color: @gray-lighter;
+    color: @gray-darker;
+    display:inline
+}
+// buttons //
+.btn-default, .btn-primary, .btn-success, .btn-info, .btn-warning, .btn-danger {
+    background-image: none;
+}
+
+.btn-info {
+  &:hover,
+  &:focus  {
+    color: #fff;
+  } 
+}
+
+// close //
+.close {
+    opacity:.5
+}
+.close:hover, .close:focus {
+    opacity:.8
+}
+// label //
+.label-success, .label-warning, .label-info {
+    color: @gray-darker;
+}
+// badges //
+.badge {
+    background-color: @brand-orange
+}
+// tabs //
+.nav-tabs > li:not(.active) > a:hover {
+    background-color: @gray-lighter;
+    color: @brand-orange;
+}
+
+// navbar
+*/
+/*# sourceMappingURL=bootstrap-orange-theme.css.map */
