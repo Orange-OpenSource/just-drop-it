@@ -25,3 +25,17 @@ PLEASE NOTE: The Cron cartridge must be installed in order to run the configured
 For more information about cron, consult the documentation:
 http://openshift.github.io/documentation/oo_cartridge_guide.html#cron
 http://openshift.github.io/documentation/oo_user_guide.html#cron
+
+## contenu de l'aide sur cron
+To schedule your scripts to run on a periodic basis, add the scripts to
+your application's .openshift/cron/{minutely,hourly,daily,weekly,monthly}/
+directories (and commit and redeploy your application).
+
+Example: A script .openshift/cron/hourly/crony added to your application
+         will be executed once every hour.
+         Similarly, a script .openshift/cron/weekly/chronograph added
+         to your application will be executed once every week.
+
+
+##MAIL_SMTP_RELAY_HOST
+  MAIL_SMTP_RELAY_PORT

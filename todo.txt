@@ -1,9 +1,0 @@
-localisation http://i18next.com/pages/doc_init.html
-gérer les annulations
-
-transfert optimisé:
-- zip
-- découpage, multistream, réassemblage
-- chrono temps restant
-- multi fichier
-

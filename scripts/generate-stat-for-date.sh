@@ -1,0 +1,106 @@
+#!/bin/bash
+## THIS IS THE MAIN SCRIPT.
+## Launch it manually if you want other than daily or montly stats
+## Example
+##      SEARCH_DATE=$(date -d 'yesterday' '+%-d %b %Y')
+##      generate-stat-for-date.sh $SEARCH_DATE
+##
+echo "Generating stats for $1"
+
+LOG_DIR=$OPENSHIFT_LOG_DIR 
+MAIL_HOST=$MAIL_SMTP_RELAY_HOST 
+MAIL_PORT=$MAIL_SMTP_RELAY_PORT
+
+MAIL_FROM="stat_$OPENSHIFT_APP_NAME@orange.com"
+MAIL_TO="arnaud.ruffin@orange.com"
+
+LOG_FILE=$LOG_DIR"/nodejs.log"
+
+SEARCH_DATE=$1
+#SEARCH_DATE=$(date -d 'yesterday' '+%-d %b %Y')
+#SEARCH_DATE="08 Jun 2015"
+#date -d 'yesterday' date -d '30 days ago'
+#Mon Jun  8 15:31:30 CEST 2015
+
+#nombre de transferts =
+nb_transfer=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "sending" | wc -l)
+
+#nombre de personne ayant ouvert la page = 
+nb_sender=$(cat $LOG_FILE| grep "$SEARCH_DATE" | grep " New sender" | wc -l)
+
+#nombre de personne ayant tenté IE = 
+nb_ie=$(cat $LOG_FILE| grep "$SEARCH_DATE" | grep "no ie" | wc -l)
+
+if [ $nb_transfer -gt 0 ]
+then
+    nb_echec=$(cat $LOG_FILE | grep "$SEARCH_DATE" | grep "forcing stream closure" | wc -l)
+    taux_echec=$(echo "scale=2; $nb_echec/$nb_transfer" | bc)
+
+    total_data=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "sending" |cut -d":" -f5 | awk '{s+=$1} END {print s}')
+    total_data_in_mo=$(echo "scale=3; $total_data/(1024*1024)" | bc)
+fi
+
+echo "-------------------------------------------"
+echo " Statistics $OPENSHIFT_APP_NAME for $SEARCH_DATE"
+echo "-------------------------------------------"
+echo "Transfers:      $nb_transfer"
+echo "Failure rate:   $taux_echec"
+echo "Total data:     $total_data_in_mo Mo"
+echo ""
+echo "connections:    $nb_sender"
+echo "nb ie tries:    $nb_ie"
+echo "-------------------------------------------"
+
+
+# error handling
+function err_exit { echo -e 1>&2; exit 1; }
+
+# create message
+function mail_input { 
+    echo "ehlo orange.com"
+    echo "MAIL FROM: <$MAIL_FROM>"
+    echo "RCPT TO: <$MAIL_TO>"
+    echo "DATA"
+    echo "From: <$MAIL_FROM>"
+    echo "To: <$MAIL_TO>"
+    echo "MIME-Version: 1.0 "
+    echo 'Content-Type:multipart/mixed;boundary="KkK170891tpbkKk__FV_KKKkkkjjwq"'
+    echo "Subject: [$OPENSHIFT_APP_NAME] Statistics for $SEARCH_DATE"
+
+    echo '--KkK170891tpbkKk__FV_KKKkkkjjwq'
+    echo ""
+    echo "-------------------------------------------"
+    echo " Statistics $OPENSHIFT_APP_NAME for $SEARCH_DATE"
+    echo "-------------------------------------------"
+    echo "Transfers:      $nb_transfer"
+    echo "Failure rate:   $taux_echec"
+    echo "Total data:     $total_data_in_mo Mo"
+    echo ""
+    echo "connections:    $nb_sender"
+    echo "nb ie tries:    $nb_ie"
+    echo "-------------------------------------------"
+
+    echo '--KkK170891tpbkKk__FV_KKKkkkjjwq'
+    echo 'Content-Type:application/octet-stream;name="log.log" '
+    echo 'Content-Transfer-Encoding:base64 '
+    echo 'Content-Disposition:attachment;filename="log.log"'
+
+    echo ''
+    cat  $LOG_FILE | grep "$SEARCH_DATE" | base64
+    #cat $LOG_FILE | sed -n -e "/$SEARCH_DATE/,$$p" | base64
+
+    ## Extrait du log concernant entre la première apparition de la date du jour et la première apparition de la date suivante
+    ## (convertie en base64 pour l'attacher au mail)
+    #cat nodejs.log | sed -n -e "/${SEARCH_DATE}/,$$p" | sed -e "/${SEARCH_DATE_NEXT}/d" > workfile.temp
+    #base64 workfile.temp
+
+    #cat $LOG_FILE | sed -n -e '/$SEARCH_DATE/,$p' | base64
+    echo "--KkK170891tpbkKk__FV_KKKkkkjjwq--"
+
+
+    echo ""
+    echo "."
+    echo "quit"
+}
+
+mail_input | nc $MAIL_HOST $MAIL_PORT || err_exit

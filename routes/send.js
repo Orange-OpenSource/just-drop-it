@@ -33,8 +33,14 @@ router.get('/test_down', function(req, res) {
     res.setHeader('Set-Cookie', 'fileDownload=true; path=/');
     stream.pipe(res);
 
-
 });
+
+
+router.get('/down_source', function(req, res){
+    var file = path.basename("just-drop-it.zip");
+    res.download(file);
+});
+
 
 
 module.exports = router;
