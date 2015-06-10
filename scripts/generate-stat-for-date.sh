@@ -2,8 +2,9 @@
 ## THIS IS THE MAIN SCRIPT.
 ## Launch it manually if you want other than daily or montly stats
 ## Example
-##      SEARCH_DATE=$(date -d 'yesterday' '+%-d %b %Y')
-##      generate-stat-for-date.sh $SEARCH_DATE
+## (don't forget to change local first)
+##      SEARCH_DATE=$(date -d '2 days ago' '+%-d %b %Y')
+##      ./generate-stat-for-date.sh "$SEARCH_DATE"
 ##
 echo "Generating stats for $1"
 
