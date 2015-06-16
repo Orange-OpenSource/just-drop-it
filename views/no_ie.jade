@@ -1,4 +1,11 @@
 extends layout
+block extra_scripts
+    script.
+        var stayOnPage = false;
+    | <!--[if IE]> <script>stayOnPage = true;</script><![endif]-->
+    script.
+        if(!stayOnPage)window.location = "/";
+
 block content
     div(class="row")
         div(class="col-xs-12 alert h3")
