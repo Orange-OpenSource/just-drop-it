@@ -57,10 +57,10 @@ function wrapServer(app, server){
                     }
                 });
 
-                // TRANSFERT_IN_PROGRESS event
-                socket.on('transfert_in_progress', function (progress) {
+                // TRANSFER_IN_PROGRESS event
+                socket.on('transfer_in_progress', function (progress) {
                     //simple routing on the other socket
-                    senders[socket.id].receiver.emit('transfert_in_progress', progress);
+                    senders[socket.id].receiver.emit('transfer_in_progress', progress);
                 });
 
                 // DISCONNECT event

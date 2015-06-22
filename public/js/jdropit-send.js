@@ -94,7 +94,7 @@ function sendFile(isLocal) {
     function fileIsReady() {
         $('.filename').html(fileToTransfert.name + " (" + Math.round(fileToTransfert.size / 1024 / 1024) + " Mo)");
         $('#copyLinkContainer').show(500);
-        $('#transfertContainer').show(500);
+        $('#transferContainer').show(500);
         $('#warning-window').show(500);
         $('#selectFileContainer').hide(500);
     };
@@ -123,13 +123,13 @@ function sendFile(isLocal) {
             //console.log(Math.floor(size / file.size * 100) + '%');
             var progress = Math.floor(size / file.size * 100);
 
-            socket.emit('transfert_in_progress', progress);
+            socket.emit('transfer_in_progress', progress);
 
             //update progress bar
-            var transfertPb = $('#transfertpb');
-            transfertPb.attr('aria-valuenow', progress);
-            transfertPb.width(progress + '%');
-            transfertPb.html(progress + '%');
+            var transferProgressBar = $('#transferProgressBar');
+            transferProgressBar.attr('aria-valuenow', progress);
+            transferProgressBar.width(progress + '%');
+            transferProgressBar.html(progress + '%');
         });
 
 
@@ -139,7 +139,7 @@ function sendFile(isLocal) {
     function uploadComplete(receiverId){
         console.log("uploadComplete - "+receiverId);
         $('#completeContainer').show(500);
-        $('#transfertContainer').hide(500);
+        $('#transferContainer').hide(500);
         $('#warning-window').hide(500);
         socket.close(true);
     }
@@ -147,7 +147,7 @@ function sendFile(isLocal) {
     function downloadError(message){
         $("#error_message").html(message);
         $('#errorContainer').show(500);
-        $('#transfertContainer').hide(500);
+        $('#transferContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }

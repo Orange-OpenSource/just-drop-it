@@ -2,7 +2,7 @@
 function receiveFile(isLocal, senderId) {
     $('#warning-window').show();
     var socket;
-    var socketParams = { query: 'userID=undefReceiver&senderID=' + senderId + '&role=receiver' };
+    var socketParams = { query: 'senderID=' + senderId + '&role=receiver' };
     if (!isLocal) {//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
     }
@@ -29,13 +29,13 @@ function receiveFile(isLocal, senderId) {
         })
     });
 
-    socket.on('transfert_in_progress', function (progress) {
+    socket.on('transfer_in_progress', function (progress) {
         //console.log('progress file ' + progress);
         //update progress bar
-        var transfertProgressBar = $('#transfertProgressBar');
-        transfertProgressBar.attr('aria-valuenow', progress);
-        transfertProgressBar.width(progress + '%');
-        transfertProgressBar.html(progress + '%');
+        var transferProgressBar = $('#transferProgressBar');
+        transferProgressBar.attr('aria-valuenow', progress);
+        transferProgressBar.width(progress + '%');
+        transferProgressBar.html(progress + '%');
         if(progress == 100){
             socket.emit('transfer_complete');
             downloadComplete();
@@ -49,7 +49,7 @@ function receiveFile(isLocal, senderId) {
 
     function downloadComplete(){
         $('#completeContainer').show(500);
-        $('#transfertContainer').hide(500);
+        $('#transferContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }
@@ -58,7 +58,7 @@ function receiveFile(isLocal, senderId) {
     function downloadError(message){
         $("#errorMessage").html(message);
         $('#errorContainer').show(500);
-        $('#transfertContainer').hide(500);
+        $('#transferContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }
