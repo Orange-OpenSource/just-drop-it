@@ -14,7 +14,7 @@ function receiveFile(isLocal, senderId) {
 
 
     socket.on('stream_ready', function (url, filename, filesize) {
-        $('.filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
+        $('#filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
         //window.open(url, '_blank');
         //meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us)
         //window.location.href = url;
