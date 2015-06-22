@@ -52,7 +52,7 @@ function sendFile(isLocal) {
     });
 
     socket.on('receiver_ready', function () {
-        $('#step2').hide(500);
+        $('#copyLinkContainer').hide(500);
         startUpload(fileToTransfert);
     });
 
@@ -93,10 +93,10 @@ function sendFile(isLocal) {
 
     function fileIsReady() {
         $('.filename').html(fileToTransfert.name + " (" + Math.round(fileToTransfert.size / 1024 / 1024) + " Mo)");
-        $('#step2').show(500);
-        $('#step3').show(500);
+        $('#copyLinkContainer').show(500);
+        $('#transfertContainer').show(500);
         $('#warning-window').show(500);
-        $('#step1').hide(500);
+        $('#selectFileContainer').hide(500);
     };
 
 
@@ -137,16 +137,16 @@ function sendFile(isLocal) {
     };
 
     function uploadComplete(){
-        $('#step4-outro').show(500);
-        $('#step3').hide(500);
+        $('#completeContainer').show(500);
+        $('#transfertContainer').hide(500);
         $('#warning-window').hide(500);
         socket.close(true);
     }
 
     function downloadError(message){
         $("#error_message").html(message);
-        $('#step4-error').show(500);
-        $('#step3').hide(500);
+        $('#errorContainer').show(500);
+        $('#transfertContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }

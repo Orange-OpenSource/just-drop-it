@@ -38,10 +38,10 @@ function receiveFile(isLocal, senderId) {
     socket.on('transfert_in_progress', function (progress) {
         //console.log('progress file ' + progress);
         //update progress bar
-        var transfertPb = $('#transfertpb');
-        transfertPb.attr('aria-valuenow', progress);
-        transfertPb.width(progress + '%');
-        transfertPb.html(progress + '%');
+        var transfertProgressBar = $('#transfertProgressBar');
+        transfertProgressBar.attr('aria-valuenow', progress);
+        transfertProgressBar.width(progress + '%');
+        transfertProgressBar.html(progress + '%');
         if(progress == 100){
             socket.emit('transfer_complete');
             downloadComplete();
@@ -54,17 +54,17 @@ function receiveFile(isLocal, senderId) {
     });
 
     function downloadComplete(){
-        $('#step4-outro').show(500);
-        $('#transfertdiv').hide(500);
+        $('#completeContainer').show(500);
+        $('#transfertContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }
 
 
     function downloadError(message){
-        $("#error_message").html(message);
-        $('#step4-error').show(500);
-        $('#transfertdiv').hide(500);
+        $("#errorMessage").html(message);
+        $('#errorContainer').show(500);
+        $('#transfertContainer').hide(500);
         $("#warning-window").hide(500);
         socket.close(true);
     }
