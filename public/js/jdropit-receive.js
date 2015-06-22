@@ -11,13 +11,7 @@ function receiveFile(isLocal, senderId) {
         displayError("Error: " + errorMsg);
     });
 
-    socket.on('connection_ready', function () {
-        console.log('connection ready');
-    });
 
-    ss(socket).on('forward_file', function () {
-        console.log('forward file');
-    });
 
     socket.on('stream_ready', function (url, filename, filesize) {
         $('.filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");

@@ -51,7 +51,7 @@ function sendFile(isLocal) {
         $('#generatedurl').html("<p>http://" + receiverUrl + " </p> ");
     });
 
-    socket.on('receiver_ready', function () {
+    socket.on('receiver_ready', function (receiverId) {
         $('#copyLinkContainer').hide(500);
         startUpload(fileToTransfert);
     });
@@ -136,7 +136,8 @@ function sendFile(isLocal) {
         blobStream.pipe(stream);
     };
 
-    function uploadComplete(){
+    function uploadComplete(receiverId){
+        console.log("uploadComplete - "+receiverId);
         $('#completeContainer').show(500);
         $('#transfertContainer').hide(500);
         $('#warning-window').hide(500);

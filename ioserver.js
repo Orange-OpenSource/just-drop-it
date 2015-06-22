@@ -22,10 +22,6 @@ function wrapServer(app, server){
     // on socket connections
     socketIoServer.on('connection', function (socket) {
 
-        //retrieve username
-        socket.userName = socket.handshake.query.userID;
-
-
         if (typeof socket.handshake.query.role === "undefined") {
 
             errorMsg = 'Error, no profile transmitted';
@@ -36,7 +32,7 @@ function wrapServer(app, server){
             if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
 
                 senders[socket.id] = {socket: socket, receiver: null};
-                debug('New sender! %s with id : %s', socket.userName, socket.id);
+                debug('New sender with id : %s',socket.id);
 
                 //generate new unique url
                 //warn sender that the receiver page is ready
@@ -76,18 +72,17 @@ function wrapServer(app, server){
                         //closing stream
                         app.streamCompleted(socket.id, true);
                     }
-                    debug("sender %s has left!", socket.userName);
+                    debug("sender %s has left!", socket.id);
                 });
 
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
                 var senderID = socket.handshake.query.senderID;
 
 
-                debug('New receiver %s/%s', socket.userName, socket.id);
-                debug('Is waiting for sender %s', senderID);
+                debug('New receiver  with id %s waiting for sender %s', socket.id, senderID);
                 var sender = senders[senderID];
                 if (typeof sender == "undefined") {
-                    error('Error: unkown senderID');
+                    error('Error: unkown senderID %s', senderID);
                     socket.emit('alert', 'unkown senderID');
                 } else {
                     //keeping reference between sender and receiver
@@ -95,15 +90,12 @@ function wrapServer(app, server){
                     sender.receiver = socket;
 
 
-                    debug('telling receiver that the connection was established');
-                    socket.emit('connection_ready', sender.socket.userName);
-                    debug('telling the sender that the receiver is ready');
 
-                    sender.socket.emit('receiver_ready', socket.userName);
+                    sender.socket.emit('receiver_ready', socket.id);
 
                     socket.on('transfer_complete', function(){
                         app.streamCompleted(senderID);
-                        sender.socket.emit('transfer_complete');
+                        sender.socket.emit('transfer_complete', socket.id);
                     });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
@@ -113,7 +105,7 @@ function wrapServer(app, server){
                             receiver.sender.emit('receiver_left');
                             app.streamCompleted(senderID, true);
                         }
-                        debug("receiver %s has left!", socket.userName);
+                        debug("receiver %s has left!", socket.id);
 
                     });
                 }
