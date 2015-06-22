@@ -44,7 +44,11 @@ function receiveFile(isLocal, senderId) {
     });
 
     socket.on('sender_left', function(){
-        downloadError("Sender left before the end of transfer");
+        $("#errorMessage").html("Sender left before the end of transfer");
+        $('#errorContainer').show(500);
+        $('#transferContainer').hide(500);
+        $("#warning-window").hide(500);
+        socket.close(true);
     });
 
     function downloadComplete(){
@@ -54,12 +58,4 @@ function receiveFile(isLocal, senderId) {
         socket.close(true);
     }
 
-
-    function downloadError(message){
-        $("#errorMessage").html(message);
-        $('#errorContainer').show(500);
-        $('#transferContainer').hide(500);
-        $("#warning-window").hide(500);
-        socket.close(true);
-    }
 }

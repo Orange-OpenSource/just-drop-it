@@ -6,70 +6,94 @@ var error = require('debug')('app:routes:receive');
 var currentFiles = {};
 
 var receivePrefix = '/';
-var downloadPrefix ='/data/';
+var downloadPrefix = '/data/';
 
 debug.log = console.log.bind(console);
 
-router.get(receivePrefix+':id', function(req, res, next){
+router.get(receivePrefix + ':id', function (req, res, next) {
     var fileId = req.params.id;
-    if(typeof currentFiles[fileId] === "undefined"){
+    if (typeof currentFiles[fileId] === "undefined") {
         error('receive - file not found %s', fileId);
         var err = new Error('Not Found');
         err.status = 404;
         next(err);
-    }else{
+    } else {
         debug('receive - rendering receive for file %s', fileId);
-        res.render('receive', {title : "Just drop it" , isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined", senderId : fileId});
+        res.render('receive', {
+            title: "Just drop it",
+            isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
+            senderId: fileId
+        });
     }
 
 });
 
 
-router.get(downloadPrefix+':id', function(req, res, next){
+router.get(downloadPrefix + ':id/:receiverId', function (req, res, next) {
     var fileId = req.params.id;
-    var streamInformations =  currentFiles[fileId];
-    if(typeof streamInformations === "undefined" || streamInformations == null){
-        error('download - file not found or not prepared: %s', fileId);
+    var receiverId = req.params.receiverId;
+    var streamInformations = currentFiles[fileId];
+    if (typeof streamInformations === "undefined" || typeof streamInformations.receivers[receiverId] == "undefined") {
+        error('download - file not found or not prepared: %s/%s', fileId, receiverId);
         var err = new Error('Not Found');
         err.status = 404;
         next(err);
-    }else{
+    } else {
         debug('download - serving file %s', fileId);
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Content-Length', streamInformations.size);
         res.setHeader('Content-Disposition', 'attachment; filename="' + streamInformations.name + '"');
         res.setHeader('Set-Cookie', 'fileDownload=true; path=/');
-        streamInformations.stream.pipe(res);
-        streamInformations.response = res;
+        streamInformations.receivers[receiverId].stream.pipe(res);
+        streamInformations.receivers[receiverId].response = res;
     }
 });
 
 
-router.prepareStream = function(fileId){
+router.prepareStream = function (fileId, filename, size) {
     debug('prepareStream - %s', fileId);
-    currentFiles[fileId] = null;
-    return receivePrefix+fileId;
+    currentFiles[fileId] = {name: filename, size: size, receivers: {}};
+    return receivePrefix + fileId;
+};
+
+
+function buildReceiverRoute(fileId, receiverId){
+    return downloadPrefix + fileId + "/" + receiverId;
 }
 
-router.setStreamInformation = function(fileId, filename, size, stream){
-    debug('setStreamInformation - %s', fileId);
-    currentFiles[fileId] = {name : filename, size : size, stream : stream, response : null};
-    return downloadPrefix+fileId;
-}
+router.addReceiver = function (fileId, receiverId, stream) {
+    currentFiles[fileId].receivers[receiverId] = {stream: stream, response: null};
+    var routeAdded = buildReceiverRoute(fileId, receiverId);
+    debug("addReceiver - %s added", routeAdded);
+    return routeAdded;
 
-router.streamCompleted = function(fileId, forceClosure){
+};
+
+
+router.removeReceiver = function (fileId, receiverId) {
     debug('streamCompleted - %s', fileId);
-    if(forceClosure){
-        var currentFile = currentFiles[fileId];
-        if(typeof currentFile != "undefined" && currentFile.response != null) {
-            debug('streamCompleted - forcing stream closure');
-            currentFile.stream.unpipe(currentFile.response);
-            currentFile.response.connection.destroy();
+    var currentFile = currentFiles[fileId];
+    if (typeof currentFile != "undefined" && typeof currentFile.receivers[receiverId] != "undefined") {
+        delete currentFile.receivers[receiverId];
+        var routeRemoved = buildReceiverRoute(fileId, receiverId);
+        debug("removeReceiver - %s removed", routeRemoved);
+        return true;
+    }else
+        return false;
+};
+
+router.removeStream = function (fileId) {
+    var currentFile = currentFiles[fileId];
+    if (typeof currentFile != "undefined") {
+        for (var receiverId in currentFile.receivers) {
+            if (currentFile.receivers.hasOwnProperty(receiverId)) {
+                currentFile.receivers[receiverId].stream.unpipe(currentFile.response);
+                currentFile.receivers[receiverId].response.connection.destroy();
+            }
         }
+        debug('streamCompleted - forcing stream closure');
+        delete currentFiles[fileId];
     }
-    delete currentFiles[fileId];
 }
-
-
 
 module.exports = router;

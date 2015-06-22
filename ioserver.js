@@ -13,65 +13,67 @@ exports = module.exports = wrapServer;
 function wrapServer(app, server){
     var socketIoServer = io.listen(server);
 
+    var senders = {}; // socketId -> {socket, receivers{ receiverId -> socket}}
 
-    var senders = {}; // socketId -> socket
-    var receivers = {}; // socketId -> socket
-
-    var errorMsg;
 
     // on socket connections
     socketIoServer.on('connection', function (socket) {
 
         if (typeof socket.handshake.query.role === "undefined") {
-
-            errorMsg = 'Error, no profile transmitted';
+            var errorMsg = 'Error, no profile transmitted';
             error(errorMsg);
             socket.emit('error', errorMsg);
 
         } else {
             if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
 
-                senders[socket.id] = {socket: socket, receiver: null};
+                senders[socket.id] = {socket: socket, receivers: {}};
                 debug('New sender with id : %s',socket.id);
 
                 //generate new unique url
                 //warn sender that the receiver page is ready
-                socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id));
+
                 debug('receive_url_ready emitted');
 
-                //ON SEND_FILE EVENT (stream)
-                ss(socket).on('send_file', function (stream, data) {
+                socket.on("file_ready", function(info){
+                    socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id, info.name, info.size));
+                });
 
-                    debug("someone is sending a file (%s) size:%d",data.name, data.size);
+                //ON SEND_FILE EVENT (stream)
+                ss(socket).on('send_file', function (stream, receiverId, filename, size) {
+
+                    debug("someone is sending a file to %s",receiverId);
 
                     //searching for the right receiver socket
                     var sender = senders[socket.id];
-                    if (typeof sender == "undefined" ||typeof sender.receiver == "undefined") {
+                    if (typeof sender == "undefined" || typeof sender.receivers[receiverId] === "undefined") {
                         error('Error: routing error');
                         socket.emit('alert', 'routing error');
                     } else {
                         //directly expose stream
-                        debug("Expose stream for receiver %s", sender.receiver.id);
+                        debug("Expose stream for receiver %s", receiverId);
                         //notifying receiver
-                        sender.receiver.emit('stream_ready', app.receive_uri_path+app.setStreamInformation(socket.id, data.name, data.size, stream), data.name, data.size);
+                        sender.receivers[receiverId].emit('stream_ready', app.receive_uri_path+app.addReceiver(socket.id, receiverId, stream), filename, size);
                     }
                 });
 
                 // TRANSFER_IN_PROGRESS event
-                socket.on('transfer_in_progress', function (progress) {
+                socket.on('transfer_in_progress', function (progress, receiverId) {
                     //simple routing on the other socket
-                    senders[socket.id].receiver.emit('transfer_in_progress', progress);
+                    senders[socket.id].receivers[receiverId].emit('transfer_in_progress', progress);
                 });
 
                 // DISCONNECT event
                 socket.on('disconnect', function () {
                     var sender = senders[socket.id];
                     delete senders[socket.id];
-                    if( sender.receiver != null && typeof receivers[sender.receiver.id] != "undefined"){
-                        sender.receiver.emit('sender_left');
-                        //closing stream
-                        app.streamCompleted(socket.id, true);
+                    for (var receiverId in sender.receivers) {
+                        if (sender.receivers.hasOwnProperty(receiverId)) {
+                            sender.receivers[receiverId].emit('sender_left');
+                        }
                     }
+                    //closing stream
+                    app.removeStream();
                     debug("sender %s has left!", socket.id);
                 });
 
@@ -86,31 +88,28 @@ function wrapServer(app, server){
                     socket.emit('alert', 'unkown senderID');
                 } else {
                     //keeping reference between sender and receiver
-                    receivers[socket.id] = {socket : socket, sender : sender.socket};
-                    sender.receiver = socket;
+                    sender.receivers[socket.id] = socket;
 
 
 
                     sender.socket.emit('receiver_ready', socket.id);
 
                     socket.on('transfer_complete', function(){
-                        app.streamCompleted(senderID);
-                        sender.socket.emit('transfer_complete', socket.id);
+                        if(app.removeReceiver(senderID, socket.id)){
+                            sender.socket.emit('transfer_complete', socket.id);
+                        }
                     });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
-                        var receiver = receivers[socket.id];
-                        delete receivers[socket.id];
-                        if(typeof senders[receiver.sender.id] != "undefined"){
-                            receiver.sender.emit('receiver_left');
-                            app.streamCompleted(senderID, true);
+                        if(app.removeReceiver(senderID, socket.id)){
+                            sender.socket.emit('receiver_left', socket.id);
+                            debug("receiver %s has left!", socket.id);
                         }
-                        debug("receiver %s has left!", socket.id);
-
+                        delete sender.receivers[socket.id];
                     });
                 }
             } else {
-                errorMsg = 'Error, unknown profile';
+                var errorMsg = 'Error, unknown profile';
                 error(errorMsg);
                 socket.emit('error', errorMsg);
             }

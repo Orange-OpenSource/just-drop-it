@@ -66,9 +66,9 @@ app.use(function(err, req, res, next) {
 
 
 app.prepareStream = receive.prepareStream;
-app.setStreamInformation = receive.setStreamInformation;
-app.streamCompleted = receive.streamCompleted;
-
+app.addReceiver = receive.addReceiver;
+app.removeReceiver = receive.removeReceiver;
+app.removeStream  = receive.removeStream;
 
 module.exports = app;
 

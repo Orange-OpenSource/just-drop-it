@@ -28,21 +28,11 @@ block content
             div.text-muted#generatedurl
             button.btn#copy-button(title="Click to copy url to clipboard") Copy to clipoard
             span#clipboardcopyok(class="glyphicon glyphicon-check" aria-hidden="true" )
-    div.row#transferContainer(hidden="true")
-        div.col-xs-12
-            p The transfer will start as soon as you friend open the link.
-            div.progress
-                div#transferProgressBar(class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;") 0%
-
-            p File:
-                span.filename
-    div.row#completeContainer(hidden="true")
-        div.col-xs-12
-            h3 Thank you!
-            p Your friend did receive the file. You can close this page now.
-    div.row#errorContainer(hidden="true")
-        div.col-xs-12
-            h3 Error
-            strong#error_message(class="text-danger")
+    div#transferContainer(hidden="true")
+        div.row
+            div.col-xs-12
+                p The transfer will start as soon as you friend open the link.
+                p File:
+                    span#filename
 
 
