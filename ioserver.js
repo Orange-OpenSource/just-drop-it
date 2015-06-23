@@ -53,7 +53,7 @@ function wrapServer(app, server){
                         var receiver = senders[socket.id].receivers[receiverId];
                         if(typeof receiver !== "undefined"){
                             //directly expose stream
-                            debug("Expose stream for receiver %s", receiverId);
+                            debug("%s/%s Expose stream for receiver filename=%s, size=%d", socket.id, receiverId, filename, size);
                             //notifying receiver
                             sender.receivers[receiverId].emit('stream_ready', app.receive_uri_path+app.addReceiver(socket.id, receiverId, stream), filename, size);
                         }else{
@@ -79,6 +79,7 @@ function wrapServer(app, server){
                     delete senders[socket.id];
                     for (var receiverId in sender.receivers) {
                         if (sender.receivers.hasOwnProperty(receiverId)) {
+                            debug("%s/%s notifying receiver that sender left", socket.id, receiverId);
                             sender.receivers[receiverId].emit('sender_left');
                         }
                     }

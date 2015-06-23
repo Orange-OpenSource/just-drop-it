@@ -91,7 +91,7 @@ router.removeStream = function (fileId) {
                 currentFile.receivers[receiverId].response.connection.destroy();
             }
         }
-        debug('streamCompleted - forcing stream closure');
+        debug('removeStream - %s removed', fileId);
         delete currentFiles[fileId];
     }
 }

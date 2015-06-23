@@ -24,7 +24,7 @@ SEARCH_DATE=$1
 #Mon Jun  8 15:31:30 CEST 2015
 
 #nombre de transferts =
-nb_transfer=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "sending" | wc -l)
+nb_transfer=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "send file" | wc -l)
 
 #nombre de personne ayant ouvert la page = 
 nb_sender=$(cat $LOG_FILE| grep "$SEARCH_DATE" | grep " New sender" | wc -l)
@@ -34,10 +34,10 @@ nb_ie=$(cat $LOG_FILE| grep "$SEARCH_DATE" | grep "no ie" | wc -l)
 
 if [ $nb_transfer -gt 0 ]
 then
-    nb_echec=$(cat $LOG_FILE | grep "$SEARCH_DATE" | grep "forcing stream closure" | wc -l)
+    nb_echec=$(cat $LOG_FILE | grep "$SEARCH_DATE" | grep "notifying receiver" | wc -l)
     taux_echec=$(echo "scale=2; $nb_echec/$nb_transfer" | bc)
 
-    total_data=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "sending" |cut -d":" -f5 | awk '{s+=$1} END {print s}')
+    total_data=$(cat  $LOG_FILE | grep "$SEARCH_DATE" | grep "Expose stream for receiver" |cut -d"=" -f3 | awk '{s+=$1} END {print s}')
     total_data_in_mo=$(echo "scale=3; $total_data/(1024*1024)" | bc)
 fi
 
