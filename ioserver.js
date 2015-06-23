@@ -42,7 +42,7 @@ function wrapServer(app, server){
                 //ON SEND_FILE EVENT (stream)
                 ss(socket).on('send_file', function (stream, receiverId, filename, size) {
 
-                    debug("%s/%s send file",senderID, receiverId);
+                    debug("%s/%s send file",socket.id, receiverId);
 
                     //searching for the right receiver socket
                     var sender = senders[socket.id];
