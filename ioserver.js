@@ -84,7 +84,7 @@ function wrapServer(app, server){
                         }
                     }
                     //closing stream
-                    app.removeStream();
+                    app.removeStream(socket.id);
                     debug("%s sender disconnect", socket.id);
                 });
 
