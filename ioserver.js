@@ -46,21 +46,31 @@ function wrapServer(app, server){
 
                     //searching for the right receiver socket
                     var sender = senders[socket.id];
-                    if (typeof sender == "undefined" || typeof sender.receivers[receiverId] === "undefined") {
+                    if (typeof sender == "undefined" ) {
                         error('Error: routing error');
                         socket.emit('alert', 'routing error');
                     } else {
-                        //directly expose stream
-                        debug("Expose stream for receiver %s", receiverId);
-                        //notifying receiver
-                        sender.receivers[receiverId].emit('stream_ready', app.receive_uri_path+app.addReceiver(socket.id, receiverId, stream), filename, size);
+                        var receiver = senders[socket.id].receivers[receiverId];
+                        if(typeof receiver !== "undefined"){
+                            //directly expose stream
+                            debug("Expose stream for receiver %s", receiverId);
+                            //notifying receiver
+                            sender.receivers[receiverId].emit('stream_ready', app.receive_uri_path+app.addReceiver(socket.id, receiverId, stream), filename, size);
+                        }else{
+                            error('Error: routing error');
+                            socket.emit('alert', 'routing error');
+                        }
                     }
                 });
 
                 // TRANSFER_IN_PROGRESS event
                 socket.on('transfer_in_progress', function (progress, receiverId) {
                     //simple routing on the other socket
-                    senders[socket.id].receivers[receiverId].emit('transfer_in_progress', progress);
+                    var receiver = senders[socket.id].receivers[receiverId];
+                    if(typeof receiver !== "undefined")
+                        receiver.emit('transfer_in_progress', progress);
+                    else
+                        debug("%s/%s receiver not registered", socket.id, receiverId);
                 });
 
                 // DISCONNECT event
@@ -74,14 +84,13 @@ function wrapServer(app, server){
                     }
                     //closing stream
                     app.removeStream();
-                    debug("sender %s has left!", socket.id);
+                    debug("%s sender disconnect", socket.id);
                 });
 
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
                 var senderID = socket.handshake.query.senderID;
 
-
-                debug('New receiver  with id %s waiting for sender %s', socket.id, senderID);
+                debug("%s/%s new receiver", senderID, socket.id);
                 var sender = senders[senderID];
                 if (typeof sender == "undefined") {
                     error('Error: unkown senderID %s', senderID);
@@ -89,18 +98,20 @@ function wrapServer(app, server){
                 } else {
                     //keeping reference between sender and receiver
                     sender.receivers[socket.id] = socket;
-
+                    debug("%s/%s receiver registered ", senderID, socket.id);
 
 
                     sender.socket.emit('receiver_ready', socket.id);
 
                     socket.on('transfer_complete', function(){
+                        debug("%s/%s transfer_complete", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
                             sender.socket.emit('transfer_complete', socket.id);
                         }
                     });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
+                        debug("%s/%s receiver disconnect", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
                             sender.socket.emit('receiver_left', socket.id);
                             debug("receiver %s has left!", socket.id);
