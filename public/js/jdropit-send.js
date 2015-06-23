@@ -126,7 +126,6 @@ function sendFile(isLocal) {
         row.append($("<div>", {id : "transfert-"+receiverId+"-remove", hidden : "true"}).addClass("col-xs-1").append(linkRemove));
         transferContainer.append(row);
 
-        var transferProgressBar = $('#transferProgressBar-'+receiverId);
         var readWriteOpts = {highWaterMark: Math.pow(2,21)};
 
         $('#transfertMessage').html("Transfert in progress...");
