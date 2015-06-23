@@ -1,5 +1,6 @@
 extends layout
 block extra_scripts
+    | <!--[if IE]> <script>if(window.location.pathname !== "/no_ie")window.location = "/no_ie";</script><![endif]-->
     script(src="/socket.io/socket.io.js")
     script(src="/js/socket.io-stream.js")
     script(src="/js/ZeroClipboard.min.js")
