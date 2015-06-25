@@ -22,7 +22,7 @@ function wrapServer(app, server){
         if (typeof socket.handshake.query.role === "undefined") {
             var errorMsg = 'Error, no profile transmitted';
             error(errorMsg);
-            socket.emit('error', errorMsg);
+            socket.emit('alert', errorMsg);
 
         } else {
             if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
@@ -102,8 +102,6 @@ function wrapServer(app, server){
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
 
-                    sender.socket.emit('receiver_ready', socket.id);
-
                     socket.on('transfer_complete', function(){
                         debug("%s/%s transfer_complete", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
@@ -119,11 +117,13 @@ function wrapServer(app, server){
                         }
                         delete sender.receivers[socket.id];
                     });
+
+                    sender.socket.emit('receiver_ready', socket.id);
                 }
             } else {
                 var errorMsg = 'Error, unknown profile';
                 error(errorMsg);
-                socket.emit('error', errorMsg);
+                socket.emit('alert', errorMsg);
             }
         }
     });
