@@ -35,17 +35,10 @@ function sendFile(isLocal) {
     var receiverUrl;
 
     //init du socket vers le serveur
-    if (isLocal) {
-        socket = io({
-            query: 'userID=undefined&role=sender'
-        });
-    } else {
-        socket = io({
-            query: 'userID=undefined&role=sender',
-            path: "/_ws/socket.io/"
-        });
-    }
-
+    var socketParams = { query: 'role=sender'};
+    if (!isLocal)//restriction on OPENSHIFT
+        socketParams.path = "/_ws/socket.io/";
+    socket = io(socketParams);
 
 
     socket.on('alert', function (errorMsg) {
