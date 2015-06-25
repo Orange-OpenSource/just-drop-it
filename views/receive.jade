@@ -6,13 +6,12 @@ block extra_scripts
     script(src="/js/jquery.fileDownload.js")
     script.
         window.onload = function(){
-            receiveFile(#{isLocal},  "#{senderId}");
+            receiveFile(#{isLocal},  "#{senderId}","#{receiverLabel}");
         }
 block content
     div.row
         div.col-xs-12
             h3 Hello
-                span.username
             p Someone just dropped you a file
     div.row#transferContainer
         div.col-xs-12

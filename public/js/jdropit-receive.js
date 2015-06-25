@@ -1,8 +1,8 @@
 "use strict";
-function receiveFile(isLocal, senderId) {
+function receiveFile(isLocal, senderId,receiverLabel) {
     $('#warning-window').show();
     var socket;
-    var socketParams = { query: 'senderID=' + senderId + '&role=receiver' };
+    var socketParams = { query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel };
     if (!isLocal) {//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
     }

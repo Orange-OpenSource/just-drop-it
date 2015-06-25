@@ -89,8 +89,9 @@ function wrapServer(app, server){
 
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
                 var senderID = socket.handshake.query.senderID;
+                var receiverLabel = socket.handshake.query.receiverLabel;
 
-                debug("%s/%s new receiver", senderID, socket.id);
+                debug("%s/%s/%s new receiver", senderID, socket.id, receiverLabel);
                 var sender = senders[senderID];
                 if (typeof sender == "undefined") {
                     error('Error: unkown senderID %s', senderID);
@@ -101,7 +102,7 @@ function wrapServer(app, server){
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
 
-                    sender.socket.emit('receiver_ready', socket.id);
+                    sender.socket.emit('receiver_ready', socket.id, receiverLabel);
 
                     socket.on('transfer_complete', function(){
                         debug("%s/%s transfer_complete", senderID, socket.id);

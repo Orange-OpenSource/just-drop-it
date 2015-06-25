@@ -92,16 +92,21 @@ function sendFile(isLocal) {
         $('#generatedurl').html("<p>http://" + receiverUrl + " </p> ");
     });
 
-    socket.on('receiver_ready', function (receiverId) {
+    socket.on('receiver_ready', function (receiverId,receiverLabel) {
         $('#copyLinkContainer').hide(500);
         $('#transferContainer').show(500);
-        startUpload(fileToTransfert, receiverId);
+        startUpload(fileToTransfert, receiverId,receiverLabel);
     });
 
 
     //fonction d'upload du fichier
-    function startUpload(file, receiverId) {
+    function startUpload(file, receiverId, receiverLabel) {
         console.log(file);
+
+        //je sais pas comment on test en javascript. C'est con, hein? Et j'ai pas internet dans le train
+        if(receiverLabel.length==0){
+            receiverLabel = "unknown receiver"
+        }
 
         var transferContainer = $('#transferContainer');
         /*
@@ -114,7 +119,7 @@ function sendFile(isLocal) {
          span.filename
          */
         var row = $("<div>", {id : "receiver-col-"+receiverId}).addClass("row");
-        row.append($("<div>").addClass("col-xs-4").append($("<p>").html(receiverId)));
+        row.append($("<div>").addClass("col-xs-4").append($("<p>").html(receiverLabel)));
         var transferProgressBar = $("<div>", {role : "progressbar", "aria-valuenow": "0",
             "aria-valuemin" : "0", "aria-valuemax" : "1000", style : "min-width: 2em;"}).addClass("progress-bar progress-bar-striped active").html("0 %");
         row.append($("<div>", {id : "transfertProgresssBar-"+receiverId}).addClass("col-xs-7").append(transferProgressBar));
