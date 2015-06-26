@@ -23,7 +23,7 @@ router.get(receivePrefix + ':id', function (req, res, next) {
             title: "Just drop it",
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             senderId: fileId,
-            receiverLabel: req.cookies['CIT']
+            receiverLabel: req.cookies['CTI']
         });
     }
 
