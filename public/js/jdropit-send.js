@@ -125,7 +125,7 @@ function sendFile(isLocal) {
         var stream = ss.createStream(readWriteOpts);
 
         // upload a file to the server.
-        ss(socket).emit('send_file', stream, receiverId , file.name, file.size);
+        ss(socket).emit('send_file', stream, receiverId);
 
         var blobStream = ss.createBlobReadStream(file,readWriteOpts);
         var size = 0;

@@ -62,10 +62,11 @@ function buildReceiverRoute(fileId, receiverId){
 }
 
 router.addReceiver = function (fileId, receiverId, stream) {
-    currentFiles[fileId].receivers[receiverId] = {stream: stream, response: null};
+    var currentFile = currentFiles[fileId];
+    currentFile.receivers[receiverId] = {stream: stream, response: null};
     var routeAdded = buildReceiverRoute(fileId, receiverId);
     debug("addReceiver - %s added", routeAdded);
-    return routeAdded;
+    return {route : routeAdded, filename : currentFile.name, size: currentFile.size};
 
 };
 
