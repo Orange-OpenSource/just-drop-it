@@ -7,7 +7,7 @@ block extra_scripts
     script(src="/js/jdropit-send.js")
     script.
         window.onload = function(){
-            sendFile(#{isLocal});
+            sendFile(#{isLocal},"#{senderLabel}");
         }
 block content
     div.row

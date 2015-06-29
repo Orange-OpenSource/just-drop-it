@@ -40,7 +40,7 @@ function wrapServer(app, server){
                 });
 
                 //ON SEND_FILE EVENT (stream)
-                ss(socket).on('send_file', function (stream, receiverId) {
+                ss(socket).on('send_file', function (stream, receiverId,senderLabel) {
 
                     debug("%s/%s send file",socket.id, receiverId);
 
@@ -54,10 +54,10 @@ function wrapServer(app, server){
                         if(typeof receiver !== "undefined"){
                             //directly expose stream
                             var info = app.addReceiver(socket.id, receiverId, stream);
-                            debug("%s/%s Expose stream for receiver filename=%s, size=%d", socket.id, receiverId, info.filename, info.size);
+                            debug("%s/%s [%s-->%s] Expose stream for receiver filename=%s, size=%d", socket.id, receiverId, senderLabel,receiver.label, info.filename, info.size);
                             //notifying receiver
 
-                            sender.receivers[receiverId].emit('stream_ready', app.receive_uri_path+info.route, info.filename, info.size);
+                            receiver.socket.emit('stream_ready', app.receive_uri_path+info.route, info.filename, info.size);
                         }else{
                             error('Error: routing error');
                             socket.emit('alert', 'routing error');
@@ -68,7 +68,7 @@ function wrapServer(app, server){
                 // TRANSFER_IN_PROGRESS event
                 socket.on('transfer_in_progress', function (progress, receiverId) {
                     //simple routing on the other socket
-                    var receiver = senders[socket.id].receivers[receiverId];
+                    var receiver = senders[socket.id].receivers[receiverId].socket;
                     if(typeof receiver !== "undefined")
                         receiver.emit('transfer_in_progress', progress);
                     else
@@ -82,7 +82,7 @@ function wrapServer(app, server){
                     for (var receiverId in sender.receivers) {
                         if (sender.receivers.hasOwnProperty(receiverId)) {
                             debug("%s/%s notifying receiver that sender left", socket.id, receiverId);
-                            sender.receivers[receiverId].emit('sender_left');
+                            sender.receivers[receiverId].socket.emit('sender_left');
                         }
                     }
                     //closing stream
@@ -101,9 +101,8 @@ function wrapServer(app, server){
                     socket.emit('alert', 'unkown senderID');
                 } else {
                     //keeping reference between sender and receiver
-                    sender.receivers[socket.id] = socket;
+                    sender.receivers[socket.id] ={socket: socket, label: receiverLabel};
                     debug("%s/%s receiver registered ", senderID, socket.id);
-
 
                     socket.on('transfer_complete', function(){
                         debug("%s/%s transfer_complete", senderID, socket.id);
@@ -121,7 +120,7 @@ function wrapServer(app, server){
                         delete sender.receivers[socket.id];
                     });
 
-                    sender.socket.emit('receiver_ready', socket.id);
+                    sender.socket.emit('receiver_ready', socket.id,receiverLabel);
                 }
             } else {
                 var errorMsg = 'Error, unknown profile';

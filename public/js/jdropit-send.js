@@ -1,5 +1,4 @@
-function sendFile(isLocal) {
-
+function sendFile(isLocal,senderLabel) {
 
 
     $("#clipboardcopyok").hide();
@@ -96,8 +95,7 @@ function sendFile(isLocal) {
     function startUpload(file, receiverId, receiverLabel) {
         console.log(file);
 
-        //je sais pas comment on test en javascript. C'est con, hein? Et j'ai pas internet dans le train
-        if(receiverLabel.length==0){
+        if(typeof receiverLabel == "undefined" || receiverLabel.length == 0 ){
             receiverLabel = "unknown receiver"
         }
 
@@ -130,7 +128,7 @@ function sendFile(isLocal) {
         var stream = ss.createStream(readWriteOpts);
 
         // upload a file to the server.
-        ss(socket).emit('send_file', stream, receiverId);
+        ss(socket).emit('send_file', stream, receiverId,senderLabel);
 
         var blobStream = ss.createBlobReadStream(file,readWriteOpts);
         var size = 0;
