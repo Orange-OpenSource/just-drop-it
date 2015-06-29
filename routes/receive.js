@@ -23,7 +23,7 @@ router.get(receivePrefix + ':id', function (req, res, next) {
             title: "Just drop it",
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             senderId: fileId,
-            receiverLabel: req.cookies['CIT']
+            receiverLabel: req.cookies['CTI']
         });
     }
 
@@ -63,10 +63,11 @@ function buildReceiverRoute(fileId, receiverId){
 }
 
 router.addReceiver = function (fileId, receiverId, stream) {
-    currentFiles[fileId].receivers[receiverId] = {stream: stream, response: null};
+    var currentFile = currentFiles[fileId];
+    currentFile.receivers[receiverId] = {stream: stream, response: null};
     var routeAdded = buildReceiverRoute(fileId, receiverId);
     debug("addReceiver - %s added", routeAdded);
-    return routeAdded;
+    return {route : routeAdded, filename : currentFile.name, size: currentFile.size};
 
 };
 
@@ -92,7 +93,7 @@ router.removeStream = function (fileId) {
                 currentFile.receivers[receiverId].response.connection.destroy();
             }
         }
-        debug('streamCompleted - forcing stream closure');
+        debug('removeStream - %s removed', fileId);
         delete currentFiles[fileId];
     }
 }

@@ -27,13 +27,13 @@ var ipAddress = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 //------------------------
-
+require("./ioserver")(app, server);
 //  Start the app on the specific interface (and port).
 server.listen(port, ipAddress, function () {
     var mDate = new Date(Date.now());
     debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
 });
 
-require("./ioserver")(app, server);
+
 
 

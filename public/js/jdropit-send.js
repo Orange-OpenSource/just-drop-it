@@ -1,5 +1,4 @@
-function sendFile(isLocal) {
-
+function sendFile(isLocal,senderLabel) {
 
 
     $("#clipboardcopyok").hide();
@@ -35,17 +34,10 @@ function sendFile(isLocal) {
     var receiverUrl;
 
     //init du socket vers le serveur
-    if (isLocal) {
-        socket = io({
-            query: 'userID=undefined&role=sender'
-        });
-    } else {
-        socket = io({
-            query: 'userID=undefined&role=sender',
-            path: "/_ws/socket.io/"
-        });
-    }
-
+    var socketParams = { query: 'role=sender'};
+    if (!isLocal)//restriction on OPENSHIFT
+        socketParams.path = "/_ws/socket.io/";
+    socket = io(socketParams);
 
 
     socket.on('alert', function (errorMsg) {
@@ -103,8 +95,7 @@ function sendFile(isLocal) {
     function startUpload(file, receiverId, receiverLabel) {
         console.log(file);
 
-        //je sais pas comment on test en javascript. C'est con, hein? Et j'ai pas internet dans le train
-        if(receiverLabel.length==0){
+        if(typeof receiverLabel == "undefined" || receiverLabel.length == 0 ){
             receiverLabel = "unknown receiver"
         }
 
@@ -137,7 +128,7 @@ function sendFile(isLocal) {
         var stream = ss.createStream(readWriteOpts);
 
         // upload a file to the server.
-        ss(socket).emit('send_file', stream, receiverId , file.name, file.size);
+        ss(socket).emit('send_file', stream, receiverId,senderLabel);
 
         var blobStream = ss.createBlobReadStream(file,readWriteOpts);
         var size = 0;

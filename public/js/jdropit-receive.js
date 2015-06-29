@@ -3,9 +3,8 @@ function receiveFile(isLocal, senderId,receiverLabel) {
     $('#warning-window').show();
     var socket;
     var socketParams = { query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel };
-    if (!isLocal) {//restriction on OPENSHIFT
+    if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
-    }
     socket = io(socketParams);
     socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
