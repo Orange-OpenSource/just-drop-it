@@ -82,7 +82,7 @@ function sendFile(isLocal,senderLabel) {
     socket.on('receive_url_ready', function (url) {
         receiverUrl = window.location.host + url;
         $('#generatedurl').html("<p>http://" + receiverUrl + " </p> ");
-        $('#generatedurlreminder').html("&nbsp(http://" + receiverUrl + ")");
+        $('#generatedurlreminder').html("&nbsp;(http://" + receiverUrl + ")");
     });
 
     socket.on('receiver_ready', function (receiverId,receiverLabel) {
