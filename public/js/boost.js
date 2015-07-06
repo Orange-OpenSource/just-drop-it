@@ -1,8 +1,8 @@
-/* boost - version 2.0.0 - 20-02-2015
+/* boost - version 2.0.1 - 20-02-2015
 Booststrap Open Orange Simplicity Toolkit
  &#169 2015 EASE - accessibility.support@orange.com */
 
-/* boost - version 2.0.0 - 20-02-2015
+/* boost - version 2.0.1 - 20-02-2015
 Booststrap Open Orange Simplicity Toolkit
  &#169 2015 EASE - accessibility.support@orange.com */
 

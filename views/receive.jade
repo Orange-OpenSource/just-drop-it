@@ -1,9 +1,17 @@
 extends layout
 block extra_scripts
-    script(src="/socket.io/socket.io.js")
-    script(src="/js/socket.io-stream.js")
-    script(src="/js/jdropit-receive.js")
-    script(src="/js/jquery.fileDownload.js")
+    if isLocal
+        script(src="/js/socket.io.js")
+        script(src="/js/socket.io-stream.js")
+        script(src="/js/ZeroClipboard.js")
+        script(src="/js/jdropit-receive.js")
+        script(src="/js/jquery.fileDownload.js")
+    else
+        script(src="/js/socket.io.min.js")
+        script(src="/js/socket.io-stream.min.js")
+        script(src="/js/ZeroClipboard.min.js")
+        script(src="/js/jdropit-receive.min.js")
+        script(src="/js/jquery.fileDownload.min.js")
     script.
         window.onload = function(){
             receiveFile(#{isLocal},  "#{senderId}","#{receiverLabel}");

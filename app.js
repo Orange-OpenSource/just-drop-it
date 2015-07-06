@@ -25,13 +25,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.receive_uri_path = '/receive';
 app.use('/', send);
-app.use(app.receive_uri_path, receive)
+app.use(app.receive_uri_path, receive);
 app.use('/js', javascript);
 
 app.use(function (req,res,next) {
     console.log("cookies ",req.cookies);
     next();
-})
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
