@@ -1,10 +1,18 @@
 extends layout
 block extra_scripts
     | <!--[if IE]> <script>if(window.location.pathname !== "/no_ie")window.location = "/no_ie";</script><![endif]-->
-    script(src="/socket.io/socket.io.js")
-    script(src="/js/socket.io-stream.js")
-    script(src="/js/ZeroClipboard.min.js")
-    script(src="/js/jdropit-send.js")
+    if isLocal
+        script(src="/js/socket.io.js")
+        script(src="/js/socket.io-stream.js")
+        script(src="/js/ZeroClipboard.js")
+        script(src="/js/jdropit-send.js")
+    else
+        script(src="/js/socket.io.min.js")
+        script(src="/js/socket.io-stream.min.js")
+        script(src="/js/ZeroClipboard.min.js")
+        script(src="/js/jdropit-send.min.js")
+    script.
+
     script.
         window.onload = function(){
             sendFile(#{isLocal},"#{senderLabel}");
@@ -32,7 +40,8 @@ block content
     div#transferContainer(hidden="true")
         div.row
             div.col-xs-12
-                p The transfer will start as soon as you friend open the link.
+                p The transfer will start as soon as your friends open the link.
+                    span.text-muted.text-right#generatedurlreminder &nbsp;(http://proutprout)
                 p File:
                     span#filename
 
