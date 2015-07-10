@@ -68,9 +68,9 @@ function wrapServer(app, server){
                 // TRANSFER_IN_PROGRESS event
                 socket.on('transfer_in_progress', function (progress, receiverId) {
                     //simple routing on the other socket
-                    var receiver = senders[socket.id].receivers[receiverId].socket;
+                    var receiver = senders[socket.id].receivers[receiverId];
                     if(typeof receiver !== "undefined")
-                        receiver.emit('transfer_in_progress', progress);
+                        receiver.socket.emit('transfer_in_progress', progress);
                     else
                         debug("%s/%s receiver not registered", socket.id, receiverId);
                 });
