@@ -1,6 +1,7 @@
 "use strict";
 function receiveFile(isLocal, senderId,receiverLabel) {
     $('#warning-window').show();
+    jdNotif.checkNotifPermissions();
     var socket;
     var socketParams = { query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel };
     if (!isLocal)//restriction on OPENSHIFT
