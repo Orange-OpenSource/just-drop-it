@@ -10,9 +10,11 @@ function receiveFile(isLocal, senderId,receiverLabel) {
         displayError("Error: " + errorMsg);
     });
 
+    var localFileName;
 
 
     socket.on('stream_ready', function (url, filename, filesize) {
+        localFileName = filename;
         $('#filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
         //window.open(url, '_blank');
         //meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us)
@@ -43,6 +45,7 @@ function receiveFile(isLocal, senderId,receiverLabel) {
     });
 
     socket.on('sender_left', function(){
+        jdNotif.notify("Oh no!","Apparently your friend left before the transfer was complete");
         $("#errorMessage").html("Sender left before the end of transfer");
         $('#errorContainer').show(500);
         $('#transferContainer').hide(500);
@@ -51,6 +54,7 @@ function receiveFile(isLocal, senderId,receiverLabel) {
     });
 
     function downloadComplete(){
+        jdNotif.notify("Download complete",localFileName+" was transferred correctly");
         $('#completeContainer').show(500);
         $('#transferContainer').hide(500);
         $("#warning-window").hide(500);
