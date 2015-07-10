@@ -107,14 +107,14 @@ function wrapServer(app, server){
                     socket.on('transfer_complete', function(){
                         debug("%s/%s transfer_complete", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
-                            sender.socket.emit('transfer_complete', socket.id);
+                            sender.socket.emit('transfer_complete', socket.id,receiverLabel);
                         }
                     });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
                         debug("%s/%s receiver disconnect", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
-                            sender.socket.emit('receiver_left', socket.id);
+                            sender.socket.emit('receiver_left', socket.id,receiverLabel);
                             debug("receiver %s has left!", socket.id);
                         }
                         delete sender.receivers[socket.id];

@@ -1,8 +1,7 @@
+"use strict";
 function sendFile(isLocal,senderLabel) {
 
-
     $("#clipboardcopyok").hide();
-
 
     //____ Handling of copy to clipboard with zeroClipboard
     var clip = new ZeroClipboard(document.getElementById("copy-button"));
@@ -43,8 +42,6 @@ function sendFile(isLocal,senderLabel) {
     socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
     });
-
-
 
 
     var fileToTransfert;
@@ -152,24 +149,29 @@ function sendFile(isLocal,senderLabel) {
         blobStream.pipe(stream);
     }
 
-    socket.on('receiver_left', function(receiverId){
+    socket.on('receiver_left', function(receiverId,receiverLabel){
         var progressBarContainer = $('#transfertProgresssBar-'+receiverId);
         progressBarContainer.empty();
         progressBarContainer.append($("<p>").addClass("text-error").html("Receiver left before end of transfer"));
         $("#transfert-"+receiverId+"-remove").show();
+        if(typeof receiverLabel != "undefined" && receiverLabel.length != 0 ) {
+            receiverLabel=receiverLabel+" "
+        }
+        jdNotif.notify("Something is wrong", "Apparently your friend "+receiverLabel+"left before the transfer was over")
 
     });
 
-    socket.on('transfer_complete', function(receiverId){
+    socket.on('transfer_complete', function(receiverId,receiverLabel){
         console.log("transfer_complete - "+receiverId);
         var progressBarContainer = $('#transfertProgresssBar-'+receiverId);
         progressBarContainer.empty();
         progressBarContainer.append($("<p>").addClass("text-success").html("File sent"));
         $("#transfert-"+receiverId+"-remove").show();
+        if(typeof receiverLabel != "undefined" && receiverLabel.length != 0 ) {
+            receiverLabel=receiverLabel+" "
+        }
+        jdNotif.notify("Transfer complete", "your friend "+receiverLabel+"correctly received your file");
     });
-
-
-
 
     $('#generatedurl').click(function () {
         $('#generatedurl').select();
@@ -178,4 +180,6 @@ function sendFile(isLocal,senderLabel) {
     $('#generatedurlreminder').click(function () {
         $('#generatedurlreminder').select();
     });
+
+
 }
