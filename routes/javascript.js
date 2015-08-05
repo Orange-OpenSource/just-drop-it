@@ -14,7 +14,8 @@ var servedFiles = {
     "socket.io" : 'socket.io/node_modules/socket.io-client/socket.io.js',
     "socket.io-stream" : 'socket.io-stream/socket.io-stream.js',
     "jdropit-send" : '../client/jdropit-send.js',
-    "jdropit-receive" : '../client/jdropit-receive.js'
+    "jdropit-receive" : '../client/jdropit-receive.js',
+    "jdropit-notif" : '../client/jdropit-notif.js'
 
 };
 
