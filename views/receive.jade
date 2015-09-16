@@ -16,7 +16,7 @@ block extra_scripts
         script(src="/js/jquery.fileDownload.min.js")
     script.
         window.onload = function(){
-            receiveFile(#{isLocal},  "#{senderId}","#{receiverLabel}");
+            receiverHandler.init(#{isLocal},  "#{senderId}","#{receiverLabel}");
         }
 block content
     div.row

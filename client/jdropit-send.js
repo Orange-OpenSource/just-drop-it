@@ -34,10 +34,10 @@ function sendFile(isLocal,senderLabel) {
 
     //init du socket vers le serveur
     var socketParams = { query: 'role=sender'};
+
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
     socket = io(socketParams);
-
 
     socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
@@ -82,36 +82,31 @@ function sendFile(isLocal,senderLabel) {
         $('#generatedurlreminder').html("&nbsp;(http://" + receiverUrl + ")");
     });
 
-    socket.on('receiver_ready', function (receiverId,receiverLabel) {
+    function getRowId(receiverId){
+        return "receiver-col-"+receiverId;
+    }
+
+
+    function getTransfertBarId(receiverId){
+        return "transfertProgresssBar-"+receiverId;
+    }
+
+    function getTransfertBarContainerId(receiverId){
+        return "transfertProgresssBarContainer-"+receiverId;
+    }
+
+    socket.on('receiver_ready', function (receiverId, receiverLabel) {
         $('#copyLinkContainer').hide(500);
         $('#transferContainer').show(500);
-        startUpload(fileToTransfert, receiverId,receiverLabel);
-    });
 
-
-    //fonction d'upload du fichier
-    function startUpload(file, receiverId, receiverLabel) {
-        console.log(file);
-
-        if(typeof receiverLabel == "undefined" || receiverLabel.length == 0 ){
-            receiverLabel = "unknown receiver"
-        }
+        //init container
 
         var transferContainer = $('#transferContainer');
-        /*
-         div.col-xs-12
-         p The transfer will start as soon as you friend open the link.
-         div.progress
-         div#transferProgressBar(class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;") 0%
-
-         p File:
-         span.filename
-         */
-        var row = $("<div>", {id : "receiver-col-"+receiverId}).addClass("row");
-        row.append($("<div>").addClass("col-xs-4").append($("<p>").html(receiverLabel)));
-        var transferProgressBar = $("<div>", {role : "progressbar", "aria-valuenow": "0",
+        var row = $("<div>", {id : getRowId(receiverId)}).addClass("row");
+        row.append($("<div>").addClass("col-xs-4").addClass("receiver-label").append($("<p>").html(receiverLabel)));
+        var transferProgressBar = $("<div>", {id : getTransfertBarId(receiverId), role : "progressbar", "aria-valuenow": "0",
             "aria-valuemin" : "0", "aria-valuemax" : "1000", style : "min-width: 2em;"}).addClass("progress-bar progress-bar-striped active").html("0 %");
-        row.append($("<div>", {id : "transfertProgresssBar-"+receiverId}).addClass("col-xs-7").append(transferProgressBar));
+        row.append($("<div>", {id : getTransfertBarContainerId(receiverId)}).addClass("col-xs-7").append(transferProgressBar));
         var linkRemove = $("<a>", {href : "#"}).append($("<span>").addClass("glyphicon glyphicon-remove"));
         linkRemove.on("click", function(e){
             e.preventDefault();
@@ -119,6 +114,28 @@ function sendFile(isLocal,senderLabel) {
         });
         row.append($("<div>", {id : "transfert-"+receiverId+"-remove", hidden : "true"}).addClass("col-xs-1").append(linkRemove));
         transferContainer.append(row);
+
+        startUpload(fileToTransfert, receiverId,transferProgressBar);
+    });
+
+
+
+
+    socket.on("restart_download", function(receiverId, receiverLabel){
+        //re init container
+        console.log("restart_download - "+receiverId);
+        $("#"+getRowId(receiverId)+" .receiver-label").html(receiverLabel+ " (experiencing network issues, download restarted)");
+        var transferProgressBar = $("#"+getTransfertBarId(receiverId));
+        transferProgressBar.attr('aria-valuenow', 0);
+        transferProgressBar.width('0%');
+        transferProgressBar.html('0%');
+        startUpload(fileToTransfert, receiverId,transferProgressBar);
+    });
+
+
+    //fonction d'upload du fichier
+    function startUpload(file, receiverId, transferProgressBar) {
+        console.log(file);
 
         var readWriteOpts = {highWaterMark: Math.pow(2,21)};
 
@@ -150,20 +167,32 @@ function sendFile(isLocal,senderLabel) {
     }
 
     socket.on('receiver_left', function(receiverId,receiverLabel){
-        var progressBarContainer = $('#transfertProgresssBar-'+receiverId);
+        var progressBarContainer = $('#'+getTransfertBarContainerId(receiverId));
         progressBarContainer.empty();
         progressBarContainer.append($("<p>").addClass("text-error").html("Receiver left before end of transfer"));
         $("#transfert-"+receiverId+"-remove").show();
         if(typeof receiverLabel != "undefined" && receiverLabel.length != 0 ) {
             receiverLabel=receiverLabel+" "
         }
-        jdNotif.notify("Something is wrong", "Apparently your friend "+receiverLabel+"left before the transfer was over")
+        jdNotif.notify("Something is wrong", "Apparently your friend "+receiverLabel+"left before the transfer was over");
+
+    });
+
+    socket.on('receiver_cancel_too_many_retries', function(receiverId,receiverLabel){
+        var progressBarContainer = $('#'+getTransfertBarContainerId(receiverId));
+        progressBarContainer.empty();
+        progressBarContainer.append($("<p>").addClass("text-error").html("Transfer canceled because of too many network failures"));
+        $("#transfert-"+receiverId+"-remove").show();
+        if(typeof receiverLabel != "undefined" && receiverLabel.length != 0 ) {
+            receiverLabel=receiverLabel+" "
+        }
+        jdNotif.notify("Something is wrong", "Apparently your friend "+receiverLabel+" had network failures, transfer has been canceled");
 
     });
 
     socket.on('transfer_complete', function(receiverId,receiverLabel){
         console.log("transfer_complete - "+receiverId);
-        var progressBarContainer = $('#transfertProgresssBar-'+receiverId);
+        var progressBarContainer = $('#'+getTransfertBarContainerId(receiverId));
         progressBarContainer.empty();
         progressBarContainer.append($("<p>").addClass("text-success").html("File sent"));
         $("#transfert-"+receiverId+"-remove").show();

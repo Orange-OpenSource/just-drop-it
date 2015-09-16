@@ -73,7 +73,7 @@ router.addReceiver = function (fileId, receiverId, stream) {
 
 
 router.removeReceiver = function (fileId, receiverId) {
-    debug('streamCompleted - %s', fileId);
+    debug('removeReceiver - %s', fileId);
     var currentFile = currentFiles[fileId];
     if (typeof currentFile != "undefined" && typeof currentFile.receivers[receiverId] != "undefined") {
         delete currentFile.receivers[receiverId];
