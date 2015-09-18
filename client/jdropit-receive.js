@@ -87,7 +87,7 @@ receiverHandler.retryDownload = function() {
     if (this.nbRetries < 5){
         this.nbRetries++;
         console.log("apparently connection lost for "+this.nbRetries+"... retrying "+" in "+(that.retryTimeout/1000)+"s");
-        displayError("Error while downloading. Restarting in few moment", that.retryTimeout);
+        displayError("Error while downloading. Restarting in a few moments", that.retryTimeout);
         setTimeout(function(){
             console.log("retarting download");
             that.displayProgress(0);
