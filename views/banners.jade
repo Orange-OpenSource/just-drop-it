@@ -6,14 +6,14 @@ script.
         setTimeout(function(){messageContainer.hide();},typeof timeout === "undefined" ? 5000 : timeout);
     }
 
-    function displayMessage(message){
+    function displayMessage(message, timeout){
         $("#dangerMessage").hide();
-        displayBanner("#successMessage", message);
+        displayBanner("#successMessage", message, timeout);
     }
 
-    function displayError(message){
+    function displayError(message, timeout){
         $("#successMessage").hide();
-        displayBanner("#dangerMessage", message);
+        displayBanner("#dangerMessage", message, timeout);
     }
 
 div(class="alert alert-success" id="successMessage" hidden="true")

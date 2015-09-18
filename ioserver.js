@@ -19,6 +19,8 @@ function wrapServer(app, server){
     // on socket connections
     socketIoServer.on('connection', function (socket) {
 
+
+
         if (typeof socket.handshake.query.role === "undefined") {
             var errorMsg = 'Error, no profile transmitted';
             error(errorMsg);
@@ -93,6 +95,9 @@ function wrapServer(app, server){
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
                 var senderID = socket.handshake.query.senderID;
                 var receiverLabel = socket.handshake.query.receiverLabel;
+                if(typeof receiverLabel == "undefined" || receiverLabel.length == 0 ){
+                    receiverLabel = "unknown receiver"
+                }
 
                 debug("%s/%s/%s new receiver", senderID, socket.id, receiverLabel);
                 var sender = senders[senderID];
@@ -118,6 +123,18 @@ function wrapServer(app, server){
                             debug("receiver %s has left!", socket.id);
                         }
                         delete sender.receivers[socket.id];
+                    });
+
+                    socket.on('restart_download', function () {
+                        debug("restarting download for ", socket.id);
+                        sender.socket.emit('restart_download', socket.id, receiverLabel);
+                    });
+
+                    socket.on('cancel_too_many_retries', function () {
+                        debug("cancelling download because of too many retries ", socket.id);
+                        sender.socket.emit('receiver_cancel_too_many_retries', socket.id,receiverLabel);
+                        //remove the route otherwise sender will receive receiver_left event. Delete will be done on disconnection
+                        app.removeReceiver(senderID, socket.id)
                     });
 
                     sender.socket.emit('receiver_ready', socket.id,receiverLabel);
