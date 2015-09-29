@@ -4,7 +4,11 @@ div(class="container footer")
         p(class="text-center")
             a(class="text-muted" data-toggle="modal" data-target="#aboutModal" role="button") About
             | &nbsp - &nbsp
-            a(class="text-muted" data-toggle="modal" data-target="#whatsNewModal" role="button") What's new
+            a(id="whatsNewLink" class="text-muted" data-toggle="modal" data-target="#whatsNewModal" role="button") What's new
+                span(id="whatsNewBadge" class="alert-danger badge") !
+script.
+    var wnHandler = new WhatsNewHandler(#{jdropitVersion},$("#whatsNewLink"),$("#whatsNewBadge"));
+    $("#whatsNewLink").click(function(){wnHandler.setAsRead()});
 include about
 include whatsnew
 

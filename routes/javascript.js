@@ -15,9 +15,12 @@ var servedFiles = {
     "socket.io-stream" : 'socket.io-stream/socket.io-stream.js',
     "jdropit-send" : '../client/jdropit-send.js',
     "jdropit-receive" : '../client/jdropit-receive.js',
-    "jdropit-notif" : '../client/jdropit-notif.js'
-
+    "jdropit-notif" : '../client/jdropit-notif.js',
+    "jdropit-whatsnew" : '../client/jdropit-whatsnew.js',
+    "Blob" : '../polyfills/Blob.js'
 };
+
+var isLocal = typeof process.env.OPENSHIFT_NODEJS_IP === "undefined";
 
 function defineRoutesForLibrairy(libName){
     var libDefinition = servedFiles[libName];
@@ -26,7 +29,11 @@ function defineRoutesForLibrairy(libName){
     router.get('/'+libName+'.js', function(req, res) {
         debug("providing %s", libName);
         res.setHeader('Content-Type', 'application/javascript');
-        res.status(200).end(source);
+        if(isLocal) {//re read each time
+            res.status(200).end(read(require.resolve(libDefinition), 'utf-8'));
+        }else{
+            res.status(200).end(source);
+        }
     });
     router.get('/'+libName+'.min.js', function(req, res) {
         console.log("providing %s minified", libName);

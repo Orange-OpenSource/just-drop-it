@@ -1,22 +1,30 @@
 extends layout
 block extra_scripts
     if isLocal
+        <!--[if lte IE 10]>
+        script(src="/js/Blob.js")
+        <![endif]-->
         script(src="/js/socket.io.js")
         script(src="/js/socket.io-stream.js")
-        script(src="/js/ZeroClipboard.js")
         script(src="/js/jdropit-notif.js")
         script(src="/js/jdropit-receive.js")
-        script(src="/js/jquery.fileDownload.js")
+        script(src="/js/jdropit-whatsnew.js")
     else
+        <!--[if lte IE 10]>
+        script(src="/js/Blob.min.js")
+        <![endif]-->
         script(src="/js/socket.io.min.js")
         script(src="/js/socket.io-stream.min.js")
-        script(src="/js/ZeroClipboard.min.js")
         script(src="/js/jdropit-notif.min.js")
         script(src="/js/jdropit-receive.min.js")
-        script(src="/js/jquery.fileDownload.min.js")
+        script(src="/js/cluster-progress-bar.js")
+        script(src="/js/jdropit-whatsnew.min.js")
+        script(src="/js/cluster-progress-bar.min.js")
+        | <!--[if IE]> <script>if(window.location.pathname !== "/no_ie")window.location = "/no_ie";</script><![endif]-->
     script.
+        var receiverHandler;
         window.onload = function(){
-            receiverHandler.init(#{isLocal},  "#{senderId}","#{receiverLabel}");
+            receiverHandler = new ReceiverHandler(#{isLocal},  "#{senderId}","#{receiverLabel}","#{fileName}",#{fileSize});
         }
 block content
     div.row

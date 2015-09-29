@@ -12,7 +12,7 @@ router.get('/', function(req, res) {
     debug('serving send with cookie %s',req.cookies['CTI']);
     res.render('send', {title : "Just drop it",
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-        senderLabel: req.cookies['CTI']});
+        jdropitVersion : global.DROP_IT_VERSION});
 });
 
 /* GET home page. */

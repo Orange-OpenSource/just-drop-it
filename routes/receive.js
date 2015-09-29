@@ -10,9 +10,33 @@ var downloadPrefix = '/data/';
 
 debug.log = console.log.bind(console);
 
+FileInfo = function (name, size) {
+    this.init(name, size);
+};
+FileInfo.prototype = {
+    constructor: FileInfo,
+    init: function (name, size) {
+        this.name = name;
+        this.size = size;
+        this.receivers = [];
+    },
+    addReceiver: function (receiverId, stream) {
+        this.receivers[receiverId] = {stream: stream, response: null};
+    },
+
+    removeReceiver: function (receiverId) {
+        if (typeof this.receivers[receiverId] != "undefined") {
+            delete this.receivers[receiverId];
+            return true;
+        } else {
+            return false;
+        }
+    }
+};
 router.get(receivePrefix + ':id', function (req, res, next) {
     var fileId = req.params.id;
-    if (typeof currentFiles[fileId] === "undefined") {
+    var fileInfo = currentFiles[fileId];
+    if (typeof fileInfo === "undefined") {
         error('receive - file not found %s', fileId);
         var err = new Error('Not Found');
         err.status = 404;
@@ -22,7 +46,9 @@ router.get(receivePrefix + ':id', function (req, res, next) {
         res.render('receive', {
             title: "Just drop it",
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-            senderId: fileId,
+            fileName: fileInfo.name,
+            fileSize: fileInfo.size,
+            jdropitVersion: global.DROP_IT_VERSION,
             receiverLabel: req.cookies['CTI']
         });
     }
@@ -53,49 +79,51 @@ router.get(downloadPrefix + ':id/:receiverId', function (req, res, next) {
 
 router.prepareStream = function (fileId, filename, size) {
     debug('prepareStream - %s', fileId);
-    currentFiles[fileId] = {name: filename, size: size, receivers: {}};
+    currentFiles[fileId] = new FileInfo(filename, size);
     return receivePrefix + fileId;
 };
 
 
-function buildReceiverRoute(fileId, receiverId){
+function buildReceiverRoute(fileId, receiverId) {
     return downloadPrefix + fileId + "/" + receiverId;
 }
 
 router.addReceiver = function (fileId, receiverId, stream) {
-    var currentFile = currentFiles[fileId];
-    currentFile.receivers[receiverId] = {stream: stream, response: null};
+    var fileInfo = currentFiles[fileId];
+    fileInfo.addReceiver(receiverId, stream);
     var routeAdded = buildReceiverRoute(fileId, receiverId);
     debug("addReceiver - %s added", routeAdded);
-    return {route : routeAdded, filename : currentFile.name, size: currentFile.size};
+    return {route: routeAdded, filename: fileInfo.name, size: fileInfo.size};
 
 };
 
 
 router.removeReceiver = function (fileId, receiverId) {
     debug('removeReceiver - %s', fileId);
-    var currentFile = currentFiles[fileId];
-    if (typeof currentFile != "undefined" && typeof currentFile.receivers[receiverId] != "undefined") {
-        delete currentFile.receivers[receiverId];
-        var routeRemoved = buildReceiverRoute(fileId, receiverId);
-        debug("removeReceiver - %s removed", routeRemoved);
-        return true;
-    }else
+    var fileInformations = currentFiles[fileId];
+    if (typeof fileInformations != "undefined") {
+        fileInformations.allReceiverStream(receiverId, function (packetIndex, streamInfo) {
+            var routeRemoved = buildReceiverPacketRoute(fileId, receiverId, packetIndex);
+            debug("removeReceiver - %s removed", routeRemoved);
+        });
+        return fileInformations.removeReceiver(receiverId);
+    } else
         return false;
 };
 
 router.removeStream = function (fileId) {
-    var currentFile = currentFiles[fileId];
-    if (typeof currentFile != "undefined") {
-        for (var receiverId in currentFile.receivers) {
-            if (currentFile.receivers.hasOwnProperty(receiverId)) {
-                currentFile.receivers[receiverId].stream.unpipe(currentFile.response);
-                currentFile.receivers[receiverId].response.connection.destroy();
+    var fileInformations = currentFiles[fileId];
+    if (typeof fileInformations != "undefined") {
+        fileInformations.allStream(function (receiverId, packetIndex, streamInfo) {
+            if (streamInfo.response != null) {
+                streamInfo.stream.unpipe(streamInfo.response);
+                streamInfo.response.connection.destroy();
             }
-        }
+
+        });
         debug('removeStream - %s removed', fileId);
         delete currentFiles[fileId];
     }
-}
+};
 
 module.exports = router;

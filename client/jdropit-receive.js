@@ -5,7 +5,6 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
-        this.dataHandler = new FileSliceHandler(nbPacket),
         this.progressBar = null ,
 
         this._init(isLocal, senderId, receiverLabel);
