@@ -5,10 +5,13 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
-        this.progressBar = null ,
+        this.progressBar = null,
+        this.storedResponses = [],
+        this.storedBytes = 0,
+        this.retryTimeout = 2000,
         this._init(isLocal, senderId, receiverLabel);
-    console.log("filename = "+filename);
-    console.log("filesize = "+fileSize);
+    console.log("filename = " + filename);
+    console.log("filesize = " + fileSize);
 }
 
 ReceiverHandler.prototype.displayProgress = function (progress) {
@@ -49,6 +52,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
     } else {
         //on utilise blob, ce qui permettra en plus de faire de la ressoumission
         var xhr = new XMLHttpRequest();
+        var lastResponse;
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
@@ -58,33 +62,30 @@ ReceiverHandler.prototype.startDownload = function (url) {
                 displayError("Error: Invalid status code" + this.status);
             }
         };
+        xhr.onprogress = function (e) {
+            var percentComplete = Math.floor((e.loaded / e.total) * 100);
+            that.displayProgress(percentComplete);
+            lastResponse = e.target.response;
+        };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
-            that.retryDownload();
+            that.storedResponses.push(lastResponse);
+            that.resumeDownload(e.total - lastResponse.size);
         };
-
-        //TODO add xhr on progress, store current response in an array, call  that.displayProgress(progress);
 
         xhr.send();
     }
 };
 
 
-ReceiverHandler.prototype.retryDownload = function () {
+ReceiverHandler.prototype.resumeDownload = function (remainingBytes) {
+    console.log("resuming for " + remainingBytes + " bytes");
     var that = this;
-    if (this.nbRetries < 5) {
-        this.nbRetries++;
-        console.log("apparently connection lost for " + this.nbRetries + "... retrying " + " in " + (that.retryTimeout / 1000) + "s");
-        displayError("Error while downloading. Restarting in a few moments", that.retryTimeout);
-        setTimeout(function () {
-            console.log("retarting download");
-            that.displayProgress(0);
-            that.socket.emit("rcv_restart_download");
-        }, that.retryTimeout);
-    } else {
-        this.socket.emit("rcv_cancel_too_many_retries");
-        this.socket.close(true);
-    }
+    setTimeout(function () {
+        console.log("retarting download");
+        that.socket.emit("rcv_resume_download_",remainingBytes);
+    }, that.retryTimeout);
+
 };
 
 ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
@@ -114,7 +115,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
 
 
     this.socket.on('server_stream_ready', function (url) {
-        that.startDownload(url );
+        that.startDownload(url);
     });
 
 

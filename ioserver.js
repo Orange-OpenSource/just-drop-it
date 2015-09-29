@@ -114,12 +114,13 @@ function wrapServer(app, server){
                         delete sender.receivers[socket.id];
                     });
 
-                    /*TODO
-                    socket.on('restart_download', function () {
-                        debug("restarting download for ", socket.id);
-                        sender.socket.emit('restart_download', socket.id, receiverLabel);
+
+                    socket.on('rcv_resume_download', function (remainingBytes) {
+                        debug("resuming download for %s %d bytes", socket.id, remainingBytes);
+                        sender.socket.emit('rcv_resume_download', socket.id,remainingBytes);
                     });
 
+                    /*TODO
                     socket.on('cancel_too_many_retries', function () {
                         debug("cancelling download because of too many retries ", socket.id);
                         sender.socket.emit('receiver_cancel_too_many_retries', socket.id,receiverLabel);

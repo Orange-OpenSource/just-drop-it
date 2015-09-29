@@ -89,8 +89,13 @@ SenderHandler.prototype = {
 
             that.receiverInfos[receiverId] = new ReceiverInfo(receiverLabel, pbContainer, transferProgressBar, linkContainer);
 
-            that.startUpload(receiverId);
+            that.startUpload(receiverId,that.fileToTransfer.size);
 
+        });
+
+        this.socket.on('rcv_resume_download', function (receiverId, remainingBytes){
+            //TODO clean previous stream
+            that.startUpload(receiverId,remainingBytes);
         });
 
         this.socket.on('server_receiver_left', function (receiverId) {
@@ -122,7 +127,7 @@ SenderHandler.prototype = {
         $('#transferContainer').show();
     },
 
-    startUpload: function (receiverId) {
+    startUpload: function (receiverId, remainingBytes) {
         console.log(this.fileToTransfer);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
 
@@ -130,16 +135,20 @@ SenderHandler.prototype = {
         var stream = ss.createStream(this.readWriteOpts);
 
         // upload a file to the server.
-        ss(this.socket).emit('snd_send_file', stream, receiverId);
+        ss(this.socket).emit('snd_send_file', stream, receiverId, remainingBytes);
 
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
-        var size = 0;
+
+        var size = this.fileToTransfer.size - remainingBytes;
+        blobStream.read(size);
+        
         var that = this;
         blobStream.on('data', function (chunk) {
             size += chunk.length;
             var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
             //update progress bar
+            //TODO handle pb on multi retries
             transferProgressBar.attr('aria-valuenow', progress);
             transferProgressBar.width(progress + '%');
             transferProgressBar.html(progress + '%');
