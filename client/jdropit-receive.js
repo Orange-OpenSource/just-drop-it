@@ -93,7 +93,10 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
     jdNotif.checkNotifPermissions();
     var that = this;
 
-    var socketParams = {query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel};
+    var socketParams = {
+        query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel,
+        transports: ['websocket', 'polling']
+    };
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
