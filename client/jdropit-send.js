@@ -1,4 +1,8 @@
 "use strict";
+
+
+
+
 function sendFile(isLocal,senderLabel) {
 
     $("#clipboardcopyok").hide();

@@ -19,7 +19,7 @@ var jdNotif = {
         var instance = new Notification(
             titletxt, {
                 body: bodytxt,
-                icon: 'favicon.ico',
+                icon: '/favicon.ico',
                 tag: 'justdrop-it notif'
             }
         );
