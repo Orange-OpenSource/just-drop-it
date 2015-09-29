@@ -119,6 +119,7 @@ SenderHandler.prototype = {
         $('#copyLinkContainer').show(500);
         $('#warning-window').show(500);
         $('#selectFileContainer').hide(500);
+        $('#transferContainer').show();
     },
 
     startUpload: function (receiverId) {
