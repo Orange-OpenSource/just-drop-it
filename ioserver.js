@@ -37,12 +37,12 @@ function wrapServer(app, server){
 
                 debug('receive_url_ready emitted');
 
-                socket.on("file_ready", function(info){
-                    socket.emit('receive_url_ready',  app.receive_uri_path+app.prepareStream(socket.id, info.name, info.size));
+                socket.on("snd_file_ready", function(info){
+                    socket.emit('server_rcv_url_generated',  app.receive_uri_path+app.prepareStream(socket.id, info.name, info.size));
                 });
 
                 //ON SEND_FILE EVENT (stream)
-                ss(socket).on('send_file', function (stream, receiverId,senderLabel) {
+                ss(socket).on('snd_send_file', function (stream, receiverId) {
 
                     debug("%s/%s send file",socket.id, receiverId);
 
@@ -56,10 +56,10 @@ function wrapServer(app, server){
                         if(typeof receiver !== "undefined"){
                             //directly expose stream
                             var info = app.addReceiver(socket.id, receiverId, stream);
-                            debug("%s/%s [%s-->%s] Expose stream for receiver filename=%s, size=%d", socket.id, receiverId, senderLabel,receiver.label, info.filename, info.size);
+                            debug("%s/%s [-->%s] Expose stream for receiver filename=%s, size=%d", socket.id, receiverId,receiver.label, info.filename, info.size);
                             //notifying receiver
 
-                            receiver.socket.emit('stream_ready', app.receive_uri_path+info.route, info.filename, info.size);
+                            receiver.socket.emit('server_stream_ready', app.receive_uri_path+info.route, info.filename, info.size);
                         }else{
                             error('Error: routing error');
                             socket.emit('alert', 'routing error');
@@ -84,7 +84,7 @@ function wrapServer(app, server){
                     for (var receiverId in sender.receivers) {
                         if (sender.receivers.hasOwnProperty(receiverId)) {
                             debug("%s/%s notifying receiver that sender left", socket.id, receiverId);
-                            sender.receivers[receiverId].socket.emit('sender_left');
+                            sender.receivers[receiverId].socket.emit('server_sender_left');
                         }
                     }
                     //closing stream
@@ -109,22 +109,21 @@ function wrapServer(app, server){
                     sender.receivers[socket.id] ={socket: socket, label: receiverLabel};
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
-                    socket.on('transfer_complete', function(){
+                    socket.on('rcv_transfer_complete', function(){
                         debug("%s/%s transfer_complete", senderID, socket.id);
-                        if(app.removeReceiver(senderID, socket.id)){
-                            sender.socket.emit('transfer_complete', socket.id,receiverLabel);
-                        }
+                        app.removeReceiver(senderID, socket.id);
                     });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
                         debug("%s/%s receiver disconnect", senderID, socket.id);
                         if(app.removeReceiver(senderID, socket.id)){
-                            sender.socket.emit('receiver_left', socket.id,receiverLabel);
+                            sender.socket.emit('server_receiver_left', socket.id,receiverLabel);
                             debug("receiver %s has left!", socket.id);
                         }
                         delete sender.receivers[socket.id];
                     });
 
+                    /*TODO
                     socket.on('restart_download', function () {
                         debug("restarting download for ", socket.id);
                         sender.socket.emit('restart_download', socket.id, receiverLabel);
@@ -135,9 +134,9 @@ function wrapServer(app, server){
                         sender.socket.emit('receiver_cancel_too_many_retries', socket.id,receiverLabel);
                         //remove the route otherwise sender will receive receiver_left event. Delete will be done on disconnection
                         app.removeReceiver(senderID, socket.id)
-                    });
+                    });*/
 
-                    sender.socket.emit('receiver_ready', socket.id,receiverLabel);
+                    sender.socket.emit('server_receiver_ready', socket.id,receiverLabel);
                 }
             } else {
                 var errorMsg = 'Error, unknown profile';

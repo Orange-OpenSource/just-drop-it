@@ -116,7 +116,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
     });
 
 
-    this.socket.on('sender_left', function () {
+    this.socket.on('server_sender_left', function () {
         jdNotif.notify("Oh no!", "Apparently your friend left before the transfer was complete");
         $("#errorMessage").html("Sender left before the end of transfer");
         $('#errorContainer').show(500);

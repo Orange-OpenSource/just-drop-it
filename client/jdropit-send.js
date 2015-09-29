@@ -37,7 +37,7 @@ SenderHandler.prototype = {
         });
 
 
-        this.socket.on('serveur_receiver_ready', function (receiverId, receiverLabel) {
+        this.socket.on('server_receiver_ready', function (receiverId, receiverLabel) {
             $('#copyLinkContainer').hide();
             $('#transfertMessage').html("Transfert in progress...");
 
@@ -114,8 +114,7 @@ SenderHandler.prototype = {
 
         this.socket.emit('snd_file_ready', {
             size: fileToTransfert.size,
-            name: fileToTransfert.name,
-            nbPacket: this.nbPacket
+            name: fileToTransfert.name
         });
         $('#copyLinkContainer').show(500);
         $('#warning-window').show(500);
