@@ -30,7 +30,7 @@ SenderHandler.prototype = {
             console.log(this.id + " - " + this.io.engine.transport.name);
         });
 
-        this.socket.on('server_receive_url_ready', function (url) {
+        this.socket.on('server_rcv_url_generated', function (url) {
             that.receiverUrl = window.location.host + url;
             $('#generatedurl').html("<p>http://" + that.receiverUrl + " </p> ");
             $('#generatedurlreminder').html("&nbsp;(http://" + that.receiverUrl + ")");
@@ -136,13 +136,14 @@ SenderHandler.prototype = {
         var that = this;
         blobStream.on('data', function (chunk) {
             size += chunk.length;
-            var progress = Math.floor(size / file.size * 100);
+            var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
             //update progress bar
             transferProgressBar.attr('aria-valuenow', progress);
             transferProgressBar.width(progress + '%');
             transferProgressBar.html(progress + '%');
 
+            console.log("progress = "+progress);
             if (progress >= 100) {
                 that.transferComplete(receiverId);
             }
@@ -228,7 +229,7 @@ function sendFile(isLocal) {
 
 
 /******************************************************************/
-ReceiverInfo = function (label, progressBarContainer, progressBar, removeLinkContainer) {
+function ReceiverInfo (label, progressBarContainer, progressBar, removeLinkContainer) {
     this.init(label, progressBarContainer, progressBar, removeLinkContainer);
 };
 

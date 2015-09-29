@@ -49,6 +49,7 @@ router.get(receivePrefix + ':id', function (req, res, next) {
             fileName: fileInfo.name,
             fileSize: fileInfo.size,
             jdropitVersion: global.DROP_IT_VERSION,
+            senderId: fileId,
             receiverLabel: req.cookies['CTI']
         });
     }
@@ -100,27 +101,23 @@ router.addReceiver = function (fileId, receiverId, stream) {
 
 router.removeReceiver = function (fileId, receiverId) {
     debug('removeReceiver - %s', fileId);
-    var fileInformations = currentFiles[fileId];
-    if (typeof fileInformations != "undefined") {
-        fileInformations.allReceiverStream(receiverId, function (packetIndex, streamInfo) {
-            var routeRemoved = buildReceiverPacketRoute(fileId, receiverId, packetIndex);
-            debug("removeReceiver - %s removed", routeRemoved);
-        });
-        return fileInformations.removeReceiver(receiverId);
+    var fileInfo = currentFiles[fileId];
+    if (typeof fileInfo != "undefined") {
+        return fileInfo.removeReceiver(receiverId);
     } else
         return false;
+
 };
 
 router.removeStream = function (fileId) {
-    var fileInformations = currentFiles[fileId];
-    if (typeof fileInformations != "undefined") {
-        fileInformations.allStream(function (receiverId, packetIndex, streamInfo) {
-            if (streamInfo.response != null) {
-                streamInfo.stream.unpipe(streamInfo.response);
-                streamInfo.response.connection.destroy();
+    var fileInfo = currentFiles[fileId];
+    if (typeof fileInfo != "undefined") {
+        for (var receiverId in fileInfo.receivers) {
+            if (fileInfo.receivers.hasOwnProperty(receiverId)) {
+                fileInfo.receivers[receiverId].stream.unpipe(currentFile.response);
+                fileInfo.receivers[receiverId].response.connection.destroy();
             }
-
-        });
+        }
         debug('removeStream - %s removed', fileId);
         delete currentFiles[fileId];
     }

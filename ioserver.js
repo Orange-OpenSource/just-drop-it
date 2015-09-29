@@ -35,7 +35,7 @@ function wrapServer(app, server){
                 //generate new unique url
                 //warn sender that the receiver page is ready
 
-                debug('receive_url_ready emitted');
+                debug('server_rcv_url_generated emitted');
 
                 socket.on("snd_file_ready", function(info){
                     socket.emit('server_rcv_url_generated',  app.receive_uri_path+app.prepareStream(socket.id, info.name, info.size));
@@ -59,7 +59,7 @@ function wrapServer(app, server){
                             debug("%s/%s [-->%s] Expose stream for receiver filename=%s, size=%d", socket.id, receiverId,receiver.label, info.filename, info.size);
                             //notifying receiver
 
-                            receiver.socket.emit('server_stream_ready', app.receive_uri_path+info.route, info.filename, info.size);
+                            receiver.socket.emit('server_stream_ready', app.receive_uri_path+info.route);
                         }else{
                             error('Error: routing error');
                             socket.emit('alert', 'routing error');
@@ -67,15 +67,6 @@ function wrapServer(app, server){
                     }
                 });
 
-                // TRANSFER_IN_PROGRESS event
-                socket.on('transfer_in_progress', function (progress, receiverId) {
-                    //simple routing on the other socket
-                    var receiver = senders[socket.id].receivers[receiverId];
-                    if(typeof receiver !== "undefined")
-                        receiver.socket.emit('transfer_in_progress', progress);
-                    else
-                        debug("%s/%s receiver not registered", socket.id, receiverId);
-                });
 
                 // DISCONNECT event
                 socket.on('disconnect', function () {
