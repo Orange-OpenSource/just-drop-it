@@ -153,7 +153,7 @@ SenderHandler.prototype = {
 
 function sendFile(isLocal) {
 
-    var senderHandler = new SenderHandler(isLocal, senderHandler);
+    var senderHandler = new SenderHandler(isLocal);
 
     $("#clipboardcopyok").hide();
     jdNotif.checkNotifPermissions();
