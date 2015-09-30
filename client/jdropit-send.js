@@ -100,6 +100,7 @@ SenderHandler.prototype = {
     },
 
     startUpload: function (receiverId, remainingBytes) {
+        //TODO mettre tout ça dans un worker!!! ça rame du cul
         console.log(this.fileToTransfer);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
 
@@ -112,6 +113,7 @@ SenderHandler.prototype = {
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
 
         var size = this.fileToTransfer.size - remainingBytes;
+        console.log("Starting file upload from byte: "+size);
         blobStream.read(size);
         
         var that = this;
@@ -125,7 +127,6 @@ SenderHandler.prototype = {
             transferProgressBar.width(progress + '%');
             transferProgressBar.html(progress + '%');
 
-            console.log("progress = "+progress);
             if (progress >= 100) {
                 that.transferComplete(receiverId);
             }

@@ -7,7 +7,6 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.socket = null,
         this.progressBar = $("#transferProgressBar"),
         this.storedResponses = [],
-        this.storedBytes = 0,
         this.retryPeriod = 2000,
         this._init(isLocal, senderId, receiverLabel);
     //TODO debug filename
@@ -64,7 +63,10 @@ ReceiverHandler.prototype.startDownload = function (url) {
             }
         };
         xhr.onprogress = function (e) {
-            var percentComplete = Math.floor((e.loaded / e.total) * 100);
+            var preloaded = that.filesize - e.total;
+
+            var percentComplete = Math.floor(((e.loaded + preloaded) / that.filesize) * 100);
+            console.log("TOTAL = "+that.filesize+" preloaded = "+preloaded+" currentlyLoaded="+ e.loaded+" progress="+percentComplete+"  currentStreamSize="+ e.total);
             that.displayProgress(percentComplete);
             lastResponse = e.target.response;
             lastBytesLoaded = e.loaded;

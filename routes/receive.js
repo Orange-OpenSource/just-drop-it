@@ -20,8 +20,8 @@ FileInfo.prototype = {
         this.size = size;
         this.receivers = [];
     },
-    addReceiver: function (receiverId, stream) {
-        this.receivers[receiverId] = {stream: stream, response: null};
+    addReceiver: function (receiverId, stream, byteInStream) {
+        this.receivers[receiverId] = {stream: stream, response: null, streamSize: byteInStream};
     },
 
     removeReceiver: function (receiverId) {
@@ -69,7 +69,7 @@ router.get(downloadPrefix + ':id/:receiverId', function (req, res, next) {
     } else {
         debug('download - serving file %s', fileId);
         res.setHeader('Content-Type', 'application/octet-stream');
-        res.setHeader('Content-Length', streamInformations.size);
+        res.setHeader('Content-Length', streamInformations.receivers[receiverId].streamSize);
         res.setHeader('Content-Disposition', 'attachment; filename="' + streamInformations.name + '"');
         res.setHeader('Set-Cookie', 'fileDownload=true; path=/');
         streamInformations.receivers[receiverId].stream.pipe(res);
@@ -89,12 +89,12 @@ function buildReceiverRoute(fileId, receiverId) {
     return downloadPrefix + fileId + "/" + receiverId;
 }
 
-router.addReceiver = function (fileId, receiverId, stream) {
+router.addReceiver = function (fileId, receiverId, stream, byteInStream) {
     var fileInfo = currentFiles[fileId];
-    fileInfo.addReceiver(receiverId, stream);
+    fileInfo.addReceiver(receiverId, stream,byteInStream);
     var routeAdded = buildReceiverRoute(fileId, receiverId);
     debug("addReceiver - %s added", routeAdded);
-    return {route: routeAdded, filename: fileInfo.name, size: fileInfo.size};
+    return routeAdded;
 
 };
 

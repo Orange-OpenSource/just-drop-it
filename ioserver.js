@@ -42,7 +42,7 @@ function wrapServer(app, server){
                 });
 
                 //ON SEND_FILE EVENT (stream)
-                ss(socket).on('snd_send_file', function (stream, receiverId) {
+                ss(socket).on('snd_send_file', function (stream, receiverId,remainingBytes) {
 
                     debug("%s/%s send file",socket.id, receiverId);
 
@@ -55,11 +55,11 @@ function wrapServer(app, server){
                         var receiver = senders[socket.id].receivers[receiverId];
                         if(typeof receiver !== "undefined"){
                             //directly expose stream
-                            var info = app.addReceiver(socket.id, receiverId, stream);
-                            debug("%s/%s [-->%s] Expose stream for receiver filename=%s, size=%d", socket.id, receiverId,receiver.label, info.filename, info.size);
+                            var route = app.addReceiver(socket.id, receiverId, stream, remainingBytes);
+                            debug("%s/%s [-->%s] Expose stream for receiver size=%d", socket.id, receiverId,receiver.label,remainingBytes);
                             //notifying receiver
 
-                            receiver.socket.emit('server_stream_ready', app.receive_uri_path+info.route);
+                            receiver.socket.emit('server_stream_ready', app.receive_uri_path+route);
                         }else{
                             error('Error: routing error');
                             socket.emit('alert', 'routing error');
