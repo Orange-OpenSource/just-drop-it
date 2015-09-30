@@ -10,7 +10,7 @@ var javascript = require('./routes/javascript');
 
 var app = express();
 
-global.DROP_IT_VERSION=2.0
+global.DROP_IT_VERSION=2.0;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -51,6 +51,7 @@ if (app.get('env') === 'development') {
         console.error(err);
         res.status(err.status || 500);
         res.render('error', {
+            jdropitVersion: global.DROP_IT_VERSION,
             message: err.message,
             error: err
         });

@@ -96,7 +96,7 @@ ReceiverHandler.prototype.waitUntilNetworkIsBack = function (remainingBytes) {
     var netTester = setInterval(function () {
         if (!networkIsBack) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', location.hostname, true);
+            xhr.open('GET', "/", true);
             xhr.onload = function (e) {
                 console.log("Network is back");
                 $('#errorContainer').hide(500);
