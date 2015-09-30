@@ -5,7 +5,7 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
-        this.progressBar = null,
+        this.progressBar = $("#transferProgressBar"),
         this.storedResponses = [],
         this.storedBytes = 0,
         this.retryTimeout = 2000,
@@ -15,10 +15,9 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
 }
 
 ReceiverHandler.prototype.displayProgress = function (progress) {
-    var transferProgressBar = $('#transferProgressBar');
-    transferProgressBar.attr('aria-valuenow', progress);
-    transferProgressBar.width(progress + '%');
-    transferProgressBar.html(progress + '%');
+    this.progressBar.attr('aria-valuenow', progress);
+    this.progressBar.width(progress + '%');
+    this.progressBar.html(progress + '%');
 };
 
 ReceiverHandler.prototype.downloadComplete = function (response) {
