@@ -117,7 +117,9 @@ function wrapServer(app, server){
 
                     socket.on('rcv_resume_download', function (remainingBytes) {
                         debug("resuming download for %s %d bytes", socket.id, remainingBytes);
-                        sender.socket.emit('rcv_resume_download', socket.id,remainingBytes);
+                        if(app.removeReceiver(senderID, socket.id)){
+                            sender.socket.emit('rcv_resume_download', socket.id,remainingBytes);
+                        }
                     });
 
                     /*TODO
