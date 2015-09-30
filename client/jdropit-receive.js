@@ -53,6 +53,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
         //on utilise blob, ce qui permettra en plus de faire de la ressoumission
         var xhr = new XMLHttpRequest();
         var lastResponse;
+        var lastBytesLoaded;
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
@@ -66,11 +67,12 @@ ReceiverHandler.prototype.startDownload = function (url) {
             var percentComplete = Math.floor((e.loaded / e.total) * 100);
             that.displayProgress(percentComplete);
             lastResponse = e.target.response;
+            lastBytesLoaded = e.loaded;
         };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
             that.storedResponses.push(lastResponse);
-            that.resumeDownload(e.total - lastResponse.size);
+            that.resumeDownload(e.total - lastBytesLoaded);
         };
 
         xhr.send();
@@ -83,7 +85,7 @@ ReceiverHandler.prototype.resumeDownload = function (remainingBytes) {
     var that = this;
     setTimeout(function () {
         console.log("retarting download");
-        that.socket.emit("rcv_resume_download_",remainingBytes);
+        that.socket.emit("rcv_resume_download",remainingBytes);
     }, that.retryTimeout);
 
 };
