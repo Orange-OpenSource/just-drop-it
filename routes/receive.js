@@ -114,7 +114,7 @@ router.removeStream = function (fileId) {
     if (typeof fileInfo != "undefined") {
         for (var receiverId in fileInfo.receivers) {
             if (fileInfo.receivers.hasOwnProperty(receiverId)) {
-                fileInfo.receivers[receiverId].stream.unpipe(currentFile.response);
+                fileInfo.receivers[receiverId].stream.unpipe(fileInfo.response);
                 fileInfo.receivers[receiverId].response.connection.destroy();
             }
         }

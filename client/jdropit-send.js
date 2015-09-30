@@ -68,7 +68,6 @@ SenderHandler.prototype = {
         });
 
         this.socket.on('rcv_resume_download', function (receiverId, remainingBytes){
-            //TODO clean previous stream
             that.startUpload(receiverId,remainingBytes);
         });
 
