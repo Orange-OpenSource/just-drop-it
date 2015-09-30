@@ -42,51 +42,25 @@ SenderHandler.prototype = {
             $('#transfertMessage').html("Transfert in progress...");
 
             //init container
-            /**TODO c'était bien, clone
-             *  var transferContainer = $('#transferContainer');
-             transferContainer.show();
-
-             var rowReceiverTemplate = $("#rowReceiverTemplate");
-             var newRow = rowReceiverTemplate.clone();
-             newRow.attr("id", "receiver-col-" + receiverId);
-             newRow.children(".col-xs-4").append($("<p>").html(receiverLabel));
-             var linkContainer = newRow.children(".col-xs-1");
-             var linkRemove = linkContainer.children("a");
-             linkRemove.on("click", function (e) {
-                e.preventDefault();
-                newRow.hide();
-            });
-
-             var pbContainer = newRow.children(".col-xs-7");
-
-             var templateBarContainer = rowReceiverTemplate.children(".col-xs-7");
-             transferContainer.append(newRow);**/
-
-
-
             var transferContainer = $('#transferContainer');
-            var row = $("<div>", {id: "receiver-col-" + receiverId}).addClass("row");
-            row.append($("<div>").addClass("col-xs-4").addClass("receiver-label").append($("<p>").html(receiverLabel)));
-            var transferProgressBar = $("<div>", {
-                id: "transfertProgresssBar-" + receiverId,
-                role: "progressbar",
-                "aria-valuenow": "0",
-                "aria-valuemin": "0",
-                "aria-valuemax": "1000",
-                style: "min-width: 2em;"
-            }).addClass("progress-bar progress-bar-striped active").html("0 %");
-            var pbContainer = $("<div>", {id: "transfertProgresssBarContainer-" + receiverId});
-            row.append(pbContainer).addClass("col-xs-7").append(transferProgressBar);
-            var linkRemove = $("<a>", {href: "#"}).append($("<span>").addClass("glyphicon glyphicon-remove"));
-            var linkContainer = $("<div>", {id: "transfert-" + receiverId + "-remove", hidden: "true"});
+            transferContainer.show();
+
+            var rowReceiverTemplate = $("#rowReceiverTemplate");
+            var newRow = rowReceiverTemplate.clone();
+            newRow.removeAttr("id");
+            newRow.show();
+            newRow.children(".col-xs-2").append($("<p>").html(receiverLabel));
+            var linkContainer = newRow.children(".col-xs-1");
+            var linkRemove = linkContainer.children("a");
             linkRemove.on("click", function (e) {
-                e.preventDefault();
-                row.hide();
+            e.preventDefault();
+            newRow.hide();
             });
-            row.append(linkContainer).addClass("col-xs-1").append(linkRemove);
-            transferContainer.append(row);
 
+            var pbContainer = newRow.children(".col-xs-9");
+            var transferProgressBar = pbContainer.find(".progress-bar");
 
+            transferContainer.append(newRow);
             that.receiverInfos[receiverId] = new ReceiverInfo(receiverLabel, pbContainer, transferProgressBar, linkContainer);
 
             that.startUpload(receiverId,that.fileToTransfer.size);
@@ -124,7 +98,6 @@ SenderHandler.prototype = {
         $('#copyLinkContainer').show(500);
         $('#warning-window').show(500);
         $('#selectFileContainer').hide(500);
-        $('#transferContainer').show();
     },
 
     startUpload: function (receiverId, remainingBytes) {
@@ -180,7 +153,7 @@ SenderHandler.prototype = {
 
 function sendFile(isLocal) {
 
-    var senderHandler = new SenderHandler(isLocal, senderHandler);
+    var senderHandler = new SenderHandler(isLocal);
 
     $("#clipboardcopyok").hide();
     jdNotif.checkNotifPermissions();
