@@ -56,6 +56,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
         var xhr = new XMLHttpRequest();
         var lastResponse;
         var lastBytesLoaded;
+        var lastTotal;
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
@@ -68,14 +69,16 @@ ReceiverHandler.prototype.startDownload = function (url) {
         xhr.onprogress = function (e) {
             var preloaded = that.filesize - e.total;
             var percentComplete = Math.floor(((e.loaded + preloaded) / that.filesize) * 100);
+            console.log("[FileSize="+that.filesize+" previouslyLoaded= "+preloaded+"] [currentStreamSize="+ e.total+" loaded="+ e.loaded+"]");
             that.displayProgress(percentComplete);
             lastResponse = e.target.response;
             lastBytesLoaded = e.loaded;
+            lastTotal = e.total; /* on chrome, onerror event.total is given, but firefox give 0 so we have to store it*/
         };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
             that.storedResponses.push(lastResponse);
-            that.waitUntilNetworkIsBack(e.total - lastBytesLoaded);
+            that.waitUntilNetworkIsBack(lastTotal - lastBytesLoaded);
         };
 
         xhr.send();
