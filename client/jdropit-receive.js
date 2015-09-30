@@ -8,6 +8,7 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.progressBar = $("#transferProgressBar"),
         this.storedResponses = [],
         this.retryPeriod = 2000,
+        this.totalTries = 0,
         this._init(isLocal, senderId, receiverLabel);
     //TODO debug filename
     console.log("filename = " + filename);
@@ -33,13 +34,15 @@ ReceiverHandler.prototype.downloadComplete = function (response) {
     //jquery anchor.click() won't work -> need to use the DOM method
     anchor[0].click();
 
-    this.socket.emit('rcv_transfer_complete');
+    this.socket.emit('rcv_transfer_complete',this.totalTries);
     this.socket.close(true);
 };
 
 
 ReceiverHandler.prototype.startDownload = function (url) {
     console.log("start download");
+    this.totalTries++;
+
     var that = this;
 
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
@@ -64,9 +67,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
         };
         xhr.onprogress = function (e) {
             var preloaded = that.filesize - e.total;
-
             var percentComplete = Math.floor(((e.loaded + preloaded) / that.filesize) * 100);
-            console.log("TOTAL = "+that.filesize+" preloaded = "+preloaded+" currentlyLoaded="+ e.loaded+" progress="+percentComplete+"  currentStreamSize="+ e.total);
             that.displayProgress(percentComplete);
             lastResponse = e.target.response;
             lastBytesLoaded = e.loaded;
@@ -86,12 +87,16 @@ ReceiverHandler.prototype.waitUntilNetworkIsBack = function (remainingBytes) {
     var that = this;
     var networkIsBack = false;
 
+    $("#errorMessage").html("You are experiencing some network issues, please check your connection");
+    $('#errorContainer').show(500);
+
     var netTester = setInterval(function () {
         if (!networkIsBack) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', location.hostname, true);
             xhr.onload = function (e) {
                 console.log("Network is back");
+                $('#errorContainer').hide(500);
                 networkIsBack = true;
             };
             xhr.onerror = function (e) {

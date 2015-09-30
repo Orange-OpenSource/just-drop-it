@@ -20,7 +20,6 @@ function wrapServer(app, server){
     socketIoServer.on('connection', function (socket) {
 
 
-
         if (typeof socket.handshake.query.role === "undefined") {
             var errorMsg = 'Error, no profile transmitted';
             error(errorMsg);
@@ -100,8 +99,9 @@ function wrapServer(app, server){
                     sender.receivers[socket.id] ={socket: socket, label: receiverLabel};
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
-                    socket.on('rcv_transfer_complete', function(){
-                        debug("%s/%s transfer_complete", senderID, socket.id);
+                    socket.on('rcv_transfer_complete', function(nbTries){
+                        //TODO find a way to log filename and fileSize here
+                        debug("%s/%s transfer_complete after %d try(ies)", senderID, socket.id,nbTries);
                         app.removeReceiver(senderID, socket.id);
                     });
                     // DISCONNECT event
