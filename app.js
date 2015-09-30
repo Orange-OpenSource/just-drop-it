@@ -23,9 +23,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.receive_uri_path = '/receive';
+var receiveUriPath = '/receive';
 app.use('/', send);
-app.use(app.receive_uri_path, receive);
+app.use(receiveUriPath, receive);
 app.use('/js', javascript);
 
 app.use(function (req,res,next) {
@@ -70,11 +70,8 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
-app.prepareStream = receive.prepareStream;
-app.addReceiver = receive.addReceiver;
-app.removeReceiver = receive.removeReceiver;
-app.removeStream  = receive.removeStream;
+app.receiverServePagePath = receiveUriPath + receive.servePagePath;
+app.receiverDownloadPath = receiveUriPath + receive.downloadPath;
 
 module.exports = app;
 

@@ -61,6 +61,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
             if (this.status == 200) {
+                //TODO check size when user disconnect
                 that.downloadComplete(this.response);
             } else {
                 displayError("Error: Invalid status code" + this.status);
