@@ -8,8 +8,9 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.progressBar = $("#transferProgressBar"),
         this.storedResponses = [],
         this.storedBytes = 0,
-        this.retryTimeout = 2000,
+        this.retryPeriod = 2000,
         this._init(isLocal, senderId, receiverLabel);
+    //TODO debug filename
     console.log("filename = " + filename);
     console.log("filesize = " + fileSize);
 }
@@ -71,21 +72,41 @@ ReceiverHandler.prototype.startDownload = function (url) {
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
             that.storedResponses.push(lastResponse);
-            that.resumeDownload(e.total - lastBytesLoaded);
+            that.waitUntilNetworkIsBack(e.total - lastBytesLoaded);
         };
 
         xhr.send();
     }
 };
 
-
-ReceiverHandler.prototype.resumeDownload = function (remainingBytes) {
-    console.log("resuming for " + remainingBytes + " bytes");
+ReceiverHandler.prototype.waitUntilNetworkIsBack = function (remainingBytes) {
+    console.log("Testing connectivity");
     var that = this;
-    setTimeout(function () {
-        console.log("retarting download");
-        that.socket.emit("rcv_resume_download",remainingBytes);
-    }, that.retryTimeout);
+    var networkIsBack = false;
+
+    var netTester = setInterval(function () {
+        if (!networkIsBack) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', location.hostname, true);
+            xhr.onload = function (e) {
+                console.log("Network is back");
+                networkIsBack = true;
+            };
+            xhr.onerror = function (e) {
+                console.log("still no network");
+            };
+            xhr.send();
+        } else {
+            console.log("Stop timer and follow");
+            clearInterval(netTester);
+            that._resumeDownload(remainingBytes)
+        }
+    }, that.retryPeriod);
+};
+
+ReceiverHandler.prototype._resumeDownload = function (remainingBytes) {
+    console.log("re-asking for download for the last " + remainingBytes + " bytes.");
+    this.socket.emit("rcv_resume_download", remainingBytes);
 
 };
 
@@ -96,11 +117,8 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
 
     var socketParams = {
         query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel,
-
         transports: ['websocket', 'polling']
     };
-
-    console.log(socketParams);
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
@@ -113,7 +131,6 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
     this.socket.on('alert', function (errorMsg) {
         displayError("Error: " + errorMsg);
     });
-
 
     this.socket.on('server_stream_ready', function (url) {
         that.startDownload(url);
