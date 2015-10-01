@@ -5,7 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var send = require('./routes/send');
-var receive = require('./routes/receive')
+var receive = require('./routes/receive');
+var admin = require('./routes/admin');
 var javascript = require('./routes/javascript');
 
 var app = express();
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 var receiveUriPath = '/receive';
 app.use('/', send);
 app.use(receiveUriPath, receive);
+app.use('/admin', admin);
 app.use('/js', javascript);
 
 app.use(function (req,res,next) {

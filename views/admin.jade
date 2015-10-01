@@ -1,0 +1,14 @@
+extends layout
+block extra_scripts
+
+block content
+    ul
+        each sender in senders
+            li= "Sender " +  sender.id
+                ul
+                    each receiverId in sender.receivers
+                        li= "Receiver " + receiverId
+
+
+
+

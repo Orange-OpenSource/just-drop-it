@@ -63,12 +63,12 @@ SenderHandler.prototype = {
             transferContainer.append(newRow);
             that.receiverInfos[receiverId] = new ReceiverInfo(receiverLabel, pbContainer, transferProgressBar, linkContainer);
 
-            that.startUpload(receiverId,that.fileToTransfer.size);
+            that.startUpload(receiverId,0);
 
         });
 
-        this.socket.on('rcv_resume_download', function (receiverId, remainingBytes){
-            that.startUpload(receiverId,remainingBytes);
+        this.socket.on('rcv_resume_download', function (receiverId, alreadyReceived){
+            that.startUpload(receiverId,alreadyReceived);
         });
 
         this.socket.on('server_receiver_left', function (receiverId) {
@@ -99,8 +99,8 @@ SenderHandler.prototype = {
         $('#selectFileContainer').hide(500);
     },
 
-    startUpload: function (receiverId, remainingBytes) {
-        //TODO mettre tout ça dans un worker!!! ça rame du cul
+    startUpload: function (receiverId, startingByte) {
+        //TODO mettre tout ça dans un worker!!! ça rame du cul...Bravo!
         console.log(this.fileToTransfer);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
 
@@ -108,15 +108,17 @@ SenderHandler.prototype = {
         var stream = ss.createStream(this.readWriteOpts);
 
         // upload a file to the server.
-        ss(this.socket).emit('snd_send_file', stream, receiverId, remainingBytes);
+        ss(this.socket).emit('snd_send_file', stream, receiverId, this.fileToTransfer.size - startingByte);
 
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
 
-        var size = this.fileToTransfer.size - remainingBytes;
+        var size = startingByte;
         console.log("Starting file upload from byte: "+size);
-        blobStream.read(size);
+        if(size > 0)
+            blobStream.read(size);
         
         var that = this;
+
         blobStream.on('data', function (chunk) {
             size += chunk.length;
             var progress = Math.floor(size / that.fileToTransfer.size * 100);

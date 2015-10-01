@@ -73,7 +73,6 @@ Sender.prototype.clean = function () {
 
 
 
-var senders = {};
 
 var Dao = function(){
     this.senders = {};
@@ -89,24 +88,33 @@ Dao.prototype._checkDefined = function(obj, callback, undefinedCallback){
 
 Dao.prototype.createSender = function (senderId, socket, callback) {
     var result = new Sender(senderId, socket);
-    senders[senderId] = result;
+    this.senders[senderId] = result;
     callback(result);
 };
 
 Dao.prototype.removeSender = function(senderId, deletedCallback, notFoundCallback){
-    this._checkDefined(senders[senderId], function(sender){
+    var self = this;
+    this._checkDefined(this.senders[senderId], function(sender){
         sender.clean();
-        delete senders[senderId];
+        delete self.senders[senderId];
         deletedCallback();
         }, notFoundCallback);
 };
 
 Dao.prototype.getSender = function(senderId, callback, notFoundCallback){
-    this._checkDefined(senders[senderId], callback, notFoundCallback);
+    this._checkDefined(this.senders[senderId], callback, notFoundCallback);
+};
+
+Dao.prototype.eachSenders = function(callback){
+    for(var senderId in this.senders){
+        if(this.senders.hasOwnProperty(senderId)){
+            callback(this.senders[senderId]);
+        }
+    }
 };
 
 Dao.prototype.addReceiver = function(senderId, receiverId, receiverLabel, socket, callback, notFoundCallback){
-    this._checkDefined(senders[senderId], function(sender){
+    this._checkDefined(this.senders[senderId], function(sender){
         callback(sender, sender.addReceiver(receiverId, receiverLabel, socket));
     }, notFoundCallback);
 };

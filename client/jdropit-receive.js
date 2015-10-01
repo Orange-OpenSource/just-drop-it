@@ -1,4 +1,38 @@
 "use strict";
+function ResponsesHandler(){
+    this.received = [];
+}
+
+
+ResponsesHandler.prototype.append= function(response, size){
+    this.received.push({data : response, size :  size});
+};
+
+
+
+ResponsesHandler.prototype.getReceivedSize = function(){
+    var receivedSize = 0;
+    $.each(this.received, function(idx, response){
+        receivedSize+=response.size;
+    });
+    return receivedSize;
+};
+
+ResponsesHandler.prototype.getFullResponse = function(){
+    if(this.received.length == 1){
+        console.log("one response of size "+this.received[0].size);
+        return this.received[0];
+    }
+    else{
+        var blobs = [];
+        $.each(this.received, function(idx, response){
+            console.log("adding response of size "+response.size);
+            blobs.push(response.data);
+        });
+        return new Blob(blobs);
+    }
+};
+
 function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
     //TODO check if old IE version, for blob compatibility
     this.isIELessThan10 = false,
@@ -6,9 +40,10 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.filesize = fileSize,
         this.socket = null,
         this.progressBar = $("#transferProgressBar"),
-        this.storedResponses = [],
+        this.storedResponses = new ResponsesHandler(),
         this.retryPeriod = 2000,
         this.totalTries = 0,
+        this.downloadActive = false,
         this._init(isLocal, senderId, receiverLabel);
     //TODO debug filename
     console.log("filename = " + filename);
@@ -21,7 +56,9 @@ ReceiverHandler.prototype.displayProgress = function (progress) {
     this.progressBar.html(progress + '%');
 };
 
-ReceiverHandler.prototype.downloadComplete = function (response) {
+ReceiverHandler.prototype.downloadComplete = function () {
+    this.downloadActive = false;
+    var response = this.storedResponses.getFullResponse();
     jdNotif.notify("Download complete", this.filename + " was transferred correctly");
 
     $('#completeContainer').show(500);
@@ -42,11 +79,11 @@ ReceiverHandler.prototype.downloadComplete = function (response) {
 ReceiverHandler.prototype.startDownload = function (url) {
     console.log("start download");
     this.totalTries++;
-
+    this.downloadActive = true;
     var that = this;
 
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
-    if (this.isIeLessThan10) {
+    if (this.isIELessThan10) {
         //"old way" : Tentative avec jquery.fileDownload
         $.fileDownload(url).fail(function () {
             displayError("Error while downloading file " + this.filename);
@@ -54,39 +91,51 @@ ReceiverHandler.prototype.startDownload = function (url) {
     } else {
         //on utilise blob, ce qui permettra en plus de faire de la ressoumission
         var xhr = new XMLHttpRequest();
+        var alreadyDownloaded = this.storedResponses.getReceivedSize();
         var lastResponse;
         var lastBytesLoaded;
-        var lastTotal;
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
             if (this.status == 200) {
-                //TODO check size when user disconnect
-                that.downloadComplete(this.response);
+                console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - success - loaded "+this.response.size);
+                that.storedResponses.append(this.response, this.response.size);
+                if(that.storedResponses.getReceivedSize() == that.filesize){
+                    that.downloadComplete();
+                }else{
+                    console.log("download ok but sizes differ");
+                    if(that.downloadActive)
+                        that.waitUntilNetworkIsBack();
+                }
+
             } else {
                 displayError("Error: Invalid status code" + this.status);
             }
         };
         xhr.onprogress = function (e) {
-            var preloaded = that.filesize - e.total;
-            var percentComplete = Math.floor(((e.loaded + preloaded) / that.filesize) * 100);
-            console.log("[FileSize="+that.filesize+" previouslyLoaded= "+preloaded+"] [currentStreamSize="+ e.total+" loaded="+ e.loaded+"]");
+            var percentComplete = Math.floor(((e.loaded + alreadyDownloaded) / that.filesize) * 100);
+            //console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] [total="+ e.total+" loaded="+ e.loaded+"]");
             that.displayProgress(percentComplete);
             lastResponse = e.target.response;
             lastBytesLoaded = e.loaded;
-            lastTotal = e.total; /* on chrome, onerror event.total is given, but firefox give 0 so we have to store it*/
+            if(lastResponse == null)
+                console.log("lastResponse is null");
         };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
-            that.storedResponses.push(lastResponse);
-            that.waitUntilNetworkIsBack(lastTotal - lastBytesLoaded);
+            if(lastResponse == null)
+                console.log("lastResponse is null");
+            console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - error - loaded "+lastBytesLoaded+" last response size "+lastResponse.size);
+            that.storedResponses.append(lastResponse, lastBytesLoaded);
+            if(that.downloadActive)
+                that.waitUntilNetworkIsBack();
         };
 
         xhr.send();
     }
 };
 
-ReceiverHandler.prototype.waitUntilNetworkIsBack = function (remainingBytes) {
+ReceiverHandler.prototype.waitUntilNetworkIsBack = function () {
     console.log("Testing connectivity");
     var that = this;
     var networkIsBack = false;
@@ -110,15 +159,17 @@ ReceiverHandler.prototype.waitUntilNetworkIsBack = function (remainingBytes) {
         } else {
             console.log("Stop timer and follow");
             clearInterval(netTester);
-            that._resumeDownload(remainingBytes)
+            that._resumeDownload()
         }
     }, that.retryPeriod);
 };
 
-ReceiverHandler.prototype._resumeDownload = function (remainingBytes) {
-    console.log("re-asking for download for the last " + remainingBytes + " bytes.");
-    this.socket.emit("rcv_resume_download", remainingBytes);
-
+ReceiverHandler.prototype._resumeDownload = function () {
+    if(this.downloadActive){
+        var alreadyReceived = this.storedResponses.getReceivedSize();
+        console.log("re-asking for download.. Received " + alreadyReceived + " bytes.");
+        this.socket.emit("rcv_resume_download", alreadyReceived);
+    }
 };
 
 ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
@@ -149,6 +200,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
 
 
     this.socket.on('server_sender_left', function () {
+        that.downloadActive = true;
         jdNotif.notify("Oh no!", "Apparently your friend left before the transfer was complete");
         $("#errorMessage").html("Sender left before the end of transfer");
         $('#errorContainer').show(500);

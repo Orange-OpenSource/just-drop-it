@@ -96,12 +96,12 @@ function wrapServer(app, server){
                     });
 
 
-                    socket.on('rcv_resume_download', function (remainingBytes) {
-                        debug("resuming download for %s %d bytes", socket.id, remainingBytes);
+                    socket.on('rcv_resume_download', function (alreadyReceived) {
+                        debug("resuming download for %s %d bytes", socket.id, alreadyReceived);
                         dao.getReceiver(senderID, socket.id, function(receiver){
                             receiver.stream = null;
                             receiver.clean = null;
-                            receiver.sender.socket.emit('rcv_resume_download', socket.id,remainingBytes);
+                            receiver.sender.socket.emit('rcv_resume_download', socket.id,alreadyReceived);
                         }, routingError);
 
                     });
