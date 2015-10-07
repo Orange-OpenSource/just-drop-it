@@ -2,12 +2,16 @@ extends layout
 block extra_scripts
     | <!--[if IE]> <script>if(window.location.pathname !== "/no_ie")window.location = "/no_ie";</script><![endif]-->
     if isLocal
+        script(src="/js/HackTimer.js")
+        script(src="/js/HackTimerWorker.js")
         script(src="/js/socket.io.js")
         script(src="/js/socket.io-stream.js")
         script(src="/js/ZeroClipboard.js")
         script(src="/js/jdropit-notif.js")
         script(src="/js/jdropit-send.js")
     else
+        script(src="/js/HackTimer.silent.min.js")
+        script(src="/js/HackTimerWorker.min.js")
         script(src="/js/socket.io.min.js")
         script(src="/js/socket.io-stream.min.js")
         script(src="/js/ZeroClipboard.min.js")
