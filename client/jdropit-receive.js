@@ -21,7 +21,7 @@ ResponsesHandler.prototype.getReceivedSize = function(){
 ResponsesHandler.prototype.getFullResponse = function(){
     if(this.received.length == 1){
         console.log("one response of size "+this.received[0].size);
-        return this.received[0];
+        return this.received[0].data;
     }
     else{
         var blobs = [];
