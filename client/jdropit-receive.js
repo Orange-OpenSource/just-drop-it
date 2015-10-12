@@ -6,7 +6,6 @@ function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
         this.filesize = fileSize,
         this.socket = null,
         this.progressBar = $("#transferProgressBar"),
-        this.storedResponses = new ResponsesHandler(),
         this.retryPeriod = 2000,
         this.totalTries = 0,
         this.downloadActive = false,
@@ -54,30 +53,26 @@ ReceiverHandler.prototype.startDownload = function (url) {
             displayError("Error while downloading file " + this.filename);
         })
     } else {
-        //on utilise blob, ce qui permettra en plus de faire de la ressoumission
         var xhr = new XMLHttpRequest();
-        var alreadyDownloaded = this.storedResponses.getReceivedSize();
         var lastResponse;
         var lastBytesLoaded;
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function (e) {
             if (this.status == 200) {
-                console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - success - loaded "+this.response.size);
                 that.downloadComplete(this.response);
-
             } else {
                 displayError("Error: Invalid status code" + this.status);
             }
         };
         xhr.onprogress = function (e) {
-            var percentComplete = Math.floor(((e.loaded + alreadyDownloaded) / that.filesize) * 100);
+            var percentComplete = Math.floor((e.loaded  / that.filesize) * 100);
             //console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] [total="+ e.total+" loaded="+ e.loaded+"]");
             that.displayProgress(percentComplete);
         };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
-            console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - error - loaded "+lastBytesLoaded+" last response size "+lastResponse.size);
+            console.log("[FileSize="+that.filesize+"] - error - loaded "+lastBytesLoaded+" last response size "+lastResponse.size);
             displayError("Sorry, your transfer was interrupted by a network xxx. This may occurs when the transaction last too longs behind some proxies and firewalls. Download failed.");
             //TODO si on veut faire propre, emettre un event spécifique plutot que disconnect, histoire de prévenir le sender de la raison de l'échec
             that.socket.disconnect();
