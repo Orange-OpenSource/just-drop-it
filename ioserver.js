@@ -96,7 +96,7 @@ function wrapServer(app, server){
                     });
 
 
-                    socket.on('rcv_resume_download', function (alreadyReceived) {
+                    /*socket.on('rcv_resume_download', function (alreadyReceived) {
                         debug("resuming download for %s %d bytes", socket.id, alreadyReceived);
                         dao.getReceiver(senderID, socket.id, function(receiver){
                             receiver.stream = null;
@@ -104,15 +104,15 @@ function wrapServer(app, server){
                             receiver.sender.socket.emit('rcv_resume_download', socket.id,alreadyReceived);
                         }, routingError);
 
-                    });
+                    });*/
 
-                    /*TODO
-                     socket.on('cancel_too_many_retries', function () {
+
+                     socket.on('rcv_download_failed', function () {
                      debug("cancelling download because of too many retries ", socket.id);
                      sender.socket.emit('receiver_cancel_too_many_retries', socket.id,receiverLabel);
                      //remove the route otherwise sender will receive receiver_left event. Delete will be done on disconnection
                      app.removeReceiver(senderID, socket.id)
-                     });*/
+                     });
 
                     sender.socket.emit('server_receiver_ready', socket.id,receiverLabel);
                 }, function(){

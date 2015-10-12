@@ -67,9 +67,9 @@ SenderHandler.prototype = {
 
         });
 
-        this.socket.on('rcv_resume_download', function (receiverId, alreadyReceived){
+        /*this.socket.on('rcv_resume_download', function (receiverId, alreadyReceived){
             that.startUpload(receiverId,alreadyReceived);
-        });
+        });*/
 
         this.socket.on('server_receiver_left', function (receiverId) {
             var receiverInfo = that.receiverInfos[receiverId];
@@ -100,7 +100,6 @@ SenderHandler.prototype = {
     },
 
     startUpload: function (receiverId, startingByte) {
-        //TODO mettre tout ça dans un worker!!! ça rame du cul...Bravo!
         console.log(this.fileToTransfer);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
 
@@ -124,7 +123,6 @@ SenderHandler.prototype = {
             var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
             //update progress bar
-            //TODO handle pb on multi retries
             transferProgressBar.attr('aria-valuenow', progress);
             transferProgressBar.width(progress + '%');
             transferProgressBar.html(progress + '%');

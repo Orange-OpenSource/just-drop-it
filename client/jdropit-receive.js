@@ -1,38 +1,4 @@
 "use strict";
-function ResponsesHandler(){
-    this.received = [];
-}
-
-
-ResponsesHandler.prototype.append= function(response, size){
-    this.received.push({data : response, size :  size});
-};
-
-
-
-ResponsesHandler.prototype.getReceivedSize = function(){
-    var receivedSize = 0;
-    $.each(this.received, function(idx, response){
-        receivedSize+=response.size;
-    });
-    return receivedSize;
-};
-
-ResponsesHandler.prototype.getFullResponse = function(){
-    if(this.received.length == 1){
-        console.log("one response of size "+this.received[0].size);
-        return this.received[0].data;
-    }
-    else{
-        var blobs = [];
-        $.each(this.received, function(idx, response){
-            console.log("adding response of size "+response.size);
-            blobs.push(response.data);
-        });
-        return new Blob(blobs);
-    }
-};
-
 function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
     //TODO check if old IE version, for blob compatibility
     this.isIELessThan10 = false,
@@ -56,9 +22,8 @@ ReceiverHandler.prototype.displayProgress = function (progress) {
     this.progressBar.html(progress + '%');
 };
 
-ReceiverHandler.prototype.downloadComplete = function () {
+ReceiverHandler.prototype.downloadComplete = function (response) {
     this.downloadActive = false;
-    var response = this.storedResponses.getFullResponse();
     jdNotif.notify("Download complete", this.filename + " was transferred correctly");
 
     $('#completeContainer').show(500);
@@ -99,14 +64,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
         xhr.onload = function (e) {
             if (this.status == 200) {
                 console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - success - loaded "+this.response.size);
-                that.storedResponses.append(this.response, this.response.size);
-                if(that.storedResponses.getReceivedSize() == that.filesize){
-                    that.downloadComplete();
-                }else{
-                    console.log("download ok but sizes differ");
-                    if(that.downloadActive)
-                        that.waitUntilNetworkIsBack();
-                }
+                that.downloadComplete(this.response);
 
             } else {
                 displayError("Error: Invalid status code" + this.status);
@@ -116,19 +74,13 @@ ReceiverHandler.prototype.startDownload = function (url) {
             var percentComplete = Math.floor(((e.loaded + alreadyDownloaded) / that.filesize) * 100);
             //console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] [total="+ e.total+" loaded="+ e.loaded+"]");
             that.displayProgress(percentComplete);
-            lastResponse = e.target.response;
-            lastBytesLoaded = e.loaded;
-            if(lastResponse == null)
-                console.log("lastResponse is null");
         };
         xhr.onerror = function (e) {
             console.log("Error fetching " + url + " retrying ");
-            if(lastResponse == null)
-                console.log("lastResponse is null");
             console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] - error - loaded "+lastBytesLoaded+" last response size "+lastResponse.size);
-            that.storedResponses.append(lastResponse, lastBytesLoaded);
-            if(that.downloadActive)
-                that.waitUntilNetworkIsBack();
+            displayError("Sorry, your transfer was interrupted by a network xxx. This may occurs when the transaction last too longs behind some proxies and firewalls. Download failed.");
+            //TODO si on veut faire propre, emettre un event spécifique plutot que disconnect, histoire de prévenir le sender de la raison de l'échec
+            that.socket.disconnect();
         };
 
         xhr.send();
