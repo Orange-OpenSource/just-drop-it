@@ -77,7 +77,7 @@ SenderHandler.prototype = {
             progressBarContainer.empty();
             progressBarContainer.append($("<p>").addClass("text-error").html("Receiver left before end of transfer"));
             receiverInfo.removeLinkContainer.show();
-            jdNotif.notify("Something is wrong", "Apparently your friend " + receiverInfo.label + "left before the transfer was over");
+            jdNotif.notify("Something is wrong", "Apparently your friend left before the transfer was over");
 
         });
     },
@@ -144,7 +144,7 @@ SenderHandler.prototype = {
         progressBarContainer.append($("<p>").addClass("text-success").html("File sent"));
         receiverInfo.removeLinkContainer.show();
 
-        jdNotif.notify("Transfer complete", "your friend " + this.receiverInfos[receiverId].label + "correctly received your file");
+        jdNotif.notify("Transfer complete", "your friend correctly received your file");
 
         this.socket.emit("snd_transfer_complete", receiverId);
     }
