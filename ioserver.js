@@ -41,14 +41,24 @@ function wrapServer(app, server){
                     });
 
                     //ON SEND_FILE EVENT (stream)
-                    ss(socket).on('snd_send_file', function (stream, receiverId,remainingBytes) {
+                    ss(socket).on('snd_send_file', function (stream, receiverId) {
                         debug("%s/%s send file",socket.id, receiverId);
                         dao.getReceiver(socket.id, receiverId, function(receiver){
-                            debug("%s/%s [-->%s] Expose stream for receiver size=%d", socket.id, receiverId,receiver.receiverLabel,remainingBytes);
+                            debug("%s/%s [-->%s] Expose stream for receiver size=%d", socket.id, receiverId,receiver.receiverLabel, receiver.sender.fileSize);
                             //notifying receiver
                             receiver.stream = stream;
-                            receiver.remainingBytes = remainingBytes;
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath+socket.id + "/" + receiverId);
+                            receiver.watchSent(function(nbSent){
+                                receiver.socket.emit('server_sent_bytes', nbSent);
+                            });
+                            receiver.watchFinished(function(){
+                                receiver.socket.emit('server_transfer_complete');
+                                dao.getSender(socket.id, function(sender){
+                                    debug("%s/%s transfer_complete - filename=%s - filesize=%d", socket.id,receiver.receiverId, sender.fileName, sender.fileSize);
+                                    sender.removeReceiver(receiver.receiverId);
+                                }, routingError);
+
+                            });
                         }, routingError);
 
                     });
@@ -81,12 +91,6 @@ function wrapServer(app, server){
                 dao.addReceiver(senderID, socket.id, receiverLabel, socket, function(sender){
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
-                    socket.on('rcv_transfer_complete', function(nbTries){
-                        dao.getSender(senderID, function(sender){
-                            debug("%s/%s/%d transfer_complete - filename=%s - filesize=%d", senderID, socket.id, nbTries, sender.fileName, sender.fileSize);
-                            sender.removeReceiver(socket.id);
-                        }, routingError);
-                    });
                     // DISCONNECT event
                     socket.on('disconnect', function () {
                         dao.getSender(senderID, function(sender){
@@ -96,23 +100,6 @@ function wrapServer(app, server){
                     });
 
 
-                    /*socket.on('rcv_resume_download', function (alreadyReceived) {
-                        debug("resuming download for %s %d bytes", socket.id, alreadyReceived);
-                        dao.getReceiver(senderID, socket.id, function(receiver){
-                            receiver.stream = null;
-                            receiver.clean = null;
-                            receiver.sender.socket.emit('rcv_resume_download', socket.id,alreadyReceived);
-                        }, routingError);
-
-                    });*/
-
-
-                     socket.on('rcv_download_failed', function () {
-                     debug("cancelling download because of too many retries ", socket.id);
-                     sender.socket.emit('receiver_cancel_too_many_retries', socket.id,receiverLabel);
-                     //remove the route otherwise sender will receive receiver_left event. Delete will be done on disconnection
-                     app.removeReceiver(senderID, socket.id)
-                     });
 
                     sender.socket.emit('server_receiver_ready', socket.id,receiverLabel);
                 }, function(){

@@ -1,41 +1,32 @@
 "use strict";
 function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
-    //TODO check if old IE version, for blob compatibility
-    this.isIELessThan10 = false,
-        this.filename = fileName,
+    this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
         this.progressBar = $("#transferProgressBar"),
-        this.retryPeriod = 2000,
         this.totalTries = 0,
-        this.downloadActive = false,
         this._init(isLocal, senderId, receiverLabel);
     //TODO debug filename
     console.log("filename = " + filename);
     console.log("filesize = " + fileSize);
 }
 
-ReceiverHandler.prototype.displayProgress = function (progress) {
+ReceiverHandler.prototype.displayProgress = function (nbByteReceived) {
+
+    var progress = Math.floor((nbByteReceived / this.filesize) * 100);
+    console.log("displayProgress="+nbByteReceived+" - "+progress);
     this.progressBar.attr('aria-valuenow', progress);
     this.progressBar.width(progress + '%');
     this.progressBar.html(progress + '%');
 };
 
-ReceiverHandler.prototype.downloadComplete = function (response) {
-    this.downloadActive = false;
+ReceiverHandler.prototype.downloadComplete = function () {
     jdNotif.notify("Download complete", this.filename + " was transferred correctly");
 
     $('#completeContainer').show(500);
     $('#transferContainer').hide(500);
     $("#warning-window").hide(500);
 
-    var objectUrl = window.URL.createObjectURL(response);
-    var anchor = $('<a></a>', {download: this.filename, 'href': objectUrl}).html("Click here to save your file again");
-    $("#completeContainer").append(anchor);
-    //jquery anchor.click() won't work -> need to use the DOM method
-    anchor[0].click();
-
-    this.socket.emit('rcv_transfer_complete',this.totalTries);
     this.socket.close(true);
 };
 
@@ -43,81 +34,13 @@ ReceiverHandler.prototype.downloadComplete = function (response) {
 ReceiverHandler.prototype.startDownload = function (url) {
     console.log("start download");
     this.totalTries++;
-    this.downloadActive = true;
     var that = this;
-
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
-    if (this.isIELessThan10) {
-        //"old way" : Tentative avec jquery.fileDownload
-        $.fileDownload(url).fail(function () {
-            displayError("Error while downloading file " + this.filename);
-        })
-    } else {
-        var xhr = new XMLHttpRequest();
-        var lastResponse;
-        var lastBytesLoaded;
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function (e) {
-            if (this.status == 200) {
-                that.downloadComplete(this.response);
-            } else {
-                displayError("Error: Invalid status code" + this.status);
-            }
-        };
-        xhr.onprogress = function (e) {
-            var percentComplete = Math.floor((e.loaded  / that.filesize) * 100);
-            //console.log("[FileSize="+that.filesize+" alreadyDownloaded= "+alreadyDownloaded+"] [total="+ e.total+" loaded="+ e.loaded+"]");
-            that.displayProgress(percentComplete);
-        };
-        xhr.onerror = function (e) {
-            console.log("Error fetching " + url + " retrying ");
-            console.log("[FileSize="+that.filesize+"] - error - loaded "+lastBytesLoaded+" last response size "+lastResponse.size);
-            displayError("Sorry, your transfer was interrupted by a network xxx. This may occurs when the transaction last too longs behind some proxies and firewalls. Download failed.");
-            //TODO si on veut faire propre, emettre un event spécifique plutot que disconnect, histoire de prévenir le sender de la raison de l'échec
-            that.socket.disconnect();
-        };
-
-        xhr.send();
-    }
+    $.fileDownload(url).fail(function () {
+        displayError("Error while downloading file " + this.filename);
+    });
 };
 
-ReceiverHandler.prototype.waitUntilNetworkIsBack = function () {
-    console.log("Testing connectivity");
-    var that = this;
-    var networkIsBack = false;
-
-    $("#errorMessage").html("You are experiencing some network issues, please check your connection");
-    $('#errorContainer').show(500);
-
-    var netTester = setInterval(function () {
-        if (!networkIsBack) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', "/", true);
-            xhr.onload = function (e) {
-                console.log("Network is back");
-                $('#errorContainer').hide(500);
-                networkIsBack = true;
-            };
-            xhr.onerror = function (e) {
-                console.log("still no network");
-            };
-            xhr.send();
-        } else {
-            console.log("Stop timer and follow");
-            clearInterval(netTester);
-            that._resumeDownload()
-        }
-    }, that.retryPeriod);
-};
-
-ReceiverHandler.prototype._resumeDownload = function () {
-    if(this.downloadActive){
-        var alreadyReceived = this.storedResponses.getReceivedSize();
-        console.log("re-asking for download.. Received " + alreadyReceived + " bytes.");
-        this.socket.emit("rcv_resume_download", alreadyReceived);
-    }
-};
 
 ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
     $('#warning-window').show();
@@ -147,7 +70,6 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
 
 
     this.socket.on('server_sender_left', function () {
-        that.downloadActive = true;
         jdNotif.notify("Oh no!", "Apparently your friend left before the transfer was complete");
         $("#errorMessage").html("Sender left before the end of transfer");
         $('#errorContainer').show(500);
@@ -156,4 +78,11 @@ ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
         that.socket.close(true);
     });
 
+    this.socket.on('server_sent_bytes', function(bytesSent){
+        that.displayProgress(bytesSent);
+    });
+
+    this.socket.on('server_transfer_complete', function(){
+       that.downloadComplete();
+    });
 };

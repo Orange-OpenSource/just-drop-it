@@ -1,6 +1,5 @@
-/**
- * Created by buce8373 on 24/09/2015.
- */
+var events = require('events');
+
 var debug = require('debug')('app:dao');
 var error = require('debug')('app:dao');
 debug.log = console.log.bind(console);
@@ -11,22 +10,60 @@ function Receiver(sender, receiverId, receiverLabel, socket) {
     this.receiverId = receiverId;
     this.receiverLabel = receiverLabel;
     this.socket = socket;
+    events.EventEmitter.call(this);
 }
 
+Receiver.super_ = events.EventEmitter;
 
+Receiver.prototype = Object.create(events.EventEmitter.prototype, {
+    constructor: Receiver
+});
+
+Receiver.prototype.notifySent = function (nbSent) {
+    this.emit('sent', nbSent);
+};
+
+
+Receiver.prototype.notifyFinished = function () {
+    this.emit('finish');
+};
+
+Receiver.prototype.watchSent = function (fun) {
+    this.on('sent', fun);
+};
+
+Receiver.prototype.watchFinished = function (fun) {
+    this.on('finish', fun);
+};
 
 
 Receiver.prototype._clean = function () {
     debug('Receiver - clean - %s', this.receiverId);
+    //clean event receivers
+    var that = this;
+
+    function cleanEvent(eventName) {
+        debug('Receiver - %s - clean event - %s', that.receiverId, eventName);
+        while (typeof that._events[eventName] != "undefined") {
+            if (typeof that._events[eventName] == "function") {
+                that.removeListener(eventName, that._events[eventName]);
+            }
+            else {//occurs when two "on" call on same event
+                that.removeListener(eventName, that._events[eventName][0])
+            }
+        }
+    }
+
+    cleanEvent('sent');
+    cleanEvent('finish');
+
     //clean resources
-    if(typeof this.clean == "function")
+    if (typeof this.clean == "function")
         this.clean();
 };
 
 //set this function to clean resources
 Receiver.prototype.clean = null;
-
-
 
 
 function Sender(senderId, socket) {
@@ -43,44 +80,42 @@ Sender.prototype.addReceiver = function (receiverId, receiverLabel, socket) {
     return result;
 };
 
-Sender.prototype.eachReceiver = function(callback){
-    for(var receiverIds in this.receivers){
-        if(this.receivers.hasOwnProperty(receiverIds)){
+Sender.prototype.eachReceiver = function (callback) {
+    for (var receiverIds in this.receivers) {
+        if (this.receivers.hasOwnProperty(receiverIds)) {
             callback(this.receivers[receiverIds]);
         }
     }
 };
 
-Sender.prototype.removeReceiver = function(receiverId){
+Sender.prototype.removeReceiver = function (receiverId) {
     var receiver = this.receivers[receiverId];
-    if(typeof receiver != "undefined"){
+    if (typeof receiver != "undefined") {
         debug('Sender - removeReceiver - %s', receiverId);
         receiver._clean();
         delete  this.receivers[receiverId];
         return true;
-    }else
+    } else
         return false;
 };
 
 Sender.prototype.clean = function () {
     debug('Sender - clean - %s', this.senderId);
     //clean resources
-    this.eachReceiver(function(receiver){
+    this.eachReceiver(function (receiver) {
         receiver._clean();
     });
     this.receivers = {};
 };
 
 
-
-
-var Dao = function(){
+var Dao = function () {
     this.senders = {};
-}
+};
 
 
-Dao.prototype._checkDefined = function(obj, callback, undefinedCallback){
-    if(typeof obj == "undefined")
+Dao.prototype._checkDefined = function (obj, callback, undefinedCallback) {
+    if (typeof obj == "undefined")
         undefinedCallback();
     else
         callback(obj);
@@ -92,36 +127,37 @@ Dao.prototype.createSender = function (senderId, socket, callback) {
     callback(result);
 };
 
-Dao.prototype.removeSender = function(senderId, deletedCallback, notFoundCallback){
+Dao.prototype.removeSender = function (senderId, deletedCallback, notFoundCallback) {
     var self = this;
-    this._checkDefined(this.senders[senderId], function(sender){
+    this._checkDefined(this.senders[senderId], function (sender) {
         sender.clean();
         delete self.senders[senderId];
         deletedCallback();
-        }, notFoundCallback);
+    }, notFoundCallback);
 };
 
-Dao.prototype.getSender = function(senderId, callback, notFoundCallback){
+Dao.prototype.getSender = function (senderId, callback, notFoundCallback) {
     this._checkDefined(this.senders[senderId], callback, notFoundCallback);
 };
 
-Dao.prototype.eachSenders = function(callback){
-    for(var senderId in this.senders){
-        if(this.senders.hasOwnProperty(senderId)){
+Dao.prototype.eachSenders = function (callback) {
+    for (var senderId in this.senders) {
+        if (this.senders.hasOwnProperty(senderId)) {
             callback(this.senders[senderId]);
         }
     }
 };
 
-Dao.prototype.addReceiver = function(senderId, receiverId, receiverLabel, socket, callback, notFoundCallback){
-    this._checkDefined(this.senders[senderId], function(sender){
-        callback(sender, sender.addReceiver(receiverId, receiverLabel, socket));
+Dao.prototype.addReceiver = function (senderId, receiverId, receiverLabel, socket, callback, notFoundCallback) {
+    this._checkDefined(this.senders[senderId], function (sender) {
+        sender.addReceiver(receiverId, receiverLabel, socket);
+        callback(sender);
     }, notFoundCallback);
 };
 
-Dao.prototype.getReceiver = function(senderId, receiverId, callback, notFoundCallback){
+Dao.prototype.getReceiver = function (senderId, receiverId, callback, notFoundCallback) {
     var self = this;
-    this.getSender(senderId, function(sender){
+    this.getSender(senderId, function (sender) {
         self._checkDefined(sender.receivers[receiverId], callback, notFoundCallback);
     }, notFoundCallback);
 };
@@ -130,4 +166,4 @@ Dao.prototype.getReceiver = function(senderId, receiverId, callback, notFoundCal
 debug("dao created");
 
 
-exports  = module.exports = new Dao();
+exports = module.exports = new Dao();

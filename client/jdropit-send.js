@@ -63,13 +63,10 @@ SenderHandler.prototype = {
             transferContainer.append(newRow);
             that.receiverInfos[receiverId] = new ReceiverInfo(receiverLabel, pbContainer, transferProgressBar, linkContainer);
 
-            that.startUpload(receiverId,0);
+            that.startUpload(receiverId);
 
         });
 
-        /*this.socket.on('rcv_resume_download', function (receiverId, alreadyReceived){
-            that.startUpload(receiverId,alreadyReceived);
-        });*/
 
         this.socket.on('server_receiver_left', function (receiverId) {
             var receiverInfo = that.receiverInfos[receiverId];
@@ -99,7 +96,7 @@ SenderHandler.prototype = {
         $('#selectFileContainer').hide(500);
     },
 
-    startUpload: function (receiverId, startingByte) {
+    startUpload: function (receiverId) {
         console.log(this.fileToTransfer);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
 
@@ -107,14 +104,11 @@ SenderHandler.prototype = {
         var stream = ss.createStream(this.readWriteOpts);
 
         // upload a file to the server.
-        ss(this.socket).emit('snd_send_file', stream, receiverId, this.fileToTransfer.size - startingByte);
+        ss(this.socket).emit('snd_send_file', stream, receiverId);
 
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
 
-        var size = startingByte;
-        console.log("Starting file upload from byte: "+size);
-        if(size > 0)
-            blobStream.read(size);
+        var size = 0;
         
         var that = this;
 
