@@ -16,8 +16,7 @@ var servedFiles = {
     "jdropit-send" : '../client/jdropit-send.js',
     "jdropit-receive" : '../client/jdropit-receive.js',
     "jdropit-notif" : '../client/jdropit-notif.js',
-    "jdropit-whatsnew" : '../client/jdropit-whatsnew.js',
-    "Blob" : '../polyfills/Blob.js'
+    "jdropit-whatsnew" : '../client/jdropit-whatsnew.js'
 };
 
 var isLocal = typeof process.env.OPENSHIFT_NODEJS_IP === "undefined";

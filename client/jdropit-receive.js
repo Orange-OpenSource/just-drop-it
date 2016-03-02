@@ -37,7 +37,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
     var that = this;
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
     $.fileDownload(url).fail(function () {
-        displayError("Error while downloading file " + this.filename);
+        displayError("Error while downloading file " + that.filename);
     });
 };
 

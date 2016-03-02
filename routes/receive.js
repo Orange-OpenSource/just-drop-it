@@ -63,6 +63,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var initSize = getNumberOfBytesSent();
 
         var HEAD_SIZE_WITHOUT_FILE_NAME = 253;
+        var CHECK_SEND_DELAY_IN_MS = 500;
 
         //sends header to flush them
         var encodedFileName = encodeFileName(receiver.sender.fileName);
@@ -75,12 +76,16 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         });
 
 
-        var headSize = encodedFileName + HEAD_SIZE_WITHOUT_FILE_NAME;
+        var headSize = encodedFileName.length + HEAD_SIZE_WITHOUT_FILE_NAME;
 
         receiver.stream.pipe(res);
         var intervalId = setInterval(function () {
-            receiver.notifySent(getNumberOfBytesSent() - headSize - initSize);
-        }, 100);
+            var nbBytesSent = getNumberOfBytesSent() - headSize - initSize;
+            if(nbBytesSent > 0){
+                receiver.notifySent(nbBytesSent);
+            }
+
+        }, CHECK_SEND_DELAY_IN_MS);
         res.on('finish', function () {
             debug("finished");
             receiver.notifyFinished();
