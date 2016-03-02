@@ -1,11 +1,11 @@
 "use strict";
-function ReceiverHandler(isLocal, senderId, receiverLabel, fileName, fileSize) {
+function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
     this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
         this.progressBar = $("#transferProgressBar"),
         this.totalTries = 0,
-        this._init(isLocal, senderId, receiverLabel);
+        this._init(isLocal, senderId);
     //TODO debug filename
     console.log("filename = " + filename);
     console.log("filesize = " + fileSize);
@@ -42,14 +42,13 @@ ReceiverHandler.prototype.startDownload = function (url) {
 };
 
 
-ReceiverHandler.prototype._init = function (isLocal, senderId, receiverLabel) {
+ReceiverHandler.prototype._init = function (isLocal, senderId) {
     $('#warning-window').show();
     jdNotif.checkNotifPermissions();
     var that = this;
 
     var socketParams = {
-        query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel,
-        transports: ['websocket', 'polling']
+        query: 'senderID=' + senderId + '&role=receiver'
     };
 
     if (!isLocal)//restriction on OPENSHIFT

@@ -22,8 +22,7 @@ router.get(router.servePagePath + ':id', function (req, res, next) {
             fileName: sender.fileName,
             fileSize: sender.fileSize,
             jdropitVersion: global.DROP_IT_VERSION,
-            senderId: fileId,
-            receiverLabel: req.cookies['CTI']
+            senderId: fileId
         });
     }, function () {
         error('receive - file not found %s', fileId);

@@ -14,8 +14,7 @@ SenderHandler.prototype = {
 
         //init du socket vers le serveur
         this.socketParams = {
-            query: 'role=sender',
-            transports: ['websocket', 'polling']
+            query: 'role=sender'
         };
 
         if (!isLocal)//restriction on OPENSHIFT
@@ -37,7 +36,7 @@ SenderHandler.prototype = {
         });
 
 
-        this.socket.on('server_receiver_ready', function (receiverId, receiverLabel) {
+        this.socket.on('server_receiver_ready', function (receiverId) {
             $('#copyLinkContainer').hide();
             $('#transfertMessage').html("Transfert in progress...");
 
@@ -49,7 +48,6 @@ SenderHandler.prototype = {
             var newRow = rowReceiverTemplate.clone();
             newRow.removeAttr("id");
             newRow.show();
-            newRow.children(".col-xs-2").append($("<p>").html(receiverLabel));
             var linkContainer = newRow.children(".col-xs-1");
             var linkRemove = linkContainer.children("a");
             linkRemove.on("click", function (e) {
@@ -61,7 +59,7 @@ SenderHandler.prototype = {
             var transferProgressBar = pbContainer.find(".progress-bar");
 
             transferContainer.append(newRow);
-            that.receiverInfos[receiverId] = new ReceiverInfo(receiverLabel, pbContainer, transferProgressBar, linkContainer);
+            that.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, linkContainer);
 
             that.startUpload(receiverId);
 
@@ -206,24 +204,18 @@ function sendFile(isLocal) {
 
 
 /******************************************************************/
-function ReceiverInfo (label, progressBarContainer, progressBar, removeLinkContainer) {
-    this.init(label, progressBarContainer, progressBar, removeLinkContainer);
+function ReceiverInfo (progressBarContainer, progressBar, removeLinkContainer) {
+    this.init(progressBarContainer, progressBar, removeLinkContainer);
 };
 
 ReceiverInfo.prototype = {
     constructor: ReceiverInfo,
-    init: function (label, progressBarContainer, progressBar, removeLinkContainer) {
-        this.label = label;
-        if (typeof label != "undefined" && label.length != 0) {
-            this.label = label + " "
-        }
+    init: function (progressBarContainer, progressBar, removeLinkContainer) {
+
         this.progressBar = progressBar;
         this.progressBarContainer = progressBarContainer;
         this.removeLinkContainer = removeLinkContainer;
 
-        if (typeof this.label != "undefined" && this.label.length != 0) {
-            this.label = this.label + " "
-        }
 
     }
 };

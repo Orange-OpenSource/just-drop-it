@@ -15,7 +15,7 @@ block extra_scripts
     script.
         var receiverHandler;
         window.onload = function(){
-            receiverHandler = new ReceiverHandler(#{isLocal}, "#{senderId}","#{receiverLabel}","#{fileName}",#{fileSize});
+            receiverHandler = new ReceiverHandler(#{isLocal}, "#{senderId}","#{fileName}",#{fileSize});
         }
 block content
     div.row

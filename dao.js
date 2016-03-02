@@ -4,11 +4,10 @@ var debug = require('debug')('app:dao');
 var error = require('debug')('app:dao');
 debug.log = console.log.bind(console);
 
-function Receiver(sender, receiverId, receiverLabel, socket) {
+function Receiver(sender, receiverId, socket) {
     debug('Receiver - init - %s', receiverId);
     this.sender = sender;
     this.receiverId = receiverId;
-    this.receiverLabel = receiverLabel;
     this.socket = socket;
     events.EventEmitter.call(this);
 }
@@ -73,9 +72,9 @@ function Sender(senderId, socket) {
     this.receivers = {};
 }
 
-Sender.prototype.addReceiver = function (receiverId, receiverLabel, socket) {
+Sender.prototype.addReceiver = function (receiverId, socket) {
     debug('Sender - addReceiver - %s', receiverId);
-    var result = new Receiver(this, receiverId, receiverLabel, socket);
+    var result = new Receiver(this, receiverId, socket);
     this.receivers[receiverId] = result;
     return result;
 };
@@ -148,9 +147,9 @@ Dao.prototype.eachSenders = function (callback) {
     }
 };
 
-Dao.prototype.addReceiver = function (senderId, receiverId, receiverLabel, socket, callback, notFoundCallback) {
+Dao.prototype.addReceiver = function (senderId, receiverId, socket, callback, notFoundCallback) {
     this._checkDefined(this.senders[senderId], function (sender) {
-        sender.addReceiver(receiverId, receiverLabel, socket);
+        sender.addReceiver(receiverId, socket);
         callback(sender);
     }, notFoundCallback);
 };

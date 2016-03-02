@@ -16,16 +16,18 @@ function wrapServer(app, server){
 
     // on socket connections
     socketIoServer.on('connection', function (socket) {
+        function emitError(errorMessage){
+            error(errorMsg);
+            socket.emit('alert', errorMsg);
+        }
+
         function routingError(){
-            error('Error: routing error');
-            socket.emit('alert', 'routing error');
+            emitError('routing error');
         }
 
 
         if (typeof socket.handshake.query.role === "undefined") {
-            var errorMsg = 'Error, no profile transmitted';
-            error(errorMsg);
-            socket.emit('alert', errorMsg);
+            emitError('Error, no profile transmitted');
 
         } else {
             if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
@@ -44,7 +46,7 @@ function wrapServer(app, server){
                     ss(socket).on('snd_send_file', function (stream, receiverId) {
                         debug("%s/%s send file",socket.id, receiverId);
                         dao.getReceiver(socket.id, receiverId, function(receiver){
-                            debug("%s/%s [-->%s] Expose stream for receiver size=%d", socket.id, receiverId,receiver.receiverLabel, receiver.sender.fileSize);
+                            debug("%s/%s Expose stream for receiver size=%d", socket.id, receiverId, receiver.sender.fileSize);
                             //notifying receiver
                             receiver.stream = stream;
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath+socket.id + "/" + receiverId);
@@ -80,37 +82,33 @@ function wrapServer(app, server){
 
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
                 var senderID = socket.handshake.query.senderID;
-                var receiverLabel = socket.handshake.query.receiverLabel;
-
-                if(typeof receiverLabel == "undefined" || receiverLabel.length == 0 ){
-                    receiverLabel = "unknown receiver"
-                }
-                debug("%s/%s/%s new receiver", senderID || "undefined", socket.id, receiverLabel);
 
 
-                dao.addReceiver(senderID, socket.id, receiverLabel, socket, function(sender){
+                debug("%s/%s new receiver", senderID || "undefined", socket.id);
+
+
+                dao.addReceiver(senderID, socket.id, socket, function(sender){
                     debug("%s/%s receiver registered ", senderID, socket.id);
 
                     // DISCONNECT event
                     socket.on('disconnect', function () {
                         dao.getSender(senderID, function(sender){
                             if(sender.removeReceiver(socket.id))
-                                sender.socket.emit('server_receiver_left', socket.id,receiverLabel);
+                                sender.socket.emit('server_receiver_left', socket.id);
                         }, routingError);
                     });
 
 
 
-                    sender.socket.emit('server_receiver_ready', socket.id,receiverLabel);
+                    sender.socket.emit('server_receiver_ready', socket.id);
                 }, function(){
                     error('Error: unkown senderID %s', senderID);
                     socket.emit('alert', 'unkown senderID');
                 });
 
             } else {
-                var errorMsg = 'Error, unknown profile';
-                error(errorMsg);
-                socket.emit('alert', errorMsg);
+                emitError('Error, unknown profile');
+
             }
         }
     });
