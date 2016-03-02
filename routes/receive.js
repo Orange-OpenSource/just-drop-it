@@ -40,11 +40,22 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
 
     function getNumberOfBytesSent() {
         //req.socket or res.connection
-        var socket =req.socket;
+        var socket = req.socket;
         debug("getNumberOfBytesSent - %d - %d", socket.bufferSize, socket.bytesWritten);
         return socket.bytesWritten + socket.bufferSize;
     }
 
+    function encodeFileName(fileName) {
+        var result = [];
+        for (var cpt = 0; cpt < fileName.length; cpt++) {
+            var currentChar = fileName[cpt];
+            if ((currentChar >= 'a' && currentChar <= 'z') || (currentChar >= 'A' && currentChar <= 'Z') || (currentChar >= '0' && currentChar <= '9')
+                || currentChar == '.' || currentChar == '_' || currentChar == '(' || currentChar == ')' || currentChar == '[' || currentChar == ']' || currentChar == ' ') {
+                result.push(currentChar);
+            }
+        }
+        return result.join('');
+    }
 
 
     dao.getReceiver(fileId, receiverId, function (receiver) {
@@ -54,15 +65,17 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var HEAD_SIZE_WITHOUT_FILE_NAME = 253;
 
         //sends header to flush them
+        var encodedFileName = encodeFileName(receiver.sender.fileName);
+
         res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
             'Content-Length': receiver.sender.fileSize,
-            'Content-Disposition': 'attachment; filename="' + receiver.sender.fileName + '"',
+            'Content-Disposition': 'attachment; filename="' + encodedFileName + '"',
             'Set-Cookie': 'fileDownload=true; path=/'
         });
 
 
-        var headSize = receiver.sender.fileName.length + HEAD_SIZE_WITHOUT_FILE_NAME;
+        var headSize = encodedFileName + HEAD_SIZE_WITHOUT_FILE_NAME;
 
         receiver.stream.pipe(res);
         var intervalId = setInterval(function () {
@@ -80,7 +93,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
             }
             clearInterval(intervalId);
         };
-        res.connection.write('', 'utf8', function(){
+        res.connection.write('', 'utf8', function () {
 
         });
 
