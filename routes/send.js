@@ -9,7 +9,7 @@ debug.log = console.log.bind(console);
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    debug('serving send with cookie %s',req.cookies['CTI']);
+    debug('serving send');
     res.render('send', {title : "Just drop it",
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
         jdropitVersion : global.DROP_IT_VERSION});
