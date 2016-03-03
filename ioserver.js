@@ -11,63 +11,69 @@ debug.log = console.log.bind(console);
 
 exports = module.exports = wrapServer;
 
-function wrapServer(app, server){
+function wrapServer(app, server) {
     var socketIoServer = io.listen(server);
 
     // on socket connections
     socketIoServer.on('connection', function (socket) {
-        function emitError(errorMessage){
+        function emitError(errorMessage) {
             error(errorMessage);
             socket.emit('alert', errorMessage);
         }
 
-        function routingError(){
+        function routingError() {
             emitError('routing error');
         }
 
+        function convertId(receivedId) {
+            return receivedId.replace(/^\//, '').replace(/^#/, '')
+        }
+
+        var senderId, receiverId;
 
         if (typeof socket.handshake.query.role === "undefined") {
             emitError('Error, no profile transmitted');
 
         } else {
             if (socket.handshake.query.role == 'sender') { // SENDER ---------------------------------
-                dao.createSender(socket.id, socket, function(){
-                    debug('New sender with id : %s',socket.id);
-                    socket.on("snd_file_ready", function(info){
-                        dao.getSender(socket.id, function(sender){
+                senderId = convertId(socket.id)
+                dao.createSender(senderId, socket, function () {
+                    debug('New sender with id : %s', senderId);
+                    socket.on("snd_file_ready", function (info) {
+                        dao.getSender(senderId, function (sender) {
                             sender.fileName = info.name;
                             sender.fileSize = info.size;
-                            socket.emit('server_rcv_url_generated',  app.receiverServePagePath+socket.id);
+                            socket.emit('server_rcv_url_generated', app.receiverServePagePath + senderId);
                         }, routingError);
 
                     });
 
                     //ON SEND_FILE EVENT (stream)
                     ss(socket).on('snd_send_file', function (stream, receiverId) {
-                        debug("%s/%s send file",socket.id, receiverId);
-                        dao.getReceiver(socket.id, receiverId, function(receiver){
-                            debug("%s/%s Expose stream for receiver size=%d", socket.id, receiverId, receiver.sender.fileSize);
+                        debug("%s/%s send file", senderId, receiverId);
+                        dao.getReceiver(senderId, receiverId, function (receiver) {
+                            debug("%s/%s Expose stream for receiver size=%d", senderId, receiverId, receiver.sender.fileSize);
                             //notifying receiver
                             receiver.stream = stream;
-                            receiver.socket.emit('server_stream_ready', app.receiverDownloadPath+socket.id + "/" + receiverId);
-                            receiver.watchSent(function(percent){
+                            receiver.socket.emit('server_stream_ready', app.receiverDownloadPath + senderId + "/" + receiverId);
+                            receiver.watchSent(function (percent) {
                                 receiver.socket.emit('server_sent_percent', percent);
                                 socket.emit('server_sent_percent', receiverId, percent);
                             });
 
-                            function receiverEnded(receiverEvent){
+                            function receiverEnded(receiverEvent) {
                                 receiver.socket.emit(receiverEvent);
                                 socket.emit(receiverEvent, receiver.receiverId);
-                                dao.getSender(socket.id, function(sender){
-                                    debug("%s/%s %s - filename=%s - filesize=%d", socket.id, receiver.receiverId, receiverEvent, sender.fileName, sender.fileSize);
+                                dao.getSender(senderId, function (sender) {
+                                    debug("%s/%s %s - filename=%s - filesize=%d", senderId, receiver.receiverId, receiverEvent, sender.fileName, sender.fileSize);
                                     sender.removeReceiver(receiver.receiverId);
                                 }, routingError);
                             }
 
-                            receiver.watchFinished(function(){
+                            receiver.watchFinished(function () {
                                 receiverEnded('server_transfer_complete')
                             });
-                            receiver.watchTimeout(function(){
+                            receiver.watchTimeout(function () {
                                 receiverEnded('server_transfer_timeout');
 
                             });
@@ -78,11 +84,11 @@ function wrapServer(app, server){
 
                     // DISCONNECT event
                     socket.on('disconnect', function () {
-                        dao.getSender(socket.id, function(sender){
-                            sender.eachReceiver(function(receiver){
+                        dao.getSender(senderId, function (sender) {
+                            sender.eachReceiver(function (receiver) {
                                 receiver.socket.emit('server_sender_left');
                             });
-                            dao.removeSender(socket.id, function(){
+                            dao.removeSender(senderId, function () {
                                 debug("%s sender disconnect", socket.id);
                             }, routingError);
                         }, routingError);
@@ -91,28 +97,27 @@ function wrapServer(app, server){
                 });
 
             } else if (socket.handshake.query.role == 'receiver') { // RECEIVER ---------------------------------
-                var senderID = socket.handshake.query.senderID;
+                senderId = socket.handshake.query.senderID;
+                receiverId = convertId(socket.id);
+
+                debug("%s/%s new receiver", senderId || "undefined", receiverId);
 
 
-                debug("%s/%s new receiver", senderID || "undefined", socket.id);
-
-
-                dao.addReceiver(senderID, socket.id, socket, function(sender){
-                    debug("%s/%s receiver registered ", senderID, socket.id);
+                dao.addReceiver(senderId, receiverId, socket, function (sender) {
+                    debug("%s/%s receiver registered ", senderId, receiverId);
 
                     // DISCONNECT event
                     socket.on('disconnect', function () {
-                        dao.getSender(senderID, function(sender){
-                            if(sender.removeReceiver(socket.id))
-                                sender.socket.emit('server_receiver_left', socket.id);
+                        dao.getSender(senderID, function (sender) {
+                            if (sender.removeReceiver(receiverId))
+                                sender.socket.emit('server_receiver_left', receiverId);
                         }, routingError);
                     });
 
 
-
-                    sender.socket.emit('server_receiver_ready', socket.id);
-                }, function(){
-                    error('Error: unkown senderID %s', senderID);
+                    sender.socket.emit('server_receiver_ready', receiverId);
+                }, function () {
+                    error('Error: unkown senderId %s', senderID);
                     socket.emit('alert', 'unkown senderID');
                 });
 

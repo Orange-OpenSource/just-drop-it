@@ -11,7 +11,7 @@ var debug = require('debug')('app:routes:javascript');
 debug.log = console.log.bind(console);
 
 var servedFiles = {
-    "socket.io" : 'socket.io/node_modules/socket.io-client/socket.io.js',
+    "socket.io" : 'socket.io-client/socket.io.js',
     "socket.io-stream" : 'socket.io-stream/socket.io-stream.js',
     "jdropit-send" : '../client/jdropit-send.js',
     "jdropit-receive" : '../client/jdropit-receive.js',
