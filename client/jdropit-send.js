@@ -9,7 +9,7 @@ SenderHandler.prototype = {
 
     init: function (isLocal) {
         this.readWriteOpts = {highWaterMark: Math.pow(2, 21)};// 2 pow 10 = 1024
-        this.receiverInfos = [];
+        this.receiverInfos = {};
         var that = this;
 
         //init du socket vers le serveur
@@ -21,12 +21,37 @@ SenderHandler.prototype = {
             this.socketParams.path = "/_ws/socket.io/";
         this.socket = io(this.socketParams);
 
-        this.socket.on('alert', function (errorMsg) {
-            displayError("Error: " + errorMsg);
-        });
 
         this.socket.on('connect', function () {
             console.log(this.id + " - " + this.io.engine.transport.name);
+
+            function handleError(errorMessage) {
+                displayError(errorMessage);
+                $.each(that.receiverInfos, function (receiverId, receiverInfo) {
+                    if (receiverInfo.active) {
+                        console.log("Receiver id " + receiverId + " failed");
+                        receiverInfo.deactivate(true);
+                        var progressBarContainer = receiverInfo.progressBarContainer;
+                        progressBarContainer.empty();
+                        progressBarContainer.append($("<p>").addClass("text-error").html("File not sent"));
+                        receiverInfo.removeLinkContainer.show();
+
+                        jdNotif.notify("Transfer ended", "your friend did not received the file");
+                    }else {
+                        console.log("Receiver id " + receiverId + " not active");
+                    }
+                });
+            }
+
+            that.socket.on('error', function (errorMsg) {
+                console.log("socket - error - " + errorMsg);
+                handleError("Error: " + errorMsg);
+            });
+
+            that.socket.on('disconnect', function () {
+                console.log("socket - disconnect");
+                handleError("Error: you has been disconnected");
+            });
         });
 
         this.socket.on('server_rcv_url_generated', function (url) {
@@ -51,8 +76,8 @@ SenderHandler.prototype = {
             var linkContainer = newRow.children(".col-xs-1");
             var linkRemove = linkContainer.children("a");
             linkRemove.on("click", function (e) {
-            e.preventDefault();
-            newRow.hide();
+                e.preventDefault();
+                newRow.hide();
             });
 
             var pbContainer = newRow.children(".col-xs-9");
@@ -68,6 +93,7 @@ SenderHandler.prototype = {
 
         this.socket.on('server_receiver_left', function (receiverId) {
             var receiverInfo = that.receiverInfos[receiverId];
+            receiverInfo.deactivate(true);
             var progressBarContainer = receiverInfo.progressBarContainer;
             progressBarContainer.empty();
             progressBarContainer.append($("<p>").addClass("text-error").html("Receiver left before end of transfer"));
@@ -96,7 +122,8 @@ SenderHandler.prototype = {
 
     startUpload: function (receiverId) {
         console.log(this.fileToTransfer);
-        var transferProgressBar = this.receiverInfos[receiverId].progressBar;
+        var receiverInfo = this.receiverInfos[receiverId];
+        var transferProgressBar = receiverInfo.progressBar;
 
         $('#transfertMessage').html("Transfert in progress...");
         var stream = ss.createStream(this.readWriteOpts);
@@ -107,30 +134,38 @@ SenderHandler.prototype = {
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
 
         var size = 0;
-        
+
         var that = this;
+        receiverInfo.activate(stream);
 
-        blobStream.on('data', function (chunk) {
-            size += chunk.length;
-            var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
-            //update progress bar
-            transferProgressBar.attr('aria-valuenow', progress);
-            transferProgressBar.width(progress + '%');
-            transferProgressBar.html(progress + '%');
+        function updateProgress(chunk){
+            if(receiverInfo.active) {
+                size += chunk.length;
+                var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
-            if (progress >= 100) {
-                that.transferComplete(receiverId);
+                //update progress bar
+                transferProgressBar.attr('aria-valuenow', progress);
+                transferProgressBar.width(progress + '%');
+                transferProgressBar.html(progress + '%');
+
+                if (progress >= 100) {
+                    that.transferComplete(receiverId);
+                }
+                blobStream.once('data',updateProgress);
             }
-        });
+        }
+        blobStream.once('data',updateProgress);
 
         blobStream.pipe(stream);
+
     },
 
 
     transferComplete: function (receiverId) {
         console.log("transfer_complete - " + receiverId);
         var receiverInfo = this.receiverInfos[receiverId];
+        receiverInfo.deactivate(false);
         var progressBarContainer = receiverInfo.progressBarContainer;
         progressBarContainer.empty();
         progressBarContainer.append($("<p>").addClass("text-success").html("File sent"));
@@ -204,18 +239,28 @@ function sendFile(isLocal) {
 
 
 /******************************************************************/
-function ReceiverInfo (progressBarContainer, progressBar, removeLinkContainer) {
+function ReceiverInfo(progressBarContainer, progressBar, removeLinkContainer) {
     this.init(progressBarContainer, progressBar, removeLinkContainer);
 };
 
 ReceiverInfo.prototype = {
     constructor: ReceiverInfo,
     init: function (progressBarContainer, progressBar, removeLinkContainer) {
-
+        this.active = false;
+        this.stream = null;
         this.progressBar = progressBar;
         this.progressBarContainer = progressBarContainer;
         this.removeLinkContainer = removeLinkContainer;
-
-
+    },
+    activate: function (stream) {
+        this.stream = stream;
+        this.active = true;
+    },
+    deactivate: function (closeStream) {
+        if (this.stream != null && closeStream) {
+            this.stream.destroy();
+        }
+        this.stream = null;
+        this.active = false;
     }
 };
