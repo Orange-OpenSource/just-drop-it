@@ -43,8 +43,12 @@ html
         div(class="content-main")
             div(class="wrapper")
                 include ./header
-                include ./banners
+                div#warning-window(class="alert alert-warning" hidden="true")
+                    span(class="glyphicon glyphicon-exclamation-sign" aria-hidden="true")
+                    span(class="sr-only") Warning:
+                    | Don't close this window!
                 div(class="container-fluid")
+                    include ./user_messages
 
                     block content
 

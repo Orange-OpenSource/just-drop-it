@@ -37,7 +37,7 @@ ReceiverHandler.prototype.startDownload = function (url) {
     var that = this;
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
     $.fileDownload(url).fail(function () {
-        displayError("Error while downloading file " + that.filename);
+        appendError("Error while downloading file " + that.filename);
     });
 };
 
@@ -56,12 +56,13 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     this.socket = io(socketParams);
     this.socket.on('connect', function () {
         console.log(this.id + " - " + this.io.engine.transport.name);
+        that.socket.on('error', function (errorMsg) {
+            appendError("Error: " + errorMsg);
+        });
     });
 
 
-    this.socket.on('alert', function (errorMsg) {
-        displayError("Error: " + errorMsg);
-    });
+
 
     this.socket.on('server_stream_ready', function (url) {
         that.startDownload(url);

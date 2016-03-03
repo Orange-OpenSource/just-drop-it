@@ -17,8 +17,8 @@ function wrapServer(app, server){
     // on socket connections
     socketIoServer.on('connection', function (socket) {
         function emitError(errorMessage){
-            error(errorMsg);
-            socket.emit('alert', errorMsg);
+            error(errorMessage);
+            socket.emit('alert', errorMessage);
         }
 
         function routingError(){

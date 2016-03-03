@@ -1,0 +1,17 @@
+script.
+    function appendError(message) {
+        var rowDiv = $("<div>").addClass("row alert alert-danger");
+        rowDiv.append($("<div>").addClass("col-xs-11").html(message));
+        var linkRemove = $("<a>", {href : "#"}).append($("<span>").addClass("glyphicon glyphicon-remove"));
+
+        rowDiv.append($("<div>").addClass("col-xs-1").append(linkRemove))
+        var userMessages = $("#userMessages");
+        userMessages.empty();
+        userMessages.append(rowDiv);
+        linkRemove.on("click", function(e){
+            e.preventDefault();
+            rowDiv.remove();
+        });
+    }
+div#userMessages
+

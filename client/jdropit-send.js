@@ -26,7 +26,7 @@ SenderHandler.prototype = {
             console.log(this.id + " - " + this.io.engine.transport.name);
 
             function handleError(errorMessage) {
-                displayError(errorMessage);
+                appendError(errorMessage);
                 $.each(that.receiverInfos, function (receiverId, receiverInfo) {
                     if (receiverInfo.active) {
                         console.log("Receiver id " + receiverId + " failed");
