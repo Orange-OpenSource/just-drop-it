@@ -50,8 +50,9 @@ function wrapServer(app, server){
                             //notifying receiver
                             receiver.stream = stream;
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath+socket.id + "/" + receiverId);
-                            receiver.watchSent(function(nbSent){
-                                receiver.socket.emit('server_sent_bytes', nbSent);
+                            receiver.watchSent(function(percent){
+                                receiver.socket.emit('server_sent_percent', percent);
+                                socket.emit('server_sent_percent', receiverId, percent);
                             });
 
                             function receiverEnded(receiverEvent){
@@ -66,8 +67,9 @@ function wrapServer(app, server){
                             receiver.watchFinished(function(){
                                 receiverEnded('server_transfer_complete')
                             });
-                            receiver.watchCanceled(function(){
-                                receiverEnded('server_transfer_canceled');
+                            receiver.watchTimeout(function(){
+                                receiverEnded('server_transfer_timeout');
+
                             });
                         }, routingError);
 

@@ -14,7 +14,8 @@ SenderHandler.prototype = {
 
         //init du socket vers le serveur
         this.socketParams = {
-            query: 'role=sender'
+            query: 'role=sender',
+            transports: ['polling']
         };
 
         if (!isLocal)//restriction on OPENSHIFT
@@ -44,7 +45,7 @@ SenderHandler.prototype = {
 
             that.socket.on('disconnect', function () {
                 console.log("socket - disconnect");
-                handleError("Error: you has been disconnected");
+                handleError("Error: you have been disconnected");
             });
         });
 
@@ -96,13 +97,17 @@ SenderHandler.prototype = {
 
         });
 
+        this.socket.on('server_sent_percent', function(receiverId, percent){
+            that.displayProgress(receiverId, percent);
+        });
+
         this.socket.on('server_transfer_complete', function (receiverId) {
-            this.transfertEnded(receiverId, false, "your friend correctly received your file", "File sent");
+            that.transfertEnded(receiverId, false, "your friend correctly received your file", "File sent");
         });
 
 
-        this.socket.on('server_transfer_canceled', function (receiverId) {
-            this.transfertEnded(receiverId, true, "your friend canceled download", "File not sent");
+        this.socket.on('server_transfer_timeout', function (receiverId) {
+            that.transfertEnded(receiverId, true, "your friend failed to download", "File not sent");
         });
     },
 
@@ -126,7 +131,7 @@ SenderHandler.prototype = {
     startUpload: function (receiverId) {
         console.log(this.fileToTransfer);
         var receiverInfo = this.receiverInfos[receiverId];
-        var transferProgressBar = receiverInfo.progressBar;
+
 
         $('#transfertMessage').html("Transfert in progress...");
         var stream = ss.createStream(this.readWriteOpts);
@@ -136,37 +141,20 @@ SenderHandler.prototype = {
 
         var blobStream = ss.createBlobReadStream(this.fileToTransfer, this.readWriteOpts);
 
-        var size = 0;
-
-        var that = this;
         receiverInfo.activate(stream);
-
-
-        function updateProgress(chunk) {
-            if (receiverInfo.active) {
-                size += chunk.length;
-                var progress = Math.floor(size / that.fileToTransfer.size * 100);
-
-                //update progress bar
-                transferProgressBar.attr('aria-valuenow', progress);
-                transferProgressBar.width(progress + '%');
-                transferProgressBar.html(progress + '%');
-
-                if (progress < 100) {
-                    blobStream.once('data', updateProgress);
-
-                }
-
-            }
-        }
-
-        blobStream.once('data', updateProgress);
 
         blobStream.pipe(stream);
 
     },
 
-
+    displayProgress : function(receiverId, percent){
+        console.log("displayProgress - "+receiverId+" - "+percent);
+        var transferProgressBar = this.receiverInfos[receiverId].progressBar;
+        //update progress bar
+        transferProgressBar.attr('aria-valuenow', percent);
+        transferProgressBar.width(percent + '%');
+        transferProgressBar.html(percent + '%');
+    },
 
     transfertEnded: function (receiverId, isError, notif, message) {
         var receiverInfo = this.receiverInfos[receiverId];

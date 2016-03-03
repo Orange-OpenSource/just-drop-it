@@ -18,13 +18,14 @@ Receiver.prototype = Object.create(events.EventEmitter.prototype, {
     constructor: Receiver
 });
 
-Receiver.prototype.notifySent = function (nbSent) {
-    this.emit('sent', nbSent);
+Receiver.prototype.notifySent = function (percent) {
+    debug("notifySent - %d", percent);
+    this.emit('sent', percent);
 };
 
 
-Receiver.prototype.notifyCancel = function () {
-    this.emit('cancel');
+Receiver.prototype.notifyTimeout = function () {
+    this.emit('timeout');
 };
 
 Receiver.prototype.notifyFinished = function () {
@@ -39,8 +40,8 @@ Receiver.prototype.watchFinished = function (fun) {
     this.on('finish', fun);
 };
 
-Receiver.prototype.watchCanceled = function (fun) {
-    this.on('cancel', fun);
+Receiver.prototype.watchTimeout = function (fun) {
+    this.on('timeout', fun);
 };
 
 

@@ -11,13 +11,11 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
     console.log("filesize = " + fileSize);
 }
 
-ReceiverHandler.prototype.displayProgress = function (nbByteReceived) {
-
-    var progress = Math.floor((nbByteReceived / this.filesize) * 100);
-    console.log("displayProgress="+nbByteReceived+" - "+progress);
-    this.progressBar.attr('aria-valuenow', progress);
-    this.progressBar.width(progress + '%');
-    this.progressBar.html(progress + '%');
+ReceiverHandler.prototype.displayProgress = function (percent) {
+    console.log("displayProgress="+percent);
+    this.progressBar.attr('aria-valuenow', percent);
+    this.progressBar.width(percent + '%');
+    this.progressBar.html(percent + '%');
 };
 
 ReceiverHandler.prototype.downloadComplete = function () {
@@ -58,7 +56,8 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     var that = this;
 
     var socketParams = {
-        query: 'senderID=' + senderId + '&role=receiver'
+        query: 'senderID=' + senderId + '&role=receiver',
+        transports: ['polling']
     };
 
     if (!isLocal)//restriction on OPENSHIFT
@@ -83,14 +82,14 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
         that.downloadError("Apparently your friend left before the transfer was complete", "Sender left before the end of transfer");
     });
 
-    this.socket.on('server_sent_bytes', function(bytesSent){
-        that.displayProgress(bytesSent);
+    this.socket.on('server_sent_percent', function(percent){
+        that.displayProgress(percent);
     });
 
     this.socket.on('server_transfer_complete', function(){
        that.downloadComplete();
     });
-    this.socket.on('server_transfer_canceled', function(){
-        that.downloadError("Download canceled", "You canceled download");
+    this.socket.on('server_transfer_timeout', function(){
+        that.downloadError("Download failed", "You did not download the file");
     });
 };
