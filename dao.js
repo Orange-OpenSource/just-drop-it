@@ -23,6 +23,10 @@ Receiver.prototype.notifySent = function (nbSent) {
 };
 
 
+Receiver.prototype.notifyCancel = function () {
+    this.emit('cancel');
+};
+
 Receiver.prototype.notifyFinished = function () {
     this.emit('finish');
 };
@@ -33,6 +37,10 @@ Receiver.prototype.watchSent = function (fun) {
 
 Receiver.prototype.watchFinished = function (fun) {
     this.on('finish', fun);
+};
+
+Receiver.prototype.watchCanceled = function (fun) {
+    this.on('cancel', fun);
 };
 
 

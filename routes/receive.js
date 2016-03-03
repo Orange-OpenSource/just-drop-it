@@ -78,17 +78,30 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var headSize = encodedFileName.length + HEAD_SIZE_WITHOUT_FILE_NAME;
 
         receiver.stream.pipe(res);
-        var intervalId = setInterval(function () {
+
+
+        function notifySent(){
             var nbBytesSent = getNumberOfBytesSent() - headSize - initSize;
             if(nbBytesSent > 0){
                 receiver.notifySent(nbBytesSent);
             }
+        }
 
-        }, CHECK_SEND_DELAY_IN_MS);
+
+
+        res.on('close', function(){
+            debug('download - %s - close', receiverId);
+            receiver.notifyCancel();
+        });
+
         res.on('finish', function () {
-            debug("finished");
+            debug("download - %s - finished", receiverId);
+            notifySent();
             receiver.notifyFinished();
         });
+
+        var intervalId = setInterval(notifySent, CHECK_SEND_DELAY_IN_MS);
+
         receiver.clean = function () {
             if (res.connection != null) {
                 debug("closing active download of %s/%s", fileId, receiverId);
@@ -97,10 +110,6 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
             }
             clearInterval(intervalId);
         };
-        res.connection.write('', 'utf8', function () {
-
-        });
-
 
     }, function () {
         error('download - file not found or not prepared: %s/%s', fileId, receiverId);

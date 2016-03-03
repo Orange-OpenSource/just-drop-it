@@ -31,6 +31,16 @@ ReceiverHandler.prototype.downloadComplete = function () {
 };
 
 
+ReceiverHandler.prototype.downloadError = function(notif, message){
+    jdNotif.notify("Oh no!", notif);
+    $("#errorMessage").html(message);
+    $('#errorContainer').show(500);
+    $('#transferContainer').hide(500);
+    $("#warning-window").hide(500);
+    this.socket.close(true);
+
+}
+
 ReceiverHandler.prototype.startDownload = function (url) {
     console.log("start download");
     this.totalTries++;
@@ -70,12 +80,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
 
 
     this.socket.on('server_sender_left', function () {
-        jdNotif.notify("Oh no!", "Apparently your friend left before the transfer was complete");
-        $("#errorMessage").html("Sender left before the end of transfer");
-        $('#errorContainer').show(500);
-        $('#transferContainer').hide(500);
-        $("#warning-window").hide(500);
-        that.socket.close(true);
+        that.downloadError("Apparently your friend left before the transfer was complete", "Sender left before the end of transfer");
     });
 
     this.socket.on('server_sent_bytes', function(bytesSent){
@@ -84,5 +89,8 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
 
     this.socket.on('server_transfer_complete', function(){
        that.downloadComplete();
+    });
+    this.socket.on('server_transfer_canceled', function(){
+        that.downloadError("Download canceled", "You canceled download");
     });
 };

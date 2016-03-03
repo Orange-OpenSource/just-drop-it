@@ -53,13 +53,21 @@ function wrapServer(app, server){
                             receiver.watchSent(function(nbSent){
                                 receiver.socket.emit('server_sent_bytes', nbSent);
                             });
-                            receiver.watchFinished(function(){
-                                receiver.socket.emit('server_transfer_complete');
+
+                            function receiverEnded(receiverEvent){
+                                receiver.socket.emit(receiverEvent);
+                                socket.emit(receiverEvent, receiver.receiverId);
                                 dao.getSender(socket.id, function(sender){
-                                    debug("%s/%s transfer_complete - filename=%s - filesize=%d", socket.id,receiver.receiverId, sender.fileName, sender.fileSize);
+                                    debug("%s/%s %s - filename=%s - filesize=%d", socket.id, receiver.receiverId, receiverEvent, sender.fileName, sender.fileSize);
                                     sender.removeReceiver(receiver.receiverId);
                                 }, routingError);
+                            }
 
+                            receiver.watchFinished(function(){
+                                receiverEnded('server_transfer_complete')
+                            });
+                            receiver.watchCanceled(function(){
+                                receiverEnded('server_transfer_canceled');
                             });
                         }, routingError);
 

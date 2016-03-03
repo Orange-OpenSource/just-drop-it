@@ -30,14 +30,8 @@ SenderHandler.prototype = {
                 $.each(that.receiverInfos, function (receiverId, receiverInfo) {
                     if (receiverInfo.active) {
                         console.log("Receiver id " + receiverId + " failed");
-                        receiverInfo.deactivate(true);
-                        var progressBarContainer = receiverInfo.progressBarContainer;
-                        progressBarContainer.empty();
-                        progressBarContainer.append($("<p>").addClass("text-error").html("File not sent"));
-                        receiverInfo.removeLinkContainer.show();
-
-                        jdNotif.notify("Transfer ended", "your friend did not received the file");
-                    }else {
+                        that.transfertEnded(receiverId, true, "your friend did not received the file", "File not sent");
+                    } else {
                         console.log("Receiver id " + receiverId + " not active");
                     }
                 });
@@ -101,6 +95,15 @@ SenderHandler.prototype = {
             jdNotif.notify("Something is wrong", "Apparently your friend left before the transfer was over");
 
         });
+
+        this.socket.on('server_transfer_complete', function (receiverId) {
+            this.transfertEnded(receiverId, false, "your friend correctly received your file", "File sent");
+        });
+
+
+        this.socket.on('server_transfer_canceled', function (receiverId) {
+            this.transfertEnded(receiverId, true, "your friend canceled download", "File not sent");
+        });
     },
 
     fileIsReady: function (fileToTransfert) {
@@ -139,8 +142,8 @@ SenderHandler.prototype = {
         receiverInfo.activate(stream);
 
 
-        function updateProgress(chunk){
-            if(receiverInfo.active) {
+        function updateProgress(chunk) {
+            if (receiverInfo.active) {
                 size += chunk.length;
                 var progress = Math.floor(size / that.fileToTransfer.size * 100);
 
@@ -149,31 +152,32 @@ SenderHandler.prototype = {
                 transferProgressBar.width(progress + '%');
                 transferProgressBar.html(progress + '%');
 
-                if (progress >= 100) {
-                    that.transferComplete(receiverId);
+                if (progress < 100) {
+                    blobStream.once('data', updateProgress);
+
                 }
-                blobStream.once('data',updateProgress);
+
             }
         }
-        blobStream.once('data',updateProgress);
+
+        blobStream.once('data', updateProgress);
 
         blobStream.pipe(stream);
 
     },
 
 
-    transferComplete: function (receiverId) {
-        console.log("transfer_complete - " + receiverId);
+
+    transfertEnded: function (receiverId, isError, notif, message) {
         var receiverInfo = this.receiverInfos[receiverId];
-        receiverInfo.deactivate(false);
+        receiverInfo.deactivate(isError);
         var progressBarContainer = receiverInfo.progressBarContainer;
         progressBarContainer.empty();
-        progressBarContainer.append($("<p>").addClass("text-success").html("File sent"));
+        progressBarContainer.append($("<p>").addClass(isError ? "text-success" : "text-error").html(message));
         receiverInfo.removeLinkContainer.show();
 
-        jdNotif.notify("Transfer complete", "your friend correctly received your file");
+        jdNotif.notify("Transfer ended", notif);
 
-        this.socket.emit("snd_transfer_complete", receiverId);
     }
 };
 
