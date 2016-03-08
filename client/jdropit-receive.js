@@ -32,7 +32,7 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
 }
 
 ReceiverHandler.prototype.displayProgress = function (percent) {
-    console.log("displayProgress="+percent);
+    console.log("displayProgress=" + percent);
     this.progressBar.attr('aria-valuenow', percent);
     this.progressBar.width(percent + '%');
     this.progressBar.html(percent + '%');
@@ -49,7 +49,7 @@ ReceiverHandler.prototype.downloadComplete = function () {
 };
 
 
-ReceiverHandler.prototype.downloadError = function(notif, message){
+ReceiverHandler.prototype.downloadError = function (notif, message) {
     jdNotif.notify("Oh no!", notif);
     $("#errorMessage").html(message);
     $('#errorContainer').show(500);
@@ -75,10 +75,9 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     jdNotif.checkNotifPermissions();
     var that = this;
 
-    var socketParams = {
-        query: 'senderID=' + senderId + '&role=receiver',
-        transports: ['polling']
-    };
+    var socketParams = {query: 'senderID=' + senderId + '&role=receiver'};
+    //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {query: 'senderID=' + senderId + '&role=receiver', transports: ['polling']};
+    socketParams = {query: 'senderID=' + senderId + '&role=receiver', transports: ['websocket']};
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
@@ -91,8 +90,6 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     });
 
 
-
-
     this.socket.on('server_stream_ready', function (url) {
         that.startDownload(url);
     });
@@ -102,14 +99,14 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
         that.downloadError("Apparently your friend left before the transfer was complete", "Sender left before the end of transfer");
     });
 
-    this.socket.on('server_sent_percent', function(percent){
+    this.socket.on('server_sent_percent', function (percent) {
         that.displayProgress(percent);
     });
 
-    this.socket.on('server_transfer_complete', function(){
-       that.downloadComplete();
+    this.socket.on('server_transfer_complete', function () {
+        that.downloadComplete();
     });
-    this.socket.on('server_transfer_timeout', function(){
+    this.socket.on('server_transfer_timeout', function () {
         that.downloadError("Download failed", "You did not download the file");
     });
 };

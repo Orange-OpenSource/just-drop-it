@@ -33,14 +33,12 @@ SenderHandler.prototype = {
         var that = this;
 
         //init du socket vers le serveur
-        this.socketParams = {
-            query: 'role=sender',
-            transports: ['polling']
-        };
+        var socketParams = {query: 'role=sender', transports: ['websocket']};
+        //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {query: 'role=sender', transports: ['polling']};
 
         if (!isLocal)//restriction on OPENSHIFT
-            this.socketParams.path = "/_ws/socket.io/";
-        this.socket = io(this.socketParams);
+            socketParams.path = "/_ws/socket.io/";
+        this.socket = io(socketParams);
 
 
         this.socket.on('connect', function () {
@@ -117,7 +115,7 @@ SenderHandler.prototype = {
 
         });
 
-        this.socket.on('server_sent_percent', function(receiverId, percent){
+        this.socket.on('server_sent_percent', function (receiverId, percent) {
             that.displayProgress(receiverId, percent);
         });
 
@@ -167,8 +165,8 @@ SenderHandler.prototype = {
 
     },
 
-    displayProgress : function(receiverId, percent){
-        console.log("displayProgress - "+receiverId+" - "+percent);
+    displayProgress: function (receiverId, percent) {
+        console.log("displayProgress - " + receiverId + " - " + percent);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
         //update progress bar
         transferProgressBar.attr('aria-valuenow', percent);
@@ -270,6 +268,7 @@ ReceiverInfo.prototype = {
     },
     deactivate: function (closeStream) {
         if (this.stream != null && closeStream) {
+            console.log("deactivate - closing stream")
             this.stream.destroy();
         }
         this.stream = null;
