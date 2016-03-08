@@ -75,18 +75,18 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     jdNotif.checkNotifPermissions();
     var that = this;
 
-    var socketParams = {query: 'senderID=' + senderId + '&role=receiver'};
     //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {query: 'senderID=' + senderId + '&role=receiver', transports: ['polling']};
-    socketParams = {query: 'senderID=' + senderId + '&role=receiver', transports: ['websocket']};
+    var socketParams = {transports: ['websocket']};
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
-    this.socket = io(socketParams);
+    this.socket = io('/receive', socketParams);
     this.socket.on('connect', function () {
         console.log(this.id + " - " + this.io.engine.transport.name);
         that.socket.on('error', function (errorMsg) {
             appendError("Error: " + errorMsg);
         });
+        that.socket.emit('rcv_sender', senderId);
     });
 
 

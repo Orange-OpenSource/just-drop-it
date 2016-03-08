@@ -33,12 +33,12 @@ SenderHandler.prototype = {
         var that = this;
 
         //init du socket vers le serveur
-        var socketParams = {query: 'role=sender', transports: ['websocket']};
-        //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {query: 'role=sender', transports: ['polling']};
+        //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {transports: ['polling']};
+        var socketParams = {transports: ['websocket']};
 
         if (!isLocal)//restriction on OPENSHIFT
             socketParams.path = "/_ws/socket.io/";
-        this.socket = io(socketParams);
+        this.socket = io('/send', socketParams);
 
 
         this.socket.on('connect', function () {
