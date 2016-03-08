@@ -1,3 +1,4 @@
+#!/bin/env node
 /*
  * just-drop-it
  * Copyright (C) 2016 Orange
@@ -17,9 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#!/bin/env node
-
 "use strict";
 var defaultDebugMode =   "app:*";
 if(typeof process.env.DEBUG == "undefined"){
