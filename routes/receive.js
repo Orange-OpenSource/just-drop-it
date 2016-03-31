@@ -80,13 +80,17 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         debug('download - serving file %s', fileId);
         var initSize = getNumberOfBytesSent();
 
-        var HEAD_SIZE_WITHOUT_FILE_NAME = 253;
+        var HEAD_SIZE_WITHOUT_FILE_NAME = 246;
         var CHECK_SEND_DELAY_IN_MS = 500;
         var TIMEOUT_IN_MS = 5000;
 
         //sends header to flush them
         var encodedFileName = encodeFileName(receiver.sender.fileName);
+        var headSize = encodedFileName.length + ('' + receiver.sender.fileSize).length + HEAD_SIZE_WITHOUT_FILE_NAME;
 
+        debug("download - init - %d - sent", getNumberOfBytesSent());
+        debug("download - file name length - %d", encodedFileName.length);
+        debug("download - file size - %d", receiver.sender.fileSize);
         res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
             'Content-Length': receiver.sender.fileSize,
@@ -95,32 +99,33 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         });
 
 
-        var headSize = encodedFileName.length + HEAD_SIZE_WITHOUT_FILE_NAME;
-
         receiver.stream.pipe(res);
-        function getBodyWritten(){
+        function getBodyWritten() {
             return getNumberOfBytesSent() - headSize - initSize;
         }
+
         var lastNumberOfBytesSent = getBodyWritten();
         var lastPercentSent = 0;
         var numberOfCycleSameSize = 0;
-        function notifySent(){
+        debug("download - after head - %d - sent", getNumberOfBytesSent());
+        function notifySent() {
             var nbBytesSent = getBodyWritten();
-            if(nbBytesSent > lastNumberOfBytesSent){
+            debug("download - running - %d - sent", getNumberOfBytesSent());
+            if (nbBytesSent > lastNumberOfBytesSent) {
                 numberOfCycleSameSize = 0;
                 lastNumberOfBytesSent = nbBytesSent;
-                if(nbBytesSent > 0){
-                    var percent = Math.floor((nbBytesSent* 100) / receiver.sender.fileSize );
-                    if(percent > lastPercentSent){
+                if (nbBytesSent > 0) {
+                    var percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize);
+                    if (percent > lastPercentSent) {
                         receiver.notifySent(percent);
                         lastPercentSent = percent;
                     }
                 }
-            }else if (nbBytesSent < receiver.sender.fileSize
-                && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS /CHECK_SEND_DELAY_IN_MS)){
+            } else if (nbBytesSent < receiver.sender.fileSize
+                && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
                 debug("download - %s - timeout", receiverId);
                 receiver.notifyTimeout();
-            }else if(nbBytesSent ==  receiver.sender.fileSize){
+            } else if (nbBytesSent == receiver.sender.fileSize) {
                 receiver.notifySent(100);
                 receiver.notifyFinished();
             }
@@ -135,6 +140,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
                 receiver.stream.unpipe(res);
                 res.connection.destroy();
             }
+            debug("download - end - %d - sent", getNumberOfBytesSent());
             clearInterval(intervalId);
         };
 
