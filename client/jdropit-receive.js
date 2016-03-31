@@ -60,7 +60,7 @@ ReceiverHandler.prototype.downloadError = function (notif, message) {
 }
 
 ReceiverHandler.prototype.startDownload = function (url) {
-    console.log("start download");
+    console.log("start download - " + url);
     this.totalTries++;
     var that = this;
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");

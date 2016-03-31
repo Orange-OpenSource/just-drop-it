@@ -79,10 +79,12 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
     dao.getReceiver(fileId, receiverId, function (receiver) {
         debug('download - serving file %s', fileId);
         var initSize = getNumberOfBytesSent();
-
-        var HEAD_SIZE_WITHOUT_FILE_NAME = 246;
+        var sendDate = false;
+        var HEAD_SIZE_WITHOUT_FILE_NAME = sendDate? 246 : 209;
         var CHECK_SEND_DELAY_IN_MS = 500;
         var TIMEOUT_IN_MS = 5000;
+
+
 
         //sends header to flush them
         var encodedFileName = encodeFileName(receiver.sender.fileName);
@@ -91,6 +93,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         debug("download - init - %d - sent", getNumberOfBytesSent());
         debug("download - file name length - %d", encodedFileName.length);
         debug("download - file size - %d", receiver.sender.fileSize);
+        res.sendDate = sendDate;
         res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
             'Content-Length': receiver.sender.fileSize,
