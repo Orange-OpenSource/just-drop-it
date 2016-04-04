@@ -28,7 +28,7 @@ SenderHandler.prototype = {
     constructor: SenderHandler,
 
     init: function (isLocal) {
-        this.readWriteOpts = {highWaterMark: Math.pow(2, 21)};// 2 pow 10 = 1024
+        this.readWriteOpts = {highWaterMark: Math.pow(2, 19)};// 2 pow 10 = 1024
         this.receiverInfos = {};
         var that = this;
 

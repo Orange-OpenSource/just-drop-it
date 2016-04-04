@@ -82,7 +82,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var sendDate = false;
         var HEAD_SIZE_WITHOUT_FILE_NAME = sendDate? 246 : 209;
         var CHECK_SEND_DELAY_IN_MS = 500;
-        var TIMEOUT_IN_MS = 5000;
+        var TIMEOUT_IN_MS = 60 * 1000;
 
 
 
