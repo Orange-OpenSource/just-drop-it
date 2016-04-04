@@ -29,6 +29,7 @@ function Receiver(sender, receiverId, socket) {
     this.sender = sender;
     this.receiverId = receiverId;
     this.socket = socket;
+    this.endNotified = false;
     events.EventEmitter.call(this);
 }
 
@@ -44,12 +45,20 @@ Receiver.prototype.notifySent = function (percent) {
 };
 
 
+
 Receiver.prototype.notifyTimeout = function () {
-    this.emit('timeout');
+    if(!this.endNotified){
+        this.emit('timeout');
+        this.endNotified = true;
+    }
+
 };
 
 Receiver.prototype.notifyFinished = function () {
-    this.emit('finish');
+    if(!this.endNotified){
+        this.emit('finish');
+        this.endNotified = true;
+    }
 };
 
 Receiver.prototype.watchSent = function (fun) {

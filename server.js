@@ -19,17 +19,16 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-var defaultDebugMode =   "app:*";
-if(typeof process.env.DEBUG == "undefined"){
-    console.log("Adding DEBUG variable to "+defaultDebugMode);
-    process.env.DEBUG=defaultDebugMode;
-}else{
-    console.log("DEBUG already set to "+defaultDebugMode);
+var defaultDebugMode = "app:*";
+if (typeof process.env.DEBUG == "undefined") {
+    console.log("Adding DEBUG variable to " + defaultDebugMode);
+    process.env.DEBUG = defaultDebugMode;
+} else {
+    console.log("DEBUG already set to " + process.env.DEBUG);
 }
 
 
 var http = require('http');
-
 
 
 var debug = require('debug')('app:server');
@@ -49,7 +48,7 @@ require("./ioserver")(app, server);
 //  Start the app on the specific interface (and port).
 server.listen(port, ipAddress, function () {
     var mDate = new Date(Date.now());
-    debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null? "*" : ipAddress, port);
+    debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null ? "*" : ipAddress, port);
 });
 
 

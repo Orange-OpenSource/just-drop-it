@@ -110,26 +110,32 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var lastNumberOfBytesSent = getBodyWritten();
         var lastPercentSent = 0;
         var numberOfCycleSameSize = 0;
-        debug("download - after head - %d - sent", getNumberOfBytesSent());
+        debug("download - %s  - after head - %d sent", receiverId, getNumberOfBytesSent());
+
+        function sendPercent(percent){
+            if (percent > lastPercentSent) {
+                receiver.notifySent(percent);
+                lastPercentSent = percent;
+            }
+        }
+
         function notifySent() {
             var nbBytesSent = getBodyWritten();
-            debug("download - running - %d - sent", getNumberOfBytesSent());
+            debug("download - %s  - running - %d sent", receiverId, getNumberOfBytesSent());
             if (nbBytesSent > lastNumberOfBytesSent) {
                 numberOfCycleSameSize = 0;
                 lastNumberOfBytesSent = nbBytesSent;
                 if (nbBytesSent > 0) {
                     var percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize);
-                    if (percent > lastPercentSent) {
-                        receiver.notifySent(percent);
-                        lastPercentSent = percent;
-                    }
+                    sendPercent(percent);
                 }
             } else if (nbBytesSent < receiver.sender.fileSize
                 && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
                 debug("download - %s - timeout", receiverId);
                 receiver.notifyTimeout();
             } else if (nbBytesSent == receiver.sender.fileSize) {
-                receiver.notifySent(100);
+                debug("download - %s - totally sent", receiverId);
+                sendPercent(100);
                 receiver.notifyFinished();
             }
         }
@@ -143,10 +149,29 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
                 receiver.stream.unpipe(res);
                 res.connection.destroy();
             }
-            debug("download - end - %d - sent", getNumberOfBytesSent());
+            debug("download - %s - end - %d sent", receiverId, getNumberOfBytesSent());
             clearInterval(intervalId);
         };
 
+
+
+        function generateHandler(eventName){
+            return function (){
+                debug("download - %s - event - %s", receiverId, eventName);
+                var nbBytesSent = getBodyWritten();
+                if (nbBytesSent < receiver.sender.fileSize){
+                    debug("download - %s - timeout/error", receiverId);
+                    receiver.notifyTimeout();
+                } else{
+                    debug("download - %s - totally sent", receiverId);
+                    sendPercent(100);
+                    receiver.notifyFinished();
+                }
+            }
+        }
+
+        res.on('finish', generateHandler('finish'));
+        res.on('close', generateHandler('close'));
     }, function () {
         error('download - file not found or not prepared: %s/%s', fileId, receiverId);
         var err = new Error('Not Found');

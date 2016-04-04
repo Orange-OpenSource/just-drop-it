@@ -84,11 +84,13 @@ function wrapServer(app, server) {
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath + senderId + "/" + receiverId);
                             receiver.watchSent(function (percent) {
                                 receiver.socket.emit('server_sent_percent', percent);
+                                debug('ioserver - sending %s', percent);
                                 socket.emit('server_sent_percent', receiverId, percent);
                             });
 
                             function receiverEnded(receiverEvent) {
                                 receiver.socket.emit(receiverEvent);
+                                debug('ioserver - sending %s', receiverEvent);
                                 socket.emit(receiverEvent, receiver.receiverId);
                                 dao.getSender(senderId, function (sender) {
                                     debug("%s/%s %s - filename=%s - filesize=%d", senderId, receiver.receiverId, receiverEvent, sender.fileName, sender.fileSize);
