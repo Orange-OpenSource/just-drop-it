@@ -82,31 +82,6 @@ function wrapServer(app, server) {
                             //notifying receiver
                             receiver.stream = stream;
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath + senderId + "/" + receiverId);
-                            receiver.watchSent(function (percent) {
-                                receiver.socket.emit('server_sent_percent', percent);
-                                debug('ioserver - sending %s', percent);
-                                socket.emit('server_sent_percent', receiverId, percent);
-                            });
-
-                            function receiverEnded(receiverEvent) {
-                                receiver.socket.emit(receiverEvent);
-                                debug('ioserver - sending %s', receiverEvent);
-                                socket.emit(receiverEvent, receiver.receiverId);
-                                dao.getSender(senderId, function (sender) {
-                                    debug("%s/%s %s - filename=%s - filesize=%d", senderId, receiver.receiverId, receiverEvent, sender.fileName, sender.fileSize);
-                                    sender.removeReceiver(receiver.receiverId);
-                                }, function () {
-                                    routingError(socket);
-                                });
-                            }
-
-                            receiver.watchFinished(function () {
-                                receiverEnded('server_transfer_complete')
-                            });
-                            receiver.watchTimeout(function () {
-                                receiverEnded('server_transfer_timeout');
-
-                            });
                         }, function () {
                             routingError(socket);
                         });
@@ -146,14 +121,16 @@ function wrapServer(app, server) {
 
                         // DISCONNECT event
                         socket.on('disconnect', function () {
-                            dao.getSender(senderId, function (sender) {
-                                if (sender.removeReceiver(receiverId))
-                                    sender.socket.emit('server_receiver_left', receiverId);
-                            }, function () {
-                                routingError(socket);
-                            });
-                        });
 
+                                dao.getSender(senderId, function (sender) {
+
+                                    if (sender.removeReceiver(receiverId))
+                                        sender.socket.emit('server_receiver_left', receiverId);
+
+                                }, function () {
+                                    routingError(socket);
+                                });
+                        });
 
                         sender.socket.emit('server_receiver_ready', receiverId);
                     }, function () {

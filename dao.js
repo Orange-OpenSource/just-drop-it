@@ -18,10 +18,8 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var events = require('events');
 
 var debug = require('debug')('app:dao');
-var error = require('debug')('app:dao');
 debug.log = console.log.bind(console);
 
 function Receiver(sender, receiverId, socket) {
@@ -30,70 +28,37 @@ function Receiver(sender, receiverId, socket) {
     this.receiverId = receiverId;
     this.socket = socket;
     this.endNotified = false;
-    events.EventEmitter.call(this);
 }
 
-Receiver.super_ = events.EventEmitter;
-
-Receiver.prototype = Object.create(events.EventEmitter.prototype, {
-    constructor: Receiver
-});
 
 Receiver.prototype.notifySent = function (percent) {
     debug("notifySent - %d", percent);
-    this.emit('sent', percent);
+    this.sender.socket.emit('server_sent_percent', this.receiverId, percent);
+    this.socket.emit('server_sent_percent', percent);
 };
 
-
-
-Receiver.prototype.notifyTimeout = function () {
+Receiver.prototype._end = function(endEvent){
     if(!this.endNotified){
-        this.emit('timeout');
-        this.endNotified = true;
-    }
-
-};
-
-Receiver.prototype.notifyFinished = function () {
-    if(!this.endNotified){
-        this.emit('finish');
+        this.socket.emit(endEvent);
+        this.sender.socket.emit(endEvent, this.receiverId);
+        this.sender.removeReceiver(this.receiverId);
+        debug("%s/%s %s - filename=%s - filesize=%d",  this.sender.senderId, this.receiverId, endEvent, this.sender.fileName, this.sender.fileSize);
         this.endNotified = true;
     }
 };
 
-Receiver.prototype.watchSent = function (fun) {
-    this.on('sent', fun);
+Receiver.prototype.timeout = function () {
+    this._end('server_transfer_timeout');
 };
 
-Receiver.prototype.watchFinished = function (fun) {
-    this.on('finish', fun);
+Receiver.prototype.completed = function () {
+    this._end('server_transfer_complete');
 };
 
-Receiver.prototype.watchTimeout = function (fun) {
-    this.on('timeout', fun);
-};
 
 
 Receiver.prototype._clean = function () {
     debug('Receiver - clean - %s', this.receiverId);
-    //clean event receivers
-    var that = this;
-
-    function cleanEvent(eventName) {
-        debug('Receiver - %s - clean event - %s', that.receiverId, eventName);
-        while (typeof that._events[eventName] != "undefined") {
-            if (typeof that._events[eventName] == "function") {
-                that.removeListener(eventName, that._events[eventName]);
-            }
-            else {//occurs when two "on" call on same event
-                that.removeListener(eventName, that._events[eventName][0])
-            }
-        }
-    }
-
-    cleanEvent('sent');
-    cleanEvent('finish');
-
     //clean resources
     if (typeof this.clean == "function")
         this.clean();

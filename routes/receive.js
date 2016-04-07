@@ -80,10 +80,9 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         debug('download - serving file %s', fileId);
         var initSize = getNumberOfBytesSent();
         var sendDate = false;
-        var HEAD_SIZE_WITHOUT_FILE_NAME = sendDate? 246 : 209;
+        var HEAD_SIZE_WITHOUT_FILE_NAME = sendDate ? 246 : 209;
         var CHECK_SEND_DELAY_IN_MS = 500;
         var TIMEOUT_IN_MS = 60 * 1000;
-
 
 
         //sends header to flush them
@@ -112,7 +111,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         var numberOfCycleSameSize = 0;
         debug("download - %s  - after head - %d sent", receiverId, getNumberOfBytesSent());
 
-        function sendPercent(percent){
+        function sendPercent(percent) {
             if (percent > lastPercentSent) {
                 receiver.notifySent(percent);
                 lastPercentSent = percent;
@@ -129,14 +128,11 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
                     var percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize);
                     sendPercent(percent);
                 }
-            } else if (nbBytesSent < receiver.sender.fileSize
+            } else if (nbBytesSent == receiver.sender.fileSize || nbBytesSent < receiver.sender.fileSize
                 && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
-                debug("download - %s - timeout", receiverId);
-                receiver.notifyTimeout();
-            } else if (nbBytesSent == receiver.sender.fileSize) {
-                debug("download - %s - totally sent", receiverId);
-                sendPercent(100);
-                receiver.notifyFinished();
+                //download is completed or user is in timeout. Forcing close of response
+                //that will trigger the finish/end event
+                res.end();
             }
         }
 
@@ -145,7 +141,7 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         receiver.clean = function () {
             var nbBytesSent = getBodyWritten();
             if (nbBytesSent < receiver.sender.fileSize && res.connection != null) {
-                debug("closing active download of %s/%s", fileId, receiverId);
+                debug("download - closing active download of %s/%s", fileId, receiverId);
                 receiver.stream.unpipe(res);
                 res.connection.destroy();
             }
@@ -154,18 +150,17 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         };
 
 
-
-        function generateHandler(eventName){
-            return function (){
+        function generateHandler(eventName) {
+            return function () {
                 debug("download - %s - event - %s", receiverId, eventName);
                 var nbBytesSent = getBodyWritten();
-                if (nbBytesSent < receiver.sender.fileSize){
-                    debug("download - %s - timeout/error", receiverId);
-                    receiver.notifyTimeout();
-                } else{
+                if (nbBytesSent < receiver.sender.fileSize) {
+                    error("download - %s - timeout/error", receiverId);
+                    receiver.timeout();
+                } else {
                     debug("download - %s - totally sent", receiverId);
                     sendPercent(100);
-                    receiver.notifyFinished();
+                    receiver.completed();
                 }
             }
         }

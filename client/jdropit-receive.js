@@ -39,6 +39,7 @@ ReceiverHandler.prototype.displayProgress = function (percent) {
 };
 
 ReceiverHandler.prototype.downloadComplete = function () {
+    console.log("downloadComplete");
     jdNotif.notify("Download complete", this.filename + " was transferred correctly");
 
     $('#completeContainer').show(500);
@@ -75,8 +76,9 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     jdNotif.checkNotifPermissions();
     var that = this;
 
-    //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {query: 'senderID=' + senderId + '&role=receiver', transports: ['polling']};
-    var socketParams = {transports: ['websocket']};
+    //NEVER USER POLLING ONLY, IT FAILS:
+    var socketParams = {transports: ['polling']};
+    //var socketParams = {transports: ['websocket']};
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";

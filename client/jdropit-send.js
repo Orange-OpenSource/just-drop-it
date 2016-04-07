@@ -33,8 +33,8 @@ SenderHandler.prototype = {
         var that = this;
 
         //init du socket vers le serveur
-        //NEVER USER POLLING ONLY, IT FAILS: var socketParams = {transports: ['polling']};
-        var socketParams = {transports: ['websocket']};
+        var socketParams = {transports: ['polling']};
+        //var socketParams = {transports: ['websocket']};
 
         if (!isLocal)//restriction on OPENSHIFT
             socketParams.path = "/_ws/socket.io/";
@@ -65,6 +65,7 @@ SenderHandler.prototype = {
                 console.log("socket - disconnect");
                 handleError("Error: you have been disconnected");
             });
+
         });
 
         this.socket.on('server_rcv_url_generated', function (url) {
