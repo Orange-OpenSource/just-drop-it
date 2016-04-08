@@ -51,6 +51,10 @@ Receiver.prototype.timeout = function () {
     this._end('server_transfer_timeout');
 };
 
+Receiver.prototype.disconnected = function () {
+    this._end('server_transfer_disconnected');
+};
+
 Receiver.prototype.completed = function () {
     this._end('server_transfer_complete');
 };

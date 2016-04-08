@@ -128,6 +128,10 @@ SenderHandler.prototype = {
         this.socket.on('server_transfer_timeout', function (receiverId) {
             that.transfertEnded(receiverId, true, "your friend failed to download", "File not sent");
         });
+
+        this.socket.on('server_transfer_disconnected', function (receiverId) {
+            that.transfertEnded(receiverId, true, "your friend failed to download", "File not sent");
+        });
     },
 
     fileIsReady: function (fileToTransfert) {

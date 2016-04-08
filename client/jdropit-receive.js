@@ -111,4 +111,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     this.socket.on('server_transfer_timeout', function () {
         that.downloadError("Download failed", "You did not download the file");
     });
+    this.socket.on('server_transfer_disconnected', function () {
+        that.downloadError("Download failed", "You did not download the file");
+    });
 };

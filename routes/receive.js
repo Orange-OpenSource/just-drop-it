@@ -150,23 +150,23 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
         };
 
 
-        function generateHandler(eventName) {
-            return function () {
-                debug("download - %s - event - %s", receiverId, eventName);
-                var nbBytesSent = getBodyWritten();
-                if (nbBytesSent < receiver.sender.fileSize) {
-                    error("download - %s - timeout/error", receiverId);
-                    receiver.timeout();
-                } else {
-                    debug("download - %s - totally sent", receiverId);
-                    sendPercent(100);
-                    receiver.completed();
-                }
+        res.on('finish', function () {
+            debug("download - finish - event - %s", receiverId);
+            var nbBytesSent = getBodyWritten();
+            if (nbBytesSent < receiver.sender.fileSize) {
+                error("download - %s - timeout/error", receiverId);
+                receiver.timeout();
+            } else {
+                debug("download - %s - totally sent", receiverId);
+                sendPercent(100);
+                receiver.completed();
             }
-        }
+        });
+        res.on('close', function () {
+            error("download - %s - connection closed by other part", receiverId);
+            receiver.disconnected();
+        });
 
-        res.on('finish', generateHandler('finish'));
-        res.on('close', generateHandler('close'));
     }, function () {
         error('download - file not found or not prepared: %s/%s', fileId, receiverId);
         var err = new Error('Not Found');
