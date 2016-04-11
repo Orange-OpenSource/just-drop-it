@@ -19,6 +19,12 @@
  */
 
 "use strict";
+
+var debug = require('debug')('justdropit:send'),
+    io = require('socket.io-client');
+
+debug.log = console.log.bind(console);
+
 function SenderHandler(isLocal) {
     this.init(isLocal);
 }
@@ -42,33 +48,34 @@ SenderHandler.prototype = {
 
 
         this.socket.on('connect', function () {
-            console.log(this.id + " - " + this.io.engine.transport.name);
+            debug("connect - %s - %s", this.id, this.io.engine.transport.name);
 
             function handleError(errorMessage) {
                 appendError(errorMessage);
                 $.each(that.receiverInfos, function (receiverId, receiverInfo) {
                     if (receiverInfo.active) {
-                        console.log("Receiver id " + receiverId + " failed");
+                        debug("Receiver id %s failed", receiverId);
                         that.transfertEnded(receiverId, true, "your friend did not received the file", "File not sent");
                     } else {
-                        console.log("Receiver id " + receiverId + " not active");
+                        debug("Receiver id %s not active", receiverId);
                     }
                 });
             }
 
             that.socket.on('error', function (errorMsg) {
-                console.log("socket - error - " + errorMsg);
+                debug("socket - error - %s", errorMsg);
                 handleError("Error: " + errorMsg);
             });
 
             that.socket.on('disconnect', function () {
-                console.log("socket - disconnect");
+                debug("socket - disconnect");
                 handleError("Error: you have been disconnected");
             });
 
         });
 
         this.socket.on('server_rcv_url_generated', function (url) {
+            debug("url generated - %s", url);
             that.receiverUrl = window.location.host + url;
             $('#generatedurl').html("<p>http://" + that.receiverUrl + " </p> ");
             $('#generatedurlreminder').html("&nbsp;(http://" + that.receiverUrl + ")");
@@ -152,7 +159,7 @@ SenderHandler.prototype = {
     },
 
     startUpload: function (receiverId) {
-        console.log(this.fileToTransfer);
+        debug("startUpload - %s", receiverId);
         var receiverInfo = this.receiverInfos[receiverId];
 
 
@@ -171,7 +178,7 @@ SenderHandler.prototype = {
     },
 
     displayProgress: function (receiverId, percent) {
-        console.log("displayProgress - " + receiverId + " - " + percent);
+        debug("displayProgress - %s - %d", receiverId, percent);
         var transferProgressBar = this.receiverInfos[receiverId].progressBar;
         //update progress bar
         transferProgressBar.attr('aria-valuenow', percent);
@@ -273,7 +280,7 @@ ReceiverInfo.prototype = {
     },
     deactivate: function (closeStream) {
         if (this.stream != null && closeStream) {
-            console.log("deactivate - closing stream")
+            debug("deactivate - closing stream");
             this.stream.destroy();
         }
         this.stream = null;

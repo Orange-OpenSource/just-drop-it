@@ -19,6 +19,11 @@
  */
 
 "use strict";
+var debug = require('debug')('justdropit:receive'),
+    io = require('socket.io-client');
+
+debug.log = console.log.bind(console);
+
 function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
     this.filename = fileName,
         this.filesize = fileSize,
@@ -27,19 +32,19 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
         this.totalTries = 0,
         this._init(isLocal, senderId);
     //TODO debug filename
-    console.log("filename = " + filename);
-    console.log("filesize = " + fileSize);
+    debug("filename = %s", fileName);
+    debug("filesize = %d", fileSize);
 }
 
 ReceiverHandler.prototype.displayProgress = function (percent) {
-    console.log("displayProgress=" + percent);
+    debug("displayProgress=%d", percent);
     this.progressBar.attr('aria-valuenow', percent);
     this.progressBar.width(percent + '%');
     this.progressBar.html(percent + '%');
 };
 
 ReceiverHandler.prototype.downloadComplete = function () {
-    console.log("downloadComplete");
+    debug("downloadComplete");
     jdNotif.notify("Download complete", this.filename + " was transferred correctly");
 
     $('#completeContainer').show(500);
@@ -61,7 +66,7 @@ ReceiverHandler.prototype.downloadError = function (notif, message) {
 }
 
 ReceiverHandler.prototype.startDownload = function (url) {
-    console.log("start download - " + url);
+    debug("start download - %s", url);
     this.totalTries++;
     var that = this;
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
@@ -84,7 +89,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
         socketParams.path = "/_ws/socket.io/";
     this.socket = io('/receive', socketParams);
     this.socket.on('connect', function () {
-        console.log(this.id + " - " + this.io.engine.transport.name);
+        debug("connect - %s - %s", this.id, this.io.engine.transport.name);
         that.socket.on('error', function (errorMsg) {
             appendError("Error: " + errorMsg);
         });
