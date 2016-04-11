@@ -38,9 +38,7 @@ SenderHandler.prototype = {
         this.receiverInfos = {};
         var that = this;
 
-        //init du socket vers le serveur
-        var socketParams = {transports: ['polling']};
-        //var socketParams = {transports: ['websocket']};
+        var socketParams = {};
 
         if (!isLocal)//restriction on OPENSHIFT
             socketParams.path = "/_ws/socket.io/";
