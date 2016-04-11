@@ -41,28 +41,5 @@ router.get('/no_ie', function(req, res) {
     res.render('no_ie', {title : "Sorry, your browser is not compatible"});
 });
 
-/* test download*/
-router.get('/test_down', function(req, res) {
-
-    var filename = path.basename("test_down.mp4");
-    var stream = fs.createReadStream(filename,{
-        highWaterMark: Math.pow(2,21)
-    });
-
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Length', 874795463 );
-    res.setHeader('Content-Disposition', 'attachment; filename="test.mp4"');
-    res.setHeader('Set-Cookie', 'fileDownload=true; path=/');
-    stream.pipe(res);
-
-});
-
-
-router.get('/down_source', function(req, res){
-    var file = path.basename("just-drop-it.zip");
-    res.download(file);
-});
-
-
 
 module.exports = router;
