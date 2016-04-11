@@ -18,9 +18,6 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Created by Arnaud on 24/09/15.
- */
 function WhatsNewHandler(version,whatsNewLink,whatsNewBadge) {
     this.init(version,whatsNewLink,whatsNewBadge);
 }

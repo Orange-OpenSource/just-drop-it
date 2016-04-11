@@ -18,9 +18,6 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Created by buce8373 on 22/06/2015.
- */
 var io = require('socket.io');
 var ss = require('socket.io-stream');
 var dao = require("./dao")
