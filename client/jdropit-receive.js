@@ -81,9 +81,7 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     jdNotif.checkNotifPermissions();
     var that = this;
 
-    //NEVER USER POLLING ONLY, IT FAILS:
-    var socketParams = {transports: ['polling']};
-    //var socketParams = {transports: ['websocket']};
+    var socketParams = {};
 
     if (!isLocal)//restriction on OPENSHIFT
         socketParams.path = "/_ws/socket.io/";
