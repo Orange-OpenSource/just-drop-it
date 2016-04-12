@@ -97,14 +97,7 @@ function mail_input {
 
     echo ''
     cat  $LOG_FILE | grep "$SEARCH_DATE" | base64
-    #cat $LOG_FILE | sed -n -e "/$SEARCH_DATE/,$$p" | base64
 
-    ## Extrait du log concernant entre la première apparition de la date du jour et la première apparition de la date suivante
-    ## (convertie en base64 pour l'attacher au mail)
-    #cat nodejs.log | sed -n -e "/${SEARCH_DATE}/,$$p" | sed -e "/${SEARCH_DATE_NEXT}/d" > workfile.temp
-    #base64 workfile.temp
-
-    #cat $LOG_FILE | sed -n -e '/$SEARCH_DATE/,$p' | base64
     echo "--KkK170891tpbkKk__FV_KKKkkkjjwq--"
 
 

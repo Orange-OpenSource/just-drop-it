@@ -1,23 +1,46 @@
+//
+ just-drop-it
+ Copyright (C) 2016 Orange
+ Authors: Benjamin Einaudi  benjamin.einaudi@orange.com
+          Arnaud Ruffin arnaud.ruffin@orange.com
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 extends layout
 block extra_scripts
     | <!--[if IE]> <script>if(window.location.pathname !== "/no_ie")window.location = "/no_ie";</script><![endif]-->
     if isLocal
-        script(src="/js/socket.io.js")
+        script(src="/js/HackTimer.js")
+        script(src="/js/HackTimerWorker.js")
+        script(src="/js/common-libraries.js")
         script(src="/js/socket.io-stream.js")
-        script(src="/js/ZeroClipboard.js")
+        script(src="/ZeroClipboard.js")
         script(src="/js/jdropit-notif.js")
         script(src="/js/jdropit-send.js")
     else
-        script(src="/js/socket.io.min.js")
+        script(src="/js/HackTimer.silent.min.js")
+        script(src="/js/HackTimerWorker.min.js")
+        script(src="/js/common-libraries.min.js")
         script(src="/js/socket.io-stream.min.js")
-        script(src="/js/ZeroClipboard.min.js")
+        script(src="/ZeroClipboard.min.js")
         script(src="/js/jdropit-notif.min.js")
         script(src="/js/jdropit-send.min.js")
     script.
 
     script.
         window.onload = function(){
-            sendFile(#{isLocal},"#{senderLabel}");
+            sendFile(#{isLocal});
         }
 block content
     div.row
@@ -46,5 +69,15 @@ block content
                     span.text-muted.text-right#generatedurlreminder &nbsp;(http://proutprout)
                 p File:
                     span#filename
+        div#rowReceiverTemplate.row(hidden="true")
+            div.col-xs-2
+                span(class="glyphicon glyphicon-user")
+            div.col-xs-9
+                div.progress
+                    div(class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;") 0%
+            div.col-xs-1(hidden="true")
+                a(href="#")
+                    span(class="glyphicon glyphicon-remove")
+
 
 

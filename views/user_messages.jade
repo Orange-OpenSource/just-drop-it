@@ -17,21 +17,20 @@
  You should have received a copy of the GNU General Public License
  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-extends layout
-block extra_scripts
-    script.
-        var stayOnPage = false;
-    | <!--[if IE]> <script>stayOnPage = true;</script><![endif]-->
-    script.
-        if(!stayOnPage)window.location = "/";
+script.
+    function appendError(message) {
+        var rowDiv = $("<div>").addClass("row alert alert-danger");
+        rowDiv.append($("<div>").addClass("col-xs-11").html(message));
+        var linkRemove = $("<a>", {href : "#"}).append($("<span>").addClass("glyphicon glyphicon-remove"));
 
-block content
-    div.row
-        div(class="col-xs-12 alert h3")
-            span(class="glyphicon glyphicon-exclamation-sign" aria-hidden="true")
-                span(class="sr-only lead") Error
-                | This project hasn't been tested on IE. Please use one of the following browser:
-                ul
-                    li Firefox
-                    li Chrome
-                    li Safari
+        rowDiv.append($("<div>").addClass("col-xs-1").append(linkRemove))
+        var userMessages = $("#userMessages");
+        userMessages.empty();
+        userMessages.append(rowDiv);
+        linkRemove.on("click", function(e){
+            e.preventDefault();
+            rowDiv.remove();
+        });
+    }
+div#userMessages
+
