@@ -46,6 +46,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'boosted', 'dist'))));
+app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery', 'dist','cdn'))));
+app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery-file-download', 'src','Scripts'))));
+app.use(express.static(path.join(__dirname, path.join('node_modules', 'zeroclipboard', 'dist'))));
 
 var receiveUriPath = '/receive';
 app.use('/', send);
