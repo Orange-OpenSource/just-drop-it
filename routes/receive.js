@@ -122,33 +122,39 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
 
         function notifySent() {
             var nbBytesSent = getBodyWritten();
-            debug("download - %s  - running - %d sent", receiverId, getNumberOfBytesSent());
-            if (nbBytesSent > lastNumberOfBytesSent) {
-                numberOfCycleSameSize = 0;
-                lastNumberOfBytesSent = nbBytesSent;
-                if (nbBytesSent > 0) {
-                    var percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize);
-                    sendPercent(percent);
+            //Having a NaN here means the interval has not been cleared properly when it should have been
+            if(isNaN(nbBytesSent)){
+                error("download - %s - task of notification has not been cleared properly", receiverId);
+                clearInterval(intervalId);
+            }else {
+                debug("%s  - running - %d sent", receiverId, nbBytesSent);
+                if (nbBytesSent > lastNumberOfBytesSent) {
+                    numberOfCycleSameSize = 0;
+                    lastNumberOfBytesSent = nbBytesSent;
+                    if (nbBytesSent > 0) {
+                        var percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize);
+                        sendPercent(percent);
+                    }
+                } else if (nbBytesSent == receiver.sender.fileSize || nbBytesSent < receiver.sender.fileSize
+                    && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
+                    //download is completed or user is in timeout. Forcing close of response
+                    //that will trigger the finish/end event
+                    res.end();
                 }
-            } else if (nbBytesSent == receiver.sender.fileSize || nbBytesSent < receiver.sender.fileSize
-                && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
-                //download is completed or user is in timeout. Forcing close of response
-                //that will trigger the finish/end event
-                res.end();
             }
         }
 
         var intervalId = setInterval(notifySent, CHECK_SEND_DELAY_IN_MS);
 
         receiver.clean = function () {
+            clearInterval(intervalId);
             var nbBytesSent = getBodyWritten();
-            if (nbBytesSent < receiver.sender.fileSize && res.connection != null) {
+            if (!isNaN(nbBytesSent) && nbBytesSent < receiver.sender.fileSize && res.connection != null) {
                 debug("download - closing active download of %s/%s", fileId, receiverId);
                 receiver.stream.unpipe(res);
                 res.connection.destroy();
             }
-            debug("download - %s - end - %d sent", receiverId, getNumberOfBytesSent());
-            clearInterval(intervalId);
+            debug("download - %s - end - %d sent", receiverId, isNaN(nbBytesSent) ? "???" : nbBytesSent.toString());
         };
 
 
