@@ -21,46 +21,53 @@
  */
 
 "use strict";
-var jdNotif = {
+var debug = require('debug')('justdropit:notif');
+var jdNotif = (function(){
+    var notification = window.Notification || window.mozNotification || window.webkitNotification;
+    var result = {};
 
-    checkNotifPermissions: function () {
+    function isNotificationAvailable(){
+        return 'undefined' !== typeof notification;
+    }
 
-        var notification = window.Notification || window.mozNotification || window.webkitNotification;
-
-        if ('undefined' === typeof notification) {
-            console.log('Web notification not supported');
-        } else {
+    //Ask permission on load
+    (function () {
+        if (isNotificationAvailable()) {
+            debug("requesting permission");
             notification.requestPermission(function (permission) {
-                console.log(permission);
+                debug(permission);
             });
+        }else {
+            debug("notification not available");
         }
-    },
+    })();
 
 
-    notify: function (titletxt, bodytxt) {
-        var instance = new Notification(
-            titletxt, {
-                body: bodytxt,
-                icon: '/favicon.ico',
-                tag: 'justdrop-it notif'
-            }
-        );
 
-        instance.onclick = function () {
-            // Something to do
-        };
-        instance.onerror = function () {
-            // Something to do
-        };
-        instance.onshow = function () {
-            // Something to do
-        };
-        instance.onclose = function () {
-            // Something to do
-        };
+    result.notify =  function (titletxt, bodytxt) {
+        if(isNotificationAvailable()){
+            var instance = new Notification(
+                titletxt, {
+                    body: bodytxt,
+                    icon: '/favicon.ico',
+                    tag: 'justdrop-it notif'
+                }
+            );
 
+            instance.onclick = function () {
+                // Something to do
+            };
+            instance.onerror = function () {
+                // Something to do
+            };
+            instance.onshow = function () {
+                // Something to do
+            };
+            instance.onclose = function () {
+                // Something to do
+            };
+        }
         return false;
-    },
-
-
-}
+    };
+    return result;
+})();

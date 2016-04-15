@@ -80,7 +80,6 @@ ReceiverHandler.prototype.startDownload = function (url) {
 
 ReceiverHandler.prototype._init = function (isLocal, senderId) {
     $('#warning-window').show();
-    jdNotif.checkNotifPermissions();
     var that = this;
 
     var socketParams = {};
