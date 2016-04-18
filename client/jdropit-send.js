@@ -205,7 +205,6 @@ function sendFile(isLocal) {
     var senderHandler = new SenderHandler(isLocal);
 
     $("#clipboardcopyok").hide();
-    jdNotif.checkNotifPermissions();
     //____ Handling of copy to clipboard with zeroClipboard
     var clip = new ZeroClipboard(document.getElementById("copy-button"));
     clip.on("ready", function () {
