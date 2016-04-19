@@ -191,7 +191,7 @@ SenderHandler.prototype = {
         receiverInfo.deactivate(isError);
         var progressBarContainer = receiverInfo.progressBarContainer;
         progressBarContainer.empty();
-        progressBarContainer.append($("<p>").addClass(isError ? "text-success" : "text-error").html(message));
+        progressBarContainer.append($("<p>").addClass(isError ? "text-danger" : "text-success").html(message));
         receiverInfo.removeLinkContainer.show();
 
         jdNotif.notify("Transfer ended", notif);
