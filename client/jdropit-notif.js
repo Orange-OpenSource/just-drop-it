@@ -26,26 +26,29 @@ var jdNotif = (function(){
     var notification = window.Notification || window.mozNotification || window.webkitNotification;
     var result = {};
 
-    function isNotificationAvailable(){
+    result.isNotificationAvailable = function(){
         return 'undefined' !== typeof notification;
-    }
+    };
 
-    //Ask permission on load
-    (function () {
-        if (isNotificationAvailable()) {
+    result.isAlreadyGranted = function(){
+        return this.isNotificationAvailable() && notification.permission === 'granted';
+    };
+
+
+    result.askPermission = function (callback) {
+        if (this.isNotificationAvailable()) {
             debug("requesting permission");
             notification.requestPermission(function (permission) {
                 debug(permission);
+                callback();
             });
-        }else {
-            debug("notification not available");
         }
-    })();
+    };
 
 
 
     result.notify =  function (titletxt, bodytxt) {
-        if(isNotificationAvailable()){
+        if(this.isNotificationAvailable()){
             var instance = new Notification(
                 titletxt, {
                     body: bodytxt,

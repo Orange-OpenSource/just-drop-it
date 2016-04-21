@@ -87,3 +87,20 @@ input[type='file'] {
 	color: transparent;
 	display: inline;
 }
+
+.notification-header {
+	text-align: center;
+	cursor : pointer;
+	background-color: #282828;
+	color: #ddd;
+}
+
+.notification-header a {
+	cursor : pointer;
+}
+
+.dismiss-notification {
+	float: right;
+	margin-right: 10px;
+}
+

@@ -26,7 +26,6 @@ block extra_scripts
         script(src="/js/common-libraries.js")
         script(src="/js/socket.io-stream.js")
         script(src="/ZeroClipboard.js")
-        script(src="/js/jdropit-notif.js")
         script(src="/js/jdropit-send.js")
     else
         script(src="/js/HackTimer.silent.min.js")
@@ -34,13 +33,13 @@ block extra_scripts
         script(src="/js/common-libraries.min.js")
         script(src="/js/socket.io-stream.min.js")
         script(src="/ZeroClipboard.min.js")
-        script(src="/js/jdropit-notif.min.js")
         script(src="/js/jdropit-send.min.js")
     script.
 
     script.
         window.onload = function(){
             sendFile(#{isLocal});
+            enableNotifications();
         }
 block content
     div.row
