@@ -22,17 +22,16 @@ block extra_scripts
     if isLocal
         script(src="/jquery.fileDownload.js")
         script(src="/js/common-libraries.js")
-        script(src="/js/jdropit-notif.js")
         script(src="/js/jdropit-receive.js")
     else
         script(src="/jquery.fileDownload.js")
         script(src="/js/common-libraries.min.js")
-        script(src="/js/jdropit-notif.min.js")
         script(src="/js/jdropit-receive.min.js")
     script.
         var receiverHandler;
         window.onload = function(){
             receiverHandler = new ReceiverHandler(#{isLocal}, "#{senderId}","#{fileName}",#{fileSize});
+            enableNotifications();
         }
 block content
     div.row
