@@ -19,19 +19,15 @@
 
 extends layout
 block extra_scripts
-    script.
-        var stayOnPage = false;
-    | <!--[if IE]> <script>stayOnPage = true;</script><![endif]-->
-    script.
-        if(!stayOnPage)window.location = "/";
 
 block content
-    div.row
-        div(class="col-xs-12 alert h3")
-            span(class="glyphicon glyphicon-exclamation-sign" aria-hidden="true")
-                span(class="sr-only lead") Error
-                | This project hasn't been tested on IE. Please use one of the following browser:
+    ul
+        each sender in senders
+            li= "Sender " +  sender.id
                 ul
-                    li Firefox
-                    li Chrome
-                    li Safari
+                    each receiverId in sender.receivers
+                        li= "Receiver " + receiverId
+
+
+
+

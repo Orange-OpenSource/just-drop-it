@@ -1,3 +1,3 @@
-The OpenShift `nodejs` cartridge documentation can be found at:
+#just drop it
 
-http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs
+Simply beam files between two browsers.

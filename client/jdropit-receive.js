@@ -1,65 +1,121 @@
+/*
+ * just-drop-it
+ * Copyright (C) 2016 Orange
+ * Authors: Benjamin Einaudi  benjamin.einaudi@orange.com
+ *          Arnaud Ruffin arnaud.ruffin@orange.com
+ *
+ * This file is part of just-drop-it.
+ *
+ * just-drop-it is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 "use strict";
-function receiveFile(isLocal, senderId,receiverLabel) {
-    $('#warning-window').show();
-    jdNotif.checkNotifPermissions();
-    var socket;
-    var socketParams = { query: 'senderID=' + senderId + '&role=receiver&receiverLabel=' + receiverLabel };
-    if (!isLocal)//restriction on OPENSHIFT
-        socketParams.path = "/_ws/socket.io/";
-    socket = io(socketParams);
-    socket.on('alert', function (errorMsg) {
-        displayError("Error: " + errorMsg);
-    });
+var debug = require('debug')('justdropit:receive'),
+    io = require('socket.io-client');
 
-    var localFileName;
+debug.log = console.log.bind(console);
+
+function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
+    this.filename = fileName,
+        this.filesize = fileSize,
+        this.socket = null,
+        this.progressBar = $("#transferProgressBar"),
+        this.totalTries = 0,
+        this._init(isLocal, senderId);
+    //TODO debug filename
+    debug("filename = %s", fileName);
+    debug("filesize = %d", fileSize);
+}
+
+ReceiverHandler.prototype.displayProgress = function (percent) {
+    debug("displayProgress=%d", percent);
+    this.progressBar.attr('aria-valuenow', percent);
+    this.progressBar.width(percent + '%');
+    this.progressBar.html(percent + '%');
+};
+
+ReceiverHandler.prototype.downloadComplete = function () {
+    debug("downloadComplete");
+    jdNotif.notify("Download complete", this.filename + " was transferred correctly");
+
+    $('#completeContainer').show(500);
+    $('#transferContainer').hide(500);
+    $("#warning-window").hide(500);
+
+    this.socket.close(true);
+};
 
 
-    socket.on('stream_ready', function (url, filename, filesize) {
-        localFileName = filename;
-        $('#filename').html(filename + " (" + Math.round(filesize / 1024 / 1024) + " Mo)");
-        //window.open(url, '_blank');
-        //meilleur car par d'erreur popup, mais fail sous chrome (les updates ne sont par re!us)
-        //window.location.href = url;
-        //window.location.assign(url);
-        //non testé, au cas ou : setTimeout(function(){document.location.href = "page.html;"},500);
-        /** autre popup :         var popup = window.open(url);
-         -         popup.blur();
-         -         window.focus();   */
-        //Tentative avec jquery.fileDownload
-        $.fileDownload(url).fail(function(){
-            displayError("Error while downloading file "+filename);
-        })
-    });
-
-    socket.on('transfer_in_progress', function (progress) {
-        //console.log('progress file ' + progress);
-        //update progress bar
-        var transferProgressBar = $('#transferProgressBar');
-        transferProgressBar.attr('aria-valuenow', progress);
-        transferProgressBar.width(progress + '%');
-        transferProgressBar.html(progress + '%');
-        if(progress == 100){
-            socket.emit('transfer_complete');
-            downloadComplete();
-        }
-
-    });
-
-    socket.on('sender_left', function(){
-        jdNotif.notify("Oh no!","Apparently your friend left before the transfer was complete");
-        $("#errorMessage").html("Sender left before the end of transfer");
-        $('#errorContainer').show(500);
-        $('#transferContainer').hide(500);
-        $("#warning-window").hide(500);
-        socket.close(true);
-    });
-
-    function downloadComplete(){
-        jdNotif.notify("Download complete",localFileName+" was transferred correctly");
-        $('#completeContainer').show(500);
-        $('#transferContainer').hide(500);
-        $("#warning-window").hide(500);
-        socket.close(true);
-    }
+ReceiverHandler.prototype.downloadError = function (notif, message) {
+    jdNotif.notify("Oh no!", notif);
+    $("#errorMessage").html(message);
+    $('#errorContainer').show(500);
+    $('#transferContainer').hide(500);
+    $("#warning-window").hide(500);
+    this.socket.close(true);
 
 }
+
+ReceiverHandler.prototype.startDownload = function (url) {
+    debug("start download - %s", url);
+    this.totalTries++;
+    var that = this;
+    $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
+    $.fileDownload(url).fail(function () {
+        appendError("Error while downloading file " + that.filename);
+    });
+};
+
+
+ReceiverHandler.prototype._init = function (isLocal, senderId) {
+    $('#warning-window').show();
+    var that = this;
+
+    var socketParams = {};
+
+    if (!isLocal)//restriction on OPENSHIFT
+        socketParams.path = "/_ws/socket.io/";
+    this.socket = io('/receive', socketParams);
+    this.socket.on('connect', function () {
+        debug("connect - %s - %s", this.id, this.io.engine.transport.name);
+        that.socket.on('error', function (errorMsg) {
+            appendError("Error: " + errorMsg);
+        });
+        that.socket.emit('rcv_sender', senderId);
+    });
+
+
+    this.socket.on('server_stream_ready', function (url) {
+        that.startDownload(url);
+    });
+
+
+    this.socket.on('server_sender_left', function () {
+        that.downloadError("Apparently your friend left before the transfer was complete", "Sender left before the end of transfer");
+    });
+
+    this.socket.on('server_sent_percent', function (percent) {
+        that.displayProgress(percent);
+    });
+
+    this.socket.on('server_transfer_complete', function () {
+        that.downloadComplete();
+    });
+    this.socket.on('server_transfer_timeout', function () {
+        that.downloadError("Download failed", "You did not download the file");
+    });
+    this.socket.on('server_transfer_disconnected', function () {
+        that.downloadError("Download failed", "You did not download the file");
+    });
+};
