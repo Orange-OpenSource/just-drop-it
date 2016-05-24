@@ -30,7 +30,6 @@ debug.log = console.log.bind(console);
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    debug('serving send with cookie %s',req.cookies['CTI']);
     var senders = [];
     dao.eachSenders(function(sender){
         var senderObj = {id : sender.senderId, receivers : []};

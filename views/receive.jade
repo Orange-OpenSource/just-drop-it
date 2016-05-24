@@ -21,11 +21,9 @@ extends layout
 block extra_scripts
     if isLocal
         script(src="/jquery.fileDownload.js")
-        script(src="/js/common-libraries.js")
         script(src="/js/jdropit-receive.js")
     else
         script(src="/jquery.fileDownload.js")
-        script(src="/js/common-libraries.min.js")
         script(src="/js/jdropit-receive.min.js")
     script.
         var receiverHandler;

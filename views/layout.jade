@@ -38,10 +38,13 @@ html
         if isLocal
             script(src="/jquery.js")
             script(src="/js/boosted.js")
+            script(src="/js/common-libraries.js")
             script(src="/js/jdropit-whatsnew.js")
         else
             script(src="/jquery.min.js")
             script(src="/js/boosted.min.js")
+            script(src="/js/common-libraries.min.js")
+
             script(src="/js/jdropit-whatsnew.min.js")
         script.
             if (typeof console == "undefined"){
