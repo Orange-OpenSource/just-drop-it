@@ -1,0 +1,62 @@
+body-parser, Node.js body parsing middleware - https://github.com/expressjs/body-parser
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+Licensed under the MIT license
+https://github.com/expressjs/body-parser/blob/master/LICENSE
+
+cookie-parser, cookie parsing middleware - https://github.com/expressjs/cookie-parser
+Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+Licensed under the MIT license
+https://github.com/expressjs/cookie-parser/blob/master/LICENSE
+
+debug, tiny node.js & browser debugging utility for your libraries and applications - https://github.com/visionmedia/debug
+Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
+Licensed under the MIT license
+https://github.com/visionmedia/debug/blob/master/LICENSE
+
+express, Fast, unopinionated, minimalist web framework for node. http://expressjs.com
+Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>
+Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+Licensed under the MIT license
+https://github.com/expressjs/express/blob/master/LICENSE
+
+Jade, Jade - robust, elegant, feature rich template engine for Node.js http://jade-lang.com
+Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>
+Licensed under the MIT license
+https://github.com/pugjs/pug/blob/master/LICENSE
+
+morgan, HTTP request logger middleware for node.js - https://github.com/expressjs/morgan
+Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+Licensed under the MIT license
+https://github.com/expressjs/morgan/blob/master/LICENSE
+
+serve-favicon, favicon serving middleware, https://github.com/expressjs/serve-favicon
+Copyright (c) 2010 Sencha Inc.
+Copyright (c) 2011 LearnBoost
+Copyright (c) 2011 TJ Holowaychuk
+Copyright (c) 2014-2015 Douglas Christopher Wilson
+Licensed under the MIT license
+https://github.com/expressjs/serve-favicon/blob/master/LICENSE
+
+socket.io, Realtime application framework (Node.JS server) http://socket.io
+Copyright (c) 2014-2015 Automattic <dev@cloudup.com>
+Licensed under the MIT license
+https://github.com/socketio/socket.io/blob/master/LICENSE
+
+socket.io client - https://github.com/socketio/socket.io-client
+Copyright (c) 2014 Guillermo Rauch
+Licensed under the MIT license
+https://github.com/socketio/socket.io-client/blob/master/LICENSE
+
+socket.io stream - https://github.com/nkzawa/socket.io-stream
+Copyright (c) 2015 Naoyuki Kanezawa
+Licensed under the MIT license
+https://github.com/nkzawa/socket.io-stream/blob/master/LICENSE
+
+uglify-js, JavaScript parser / mangler / compressor / beautifier toolkit http://lisperator.net/uglifyjs
+Copyright 2012-2013 (c) Mihai Bazon <mihai.bazon@gmail.com>
+Licensed under the BSD license
+https://github.com/mishoo/UglifyJS2/blob/master/LICENSE
