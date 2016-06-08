@@ -32,7 +32,7 @@ var javascript = require('./routes/javascript');
 
 var app = express();
 
-global.DROP_IT_VERSION=2.0;
+global.DROP_IT_VERSION=2.1;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
