@@ -18,6 +18,38 @@
 
  You should have received a copy of the GNU General Public License
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
+header(role="banner")
+    div.notification-header(role="banner" style="display: none;") Just-drop-it needs your permission to &nbsp;
+        em enable desktop notifications
+            a.dismiss-notification
+                em.icon-delete
+    div.header-content
+        div.container
+            div.row
+                div.col-xs-12
+                    h1 Just drop it
+                        small &laquo;Let us ease your file transfer&raquo;
 
-div.page-header
-    h1 #{title}
+
+script.
+    function enableNotifications() {
+        if (jdNotif.isAlreadyGranted()) {
+            jdNotif.notify("Great!", "Notifications are enabled");
+        } else if(jdNotif.isNotificationAvailable()){
+            var container = $(".notification-header").first();
+            var dismiss = container.find(".dismiss-notification").first();
+            container.show();
+            dismiss.on('click', function (event) {
+                debug("dismiss clicked");
+                event.stopPropagation();
+                container.hide();
+            });
+            container.on("click", function () {
+                debug("banner clicked");
+                jdNotif.askPermission(function () {
+                    container.hide();
+                    jdNotif.notify("Great!", "Notifications are enabled");
+                });
+            });
+        }
+    }

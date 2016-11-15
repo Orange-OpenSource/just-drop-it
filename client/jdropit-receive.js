@@ -30,7 +30,8 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
     this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
-        this.progressBar = $("#transferProgressBar"),
+        this.progressBar = $("#progress"),
+        this.displayProgressBar = $("#progress-display"),
         this.totalTries = 0,
         this._init(isLocal, senderId);
     //TODO debug filename
@@ -40,9 +41,8 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
 
 ReceiverHandler.prototype.displayProgress = function (percent) {
     debug("displayProgress=%d", percent);
-    this.progressBar.attr('aria-valuenow', percent);
-    this.progressBar.width(percent + '%');
-    this.progressBar.html(percent + '%');
+    this.progressBar.attr('value', percent);
+    this.displayProgressBar.html(percent + '%');
 };
 
 ReceiverHandler.prototype.downloadComplete = function () {

@@ -32,7 +32,7 @@ var javascript = require('./routes/javascript');
 
 var app = express();
 
-global.DROP_IT_VERSION=2.1;
+global.DROP_IT_VERSION=2.2;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -43,6 +43,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, path.join('node_modules', 'tether', 'dist'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'boosted', 'dist'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery', 'dist','cdn'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery-file-download', 'src','Scripts'))));
@@ -60,6 +61,7 @@ app.use(function(req, res, next) {
     console.log("not found");
     var err = new Error('Not Found');
     err.status = 404;
+    err.sub_message = "";
     next(err);
 });
 
@@ -75,6 +77,7 @@ if (app.get('env') === 'development') {
         res.render('error', {
             jdropitVersion: global.DROP_IT_VERSION,
             message: err.message,
+            sub_message: err.sub_message,
             error: err
         });
     });
@@ -87,8 +90,10 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
+        isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
         message: err.message,
-        error: {}
+        sub_message: err.sub_message,
+        stack: err.stack
     });
 });
 

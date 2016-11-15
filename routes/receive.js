@@ -39,7 +39,6 @@ router.get(router.servePagePath + ':id', function (req, res, next) {
     dao.getSenderFromUri(uri, function (sender) {
         debug('receive - rendering receive for uri %s', uri);
         res.render('receive', {
-            title: "Just drop it",
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             fileName: sender.fileName,
             fileSize: sender.fileSize,
@@ -47,9 +46,10 @@ router.get(router.servePagePath + ':id', function (req, res, next) {
             senderId: sender.senderId
         });
     }, function () {
-        error('receive - file not found %s', fileId);
-        var err = new Error('Not Found');
+        error('receive - file not found %s', uri);
+        var err = new Error('Unknown transfer reference');
         err.status = 404;
+        err.sub_message = uri;
         next(err);
     });
 });
@@ -177,8 +177,10 @@ router.get(router.downloadPath + ':id/:receiverId', function (req, res, next) {
 
     }, function () {
         error('download - file not found or not prepared: %s/%s', fileId, receiverId);
-        var err = new Error('Not Found');
+        var err = new Error('Unknown transfer reference');
         err.status = 404;
+        err.sub_message = fileId+"/"+receiverId;
+
         next(err);
     });
 });

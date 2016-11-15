@@ -55,7 +55,7 @@ SenderHandler.prototype = {
                 $.each(that.receiverInfos, function (receiverId, receiverInfo) {
                     if (receiverInfo.active) {
                         debug("Receiver id %s failed", receiverId);
-                        that.transfertEnded(receiverId, true, "your friend did not received the file", "File not sent");
+                        that.transfertEnded(receiverId, true, "your friend did not received the file");
                     } else {
                         debug("Receiver id %s not active", receiverId);
                     }
@@ -77,14 +77,15 @@ SenderHandler.prototype = {
         this.socket.on('server_rcv_url_generated', function (url) {
             debug("url generated - %s", url);
             that.receiverUrl = window.location.host + url;
-            $('#generatedurl').html("<p>http://" + that.receiverUrl + " </p> ");
-            $('#generatedurlreminder').html("&nbsp;(http://" + that.receiverUrl + ")");
+            $('#generatedurl').html("http://" + that.receiverUrl);
+            $('#generatedurlreminder').html("http://" + that.receiverUrl);
+
         });
 
 
         this.socket.on('server_receiver_ready', function (receiverId) {
             $('#copyLinkContainer').hide();
-            $('#transfertMessage').html("Transfert in progress...");
+            $('#transfertMessage').html("Transfer in progress...");
 
             //init container
             var transferContainer = $('#transferContainer');
@@ -94,18 +95,20 @@ SenderHandler.prototype = {
             var newRow = rowReceiverTemplate.clone();
             newRow.removeAttr("id");
             newRow.show();
-            var linkContainer = newRow.children(".col-xs-1");
-            var linkRemove = linkContainer.children("a");
+            var linkRemove = newRow.find(".icon-delete");
             linkRemove.on("click", function (e) {
                 e.preventDefault();
                 newRow.hide();
             });
+            linkRemove.tooltip();
 
-            var pbContainer = newRow.children(".col-xs-9");
-            var transferProgressBar = pbContainer.find(".progress-bar");
-
+            var pbContainer = newRow.children(".col-xs-7");
+            var transferProgressBar = pbContainer.find("progress");
+            var displayProgressBar = pbContainer.find(".text-xs-center");
+            displayProgressBar.attr("id", "progress-"+receiverId);
+            transferProgressBar.attr("aria-describedby", "progress-"+receiverId);
             transferContainer.append(newRow);
-            that.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, linkContainer);
+            that.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, displayProgressBar, linkRemove);
 
             that.startUpload(receiverId);
 
@@ -113,13 +116,7 @@ SenderHandler.prototype = {
 
 
         this.socket.on('server_receiver_left', function (receiverId) {
-            var receiverInfo = that.receiverInfos[receiverId];
-            receiverInfo.deactivate(true);
-            var progressBarContainer = receiverInfo.progressBarContainer;
-            progressBarContainer.empty();
-            progressBarContainer.append($("<p>").addClass("text-error").html("Receiver left before end of transfer"));
-            receiverInfo.removeLinkContainer.show();
-            jdNotif.notify("Something is wrong", "Apparently your friend left before the transfer was over");
+            that.transfertEnded(receiverId, true, "Apparently your friend left before the transfer was over")
 
         });
 
@@ -128,16 +125,16 @@ SenderHandler.prototype = {
         });
 
         this.socket.on('server_transfer_complete', function (receiverId) {
-            that.transfertEnded(receiverId, false, "your friend correctly received your file", "File sent");
+            that.transfertEnded(receiverId, false, "your friend correctly received your file");
         });
 
 
         this.socket.on('server_transfer_timeout', function (receiverId) {
-            that.transfertEnded(receiverId, true, "your friend failed to download", "File not sent");
+            that.transfertEnded(receiverId, true, "your friend failed to download");
         });
 
         this.socket.on('server_transfer_disconnected', function (receiverId) {
-            that.transfertEnded(receiverId, true, "your friend failed to download", "File not sent");
+            that.transfertEnded(receiverId, true, "your friend failed to download");
         });
     },
 
@@ -179,19 +176,30 @@ SenderHandler.prototype = {
 
     displayProgress: function (receiverId, percent) {
         debug("displayProgress - %s - %d", receiverId, percent);
-        var transferProgressBar = this.receiverInfos[receiverId].progressBar;
+        var receiver = this.receiverInfos[receiverId];
         //update progress bar
-        transferProgressBar.attr('aria-valuenow', percent);
-        transferProgressBar.width(percent + '%');
-        transferProgressBar.html(percent + '%');
+        receiver.progressBar.attr('value', percent);
+        receiver.progressBar.attr('aria-valuenow', percent);
+        receiver.displayProgressBar.html(percent + '%');
     },
 
-    transfertEnded: function (receiverId, isError, notif, message) {
+    transfertEnded: function (receiverId, isError, notif) {
         var receiverInfo = this.receiverInfos[receiverId];
         receiverInfo.deactivate(isError);
         var progressBarContainer = receiverInfo.progressBarContainer;
+        var spanResultProperties = {};
+        spanResultProperties["data-toggle"] = "tooltip";
+        spanResultProperties["data-placement"] = "right";
+        spanResultProperties["title"] = isError? "Transfer failed" : "Transfer successful";
+        var spanResult = $("<span>", spanResultProperties)
+            .addClass(isError? "icon-Thumb-down" : "icon-Thumb-up")
+            .addClass("big-icon");
         progressBarContainer.empty();
-        progressBarContainer.append($("<p>").addClass(isError ? "text-danger" : "text-success").html(message));
+        progressBarContainer.append($("<p>")
+            .addClass(isError ? "text-danger" : "text-success")
+            .append(spanResult)
+        );
+        spanResult.tooltip();
         receiverInfo.removeLinkContainer.show();
 
         jdNotif.notify("Transfer ended", notif);
@@ -260,16 +268,17 @@ function sendFile(isLocal) {
 
 
 /******************************************************************/
-function ReceiverInfo(progressBarContainer, progressBar, removeLinkContainer) {
-    this.init(progressBarContainer, progressBar, removeLinkContainer);
+function ReceiverInfo(progressBarContainer, progressBar, displayProgressBar, removeLinkContainer) {
+    this.init(progressBarContainer, progressBar, displayProgressBar, removeLinkContainer);
 };
 
 ReceiverInfo.prototype = {
     constructor: ReceiverInfo,
-    init: function (progressBarContainer, progressBar, removeLinkContainer) {
+    init: function (progressBarContainer, progressBar, displayProgressBar, removeLinkContainer) {
         this.active = false;
         this.stream = null;
         this.progressBar = progressBar;
+        this.displayProgressBar = displayProgressBar;
         this.progressBarContainer = progressBarContainer;
         this.removeLinkContainer = removeLinkContainer;
     },
