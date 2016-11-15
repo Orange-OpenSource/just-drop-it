@@ -26,6 +26,7 @@ var dao = require("./dao")
 var debug = require('debug')('app:ioserver');
 var error = require('debug')('app:ioserver');
 debug.log = console.log.bind(console);
+var dao = require("./url-generator")
 
 
 exports = module.exports = wrapServer;
