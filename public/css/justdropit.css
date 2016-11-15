@@ -71,13 +71,17 @@ body {
 }
 
 .footer {
-	position: absolute;
-	bottom: 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
 
-.footer-content{
-    background-color: #f5f5f5;
-    display: inline-block;
+
+.footer-content {
+    background-color: #d5d5d5;
+    padding-bottom: .9rem;
+    margin: 4rem 0 0rem;
+    border-bottom: 1px solid #eee;
 }
 
 /* Remove "no file selected" on file input
@@ -97,6 +101,7 @@ input[type='file'] {
 
 .notification-header a {
 	cursor : pointer;
+	color: #f16e00;
 }
 
 .dismiss-notification {
