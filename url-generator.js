@@ -19,45 +19,66 @@
  * You should have received a copy of the GNU General Public License
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 var fs = require('fs');
 var debug = require('debug')('app:url-generator');
 var error = require('debug')('app:url-generator');
 debug.log = console.log.bind(console);
-var adj = [];
-var adv = [];
-var noun = [];
 
-function oneFileLoadingReady() {
-    if (adj.length != 0 && adv.length != 0 && noun.length != 0) {
-        debug("url generator is ready. have a sample = %s",generateUrl());
+
+var UriGenerator = function() {
+    this.adj = [];
+    this.adv = [];
+    this.noun = [];
+    var that = this;
+
+    //async load of the file content in memory
+    fs.readFile('data/adj', function(err, data) {
+        if(err) {
+            error(err);
+        }
+        that.adj = data.toString().split("\n");
+        that.oneFileLoadingReady();
+    });
+    fs.readFile('data/adv', function(err, data) {
+        if(err) {
+            error(err);
+        }
+        that.adv = data.toString().split("\n");
+        that.oneFileLoadingReady();
+    });
+    fs.readFile('data/noun', function(err, data) {
+        if(err) {
+            error(err);
+        }
+        that.noun = data.toString().split("\n");
+        that.oneFileLoadingReady();
+    });
+}
+
+UriGenerator.prototype.oneFileLoadingReady = function() {
+    if (this.adj.length != 0 && this.adv.length != 0 && this.noun.length != 0) {
+        debug("url generator is ready. have a sample = %s",this.generateUrl());
     }
 }
 
-function generateUrl() {
-    if (adj.length == 0 || adv.length == 0 || noun.length == 0){
+UriGenerator.prototype.generateUrl = function () {
+    if (this.adj.length == 0 || this.adv.length == 0 || this.noun.length == 0){
         error("url generation not ready: file are not all loaded");
         return null;
     } else {
-        return adv[Math.floor(Math.random() * adv.length) + 1] + '-' +
-            adj[Math.floor(Math.random() * adj.length) + 1] + '-' +
-            noun[Math.floor(Math.random() * noun.length) + 1];
+        return this.adv[Math.floor(Math.random() * this.adv.length) + 1] + '-' +
+            this.adj[Math.floor(Math.random() * this.adj.length) + 1] + '-' +
+            this.noun[Math.floor(Math.random() * this.noun.length) + 1];
     }
 }
 
-//async load of the file content in memory
-fs.readFile('data/adj', function(err, data) {
-    if(err) throw err;
-     adj = data.toString().split("\n");
-    oneFileLoadingReady();
-});
-fs.readFile('data/adv', function(err, data) {
-    if(err) throw err;
-    adv = data.toString().split("\n");
-    oneFileLoadingReady();
-});
-fs.readFile('data/noun', function(err, data) {
-    if(err) throw err;
-    noun = data.toString().split("\n");
-    oneFileLoadingReady();
-});
+
+
+module.exports = new UriGenerator();
+
+
+
+
+
+
+

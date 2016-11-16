@@ -148,6 +148,20 @@ Dao.prototype.getSender = function (senderId, callback, notFoundCallback) {
     this._checkDefined(this.senders[senderId], callback, notFoundCallback);
 };
 
+Dao.prototype.getSenderFromUri = function (uri, callback, notFoundCallback) {
+    debug("Searching sender for URI %s",uri);
+    for (var senderId in this.senders) {
+        debug("Testing sender id %s", senderId);
+        if (this.senders.hasOwnProperty(senderId) && this.senders[senderId].uri == uri) {
+            debug("sender found");
+            this._checkDefined(this.senders[senderId], callback, notFoundCallback);
+            return;
+        }
+    }
+    notFoundCallback();
+};
+
+
 Dao.prototype.eachSenders = function (callback) {
     for (var senderId in this.senders) {
         if (this.senders.hasOwnProperty(senderId)) {

@@ -26,7 +26,7 @@ var dao = require("./dao")
 var debug = require('debug')('app:ioserver');
 var error = require('debug')('app:ioserver');
 debug.log = console.log.bind(console);
-var dao = require("./url-generator")
+var uriGenerator = require("./url-generator");
 
 
 exports = module.exports = wrapServer;
@@ -67,7 +67,10 @@ function wrapServer(app, server) {
                         dao.getSender(senderId, function (sender) {
                             sender.fileName = info.name;
                             sender.fileSize = info.size;
-                            socket.emit('server_rcv_url_generated', app.receiverServePagePath + senderId);
+                            sender.uri = uriGenerator.generateUrl();
+
+                            debug("Generated uri "+ sender.uri);
+                            socket.emit('server_rcv_url_generated', app.receiverServePagePath + sender.uri);
                         }, function () {
                             routingError(socket);
                         });
