@@ -32,21 +32,21 @@ var UriGenerator = function() {
     var that = this;
 
     //async load of the file content in memory
-    fs.readFile('data/adj', function(err, data) {
+    fs.readFile('data/adj-short', function(err, data) {
         if(err) {
             error(err);
         }
         that.adj = data.toString().split("\n");
         that.oneFileLoadingReady();
     });
-    fs.readFile('data/adv', function(err, data) {
+    fs.readFile('data/adv-short', function(err, data) {
         if(err) {
             error(err);
         }
         that.adv = data.toString().split("\n");
         that.oneFileLoadingReady();
     });
-    fs.readFile('data/noun', function(err, data) {
+    fs.readFile('data/noun-short', function(err, data) {
         if(err) {
             error(err);
         }
