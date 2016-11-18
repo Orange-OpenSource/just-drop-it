@@ -35,16 +35,16 @@ debug.log = console.log.bind(console);
 
 
 router.get(router.servePagePath + ':id', function (req, res, next) {
-    var fileId = req.params.id;
-    dao.getSender(fileId, function (sender) {
-        debug('receive - rendering receive for file %s', fileId);
+    var uri = req.params.id;
+    dao.getSenderFromUri(uri, function (sender) {
+        debug('receive - rendering receive for uri %s', uri);
         res.render('receive', {
             title: "Just drop it",
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             fileName: sender.fileName,
             fileSize: sender.fileSize,
             jdropitVersion: global.DROP_IT_VERSION,
-            senderId: fileId
+            senderId: sender.senderId
         });
     }, function () {
         error('receive - file not found %s', fileId);
