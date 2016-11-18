@@ -54,27 +54,27 @@ block content
                     | Or select it in your file explorer:
                     label(for="file" class="hidden") select a file
                     input(type="file" id="file")
-    div.row#copyLinkContainer(hidden="true")
+    div.row#copyLinkContainer(style="display: none;")
         div(class="col-xs-12 jumbotron")
             h4 Ready to transfert!
             p.lead Tell your friend to go to this url:
             div.text-muted#generatedurl
             button.btn#copy-button(title="Click to copy url to clipboard") Copy to clipoard
             span#clipboardcopyok(class="glyphicon glyphicon-check" aria-hidden="true" )
-    div#transferContainer(hidden="true")
+    div#transferContainer(style="display: none;")
         div.row
             div.col-xs-12
                 p The transfer will start as soon as your friends open the link.
                     span.text-muted.text-right#generatedurlreminder &nbsp;(http://proutprout)
                 p File:
                     span#filename
-        div#rowReceiverTemplate.row(hidden="true")
+        div#rowReceiverTemplate.row(style="display: none;")
             div.col-xs-2
                 span(class="glyphicon glyphicon-user")
             div.col-xs-9
                 div.progress
                     div(class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;") 0%
-            div.col-xs-1(hidden="true")
+            div(class="col-xs-1 text-right" style="display: none;")
                 a(href="#")
                     span(class="glyphicon glyphicon-remove")
 
