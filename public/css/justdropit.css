@@ -23,6 +23,7 @@
 /* drag and drop style
 -------------------------------------------------- */
 
+
 .upload-drop-zone {
 	height: 200px;
 	border-width: 2px;
@@ -56,51 +57,161 @@
 #inner-message {
 	margin: 0 auto;
 }
-/* Sticky footer styles
--------------------------------------------------- */
 
-html {
-	position: relative;
-	min-height: 100%;
+a {
+    color: #f16e00;
+    text-decoration: none;
 }
 
-body {
-	/* Margin bottom by footer height */
-	
-	margin-bottom: 60px;
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #f16e00;
 }
 
-.footer {
-	position: absolute;
-	bottom: 0;
+.error small {
+    color: #222;
 }
 
-.footer-content{
-    background-color: #f5f5f5;
-    display: inline-block;
+header {
+    width: 100%;
+    background-color: #000;
 }
 
+.header-content {
+}
+
+.header-content h1 {
+    padding: 0.5rem 0px 0.2rem;
+}
+
+.header-content h1 small {
+    font-style: italic;
+    color: #ddd;
+    display: block;
+    font-size: 50%;
+}
+
+.notification-header {
+    text-align: center;
+    cursor : pointer;
+    color: #EFEFEF;
+    border-bottom: 1px solid #EFEFEF;
+}
+
+.notification-header em {
+    color: #f16e00;
+}
+
+.notification-header a {
+    color: #f16e00;
+}
+
+.dismiss-notification {
+    float: right;
+    margin-right: 10px;
+}
+
+main {
+    padding: 1.5rem 0px 1.1rem;
+}
+
+main em {
+    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.btn-orange {
+    background-color: #222;
+    border-color: #222;
+    color: #EFEFEF;
+}
+
+button.btn-orange:hover {
+    background-color: #222;
+    border-color: #222;
+    color: #f16e00;
+}
+
+.link-like {
+    cursor: pointer;
+    color: #f16e00;
+}
+
+.big-icon {
+    font-size: 1.5rem;
+    font-style: normal;
+}
+
+.text-right {
+    text-align: right;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+
+.footer-content {
+    background-color: #000;
+    color: #ffffff;
+    margin: 4rem 0 0rem;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    padding: 0.2rem 0px 0px;
+}
+
+.footer-top {
+    padding: 0.5rem 0px 0px;
+}
+
+.footer-bottom {
+    color: #ddd;
+}
+
+
+.footer-bottom ul {
+    padding: 10px;
+    margin: 0;
+    text-align: center;
+    list-style: none;
+}
+
+.footer-bottom ul > li {
+    display: inline;
+    margin-right: 20px;
+    font-size: 0.875rem;
+}
+
+
+.modal-header {
+    background-color: #000;
+}
+
+.modal-title {
+    color: #f16e00;
+}
+
+.modal-header  .close{
+    color: #f16e00;
+    opacity: 1;
+}
+
+.modal-body a, h5 {
+    color: #222222;
+    font-style: italic;
+}
 /* Remove "no file selected" on file input
 --------- */
+
 
 input[type='file'] {
 	color: transparent;
 	display: inline;
 }
 
-.notification-header {
-	text-align: center;
-	cursor : pointer;
-	background-color: #282828;
-	color: #ddd;
-}
 
-.notification-header a {
-	cursor : pointer;
-}
 
-.dismiss-notification {
-	float: right;
-	margin-right: 10px;
-}
+
 

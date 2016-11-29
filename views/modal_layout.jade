@@ -19,21 +19,13 @@
  You should have received a copy of the GNU General Public License
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 
-extends layout
-block extra_scripts
-    script.
-        var stayOnPage = false;
-    | <!--[if IE]> <script>stayOnPage = true;</script><![endif]-->
-    script.
-        if(!stayOnPage)window.location = "/";
-
-block content
-    div.row
-        div.col-xs-12.alert.h3
-            span.icon-Warningimportant(aria-hidden="true")
-                span.sr-only.lead Error
-                | This project hasn't been tested on IE. Please use one of the following browser:
-                ul
-                    li Firefox
-                    li Chrome
-                    li Safari
+div.modal.fade(tabindex="-1" role="dialog" aria-hidden="true")
+    div.modal-dialog(role="document")
+        div.modal-content
+            div.modal-header.modal-header-dropit
+                button.close(type="button" data-dismiss="modal" aria-label="Close")
+                    span(aria-hidden="true") &times;
+                h4.modal-title
+                    block modal_title
+            div.modal-body
+                block modal_body

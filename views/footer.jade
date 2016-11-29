@@ -19,22 +19,28 @@
  You should have received a copy of the GNU General Public License
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 
-div(class="container footer")
-    div(class="footer-content")
-        p(class="text-muted text-left") This page allows you to simply beam a file to a colleague. You and your pal must be in front of your browsers at the same time. Nothing is stored on any server.
-        p(class="text-center")
-            a(class="text-muted" data-toggle="modal" data-target="#thirdPartiesModal" role="button") Third Parties
-            | &nbsp; - &nbsp;
-            a(class="text-muted" data-toggle="modal" data-target="#aboutModal" role="button") About
-            | &nbsp; - &nbsp;
-            a(id="whatsNewLink" class="text-muted" data-toggle="modal" data-target="#whatsNewModal" role="button") What's new
-                span(id="whatsNewBadge" class="alert-danger badge") !
+footer
+    div.footer-content
+        div.container(role="contentinfo")
+            div.footer-top
+                p This page allows you to simply beam a file to a colleague. You and your pal must be in front of your browsers at the same time. Nothing is stored on any server.
+        div.footer-bottom
+            ul
+                li
+                    a(data-toggle="modal" data-target=".modal:nth-of-type(1)" role="button") Third Parties
+                li .
+                li
+                    a(data-toggle="modal" data-target=".modal:nth-of-type(2)" role="button") About
+                li .
+                li
+                    a#whatsNewLink(data-toggle="modal" data-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
+                        span.text-danger.icon-Discussion-more.big-icon.badge#whatsNewBadge
 script.
     var wnHandler = new WhatsNewHandler(#{jdropitVersion},$("#whatsNewLink"),$("#whatsNewBadge"));
     $("#whatsNewLink").click(function(){wnHandler.setAsRead()});
+include thirdparties
 include about
 include whatsnew
-include thirdparties
 
 
 
