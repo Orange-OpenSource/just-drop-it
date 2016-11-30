@@ -41,10 +41,23 @@ block extra_scripts
             sendFile(#{isLocal});
             enableNotifications();
         }
+block extra_header
+    nav.o-stepbar
+        ol
+            li.stepbar-item.current
+                a.stepbar-link(title="Select your file")
+                    span.step-number 1
+                    span.step-title Select your file
+            li.stepbar-item
+                a.stepbar-link(title="Share it with your friends")
+                    span.step-number 2
+                    span.step-title Share it with your friends
+            li.stepbar-item
+                a.stepbar-link(title="Transferring")
+                    span.step-number 3
+                    span.step-title Transferring
 block content
     div.row#selectFileContainer
-        div.col-xs-12
-            h2 Select your file
         div.col-xs-12
             p.lead Either drop a file below:
             div.upload-drop-zone#drop-zone Just drag and drop a file here
@@ -53,7 +66,6 @@ block content
                 input#file(type="file")
     div.row#copyLinkContainer(style="display: none;")
         div.col-xs-12
-            h2 Ready to transfer!
             p.lead Tell your friend to go to this url:
             div.text-muted
                 p#generatedurl
@@ -62,7 +74,7 @@ block content
     div#transferContainer(style="display: none;")
         div.row
             div.col-xs-12
-                em The transfer will start as soon as your friends open the link.
+                em Each transfer will start as soon as your friends open the link.
 
                 p.text-muted#generatedurlreminder
                 p &nbsp;
