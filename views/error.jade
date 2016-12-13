@@ -24,8 +24,11 @@ block extra_scripts
     script.
         window.onload = function() {
             $("#warning-window").hide();
+            $("header").hide()
         }
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+    h1.error #{message}&nbsp;(
+        small #{sub_message}
+        | )
+    if isLocal
+        pre #{stack}

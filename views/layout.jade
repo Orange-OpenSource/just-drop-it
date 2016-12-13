@@ -24,11 +24,16 @@ html
     head
         meta(charset="utf-8")
         meta(http-equiv="X-UA-Compatible" content="IE=edge")
-        meta(name="viewport" content="width=device-width, initial-scale=1")
-        title=title
-        link(rel='stylesheet', href='/css/bootstrap-orange.css')
-        link(rel='stylesheet', href='/css/bootstrap-orange-theme.css')
-        link(rel='stylesheet', href='/css/boosted.css')
+        meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+        title Just drop it
+        if isLocal
+            link(rel='stylesheet', href='/css/orangeIcons.css')
+            link(rel='stylesheet', href='/css/boosted.css')
+            link(rel='stylesheet', href='/css/tether.css')
+        else
+            link(rel='stylesheet', href='/css/orangeIcons.min.css')
+            link(rel='stylesheet', href='/css/boosted.min.css')
+            link(rel='stylesheet', href='/css/tether.min.css')
         link(rel='stylesheet', href='/css/justdropit.css')
 
         block extra_styles
@@ -39,15 +44,18 @@ html
         //script(src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js")
         if isLocal
             script(src="/jquery.js")
+            script(src="/js/tether.js")
             script(src="/js/boosted.js")
             script(src="/js/common-libraries.js")
             script(src="/js/jdropit-whatsnew.js")
+            script(src="/js/jdropit-notif.js")
         else
             script(src="/jquery.min.js")
+            script(src="/js/tether.min.js")
             script(src="/js/boosted.min.js")
             script(src="/js/common-libraries.min.js")
-
             script(src="/js/jdropit-whatsnew.min.js")
+            script(src="/js/jdropit-notif.min.js")
         script.
             if (typeof console == "undefined"){
                 window.console = {
@@ -62,18 +70,20 @@ html
                 }
             }
         block extra_scripts
-    body(class="container")
-        include ./notification
-        div(class="content-main")
-            div(class="wrapper")
-                include ./header
-                div#warning-window(class="alert alert-warning" hidden="true")
-                    span(class="glyphicon glyphicon-exclamation-sign" aria-hidden="true")
-                    span(class="sr-only") Warning:
-                    | Don't close this window!
-                div(class="container-fluid")
-                    include ./user_messages
-
-                    block content
-
+    body
+        include ./header
+        main
+            div.container
+                div.alert.alert-warning#warning-window(style="display: none;")
+                    span.icon-Warningimportant(aria-hidden="true")
+                    span.sr-only Warning:
+                    span
+                        | &nbsp; Don't close this window!
+                include ./user_messages
+                block content
         include ./footer
+
+
+
+
+

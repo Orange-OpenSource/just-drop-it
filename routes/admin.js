@@ -32,7 +32,7 @@ debug.log = console.log.bind(console);
 router.get('/', function(req, res) {
     var senders = [];
     dao.eachSenders(function(sender){
-        var senderObj = {id : sender.senderId, receivers : []};
+        var senderObj = {id : sender.senderId, receivers : [], fileName: sender.fileName};
         sender.eachReceiver(function(receiver){
             senderObj.receivers.push(receiver.receiverId);
         });

@@ -34,22 +34,21 @@ block extra_scripts
             enableNotifications();
         }
 block content
-    div.row
-        div.col-xs-12
-            h3 Hello
-            p Someone just dropped you a file
     div.row#transferContainer
         div.col-xs-12
-            div.progress
-                div#transferProgressBar(class="progress-bar  progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;") 0%
-            p File:
+            h2 Hello
+            p Transfer in progress...
+        div.col-xs-12
+            div.text-xs-center#progress-display 0%
+            progress.progress#progress(value="0" max="100" style="min-width: 2em;" aria-describedby="progress-display")
+            p
                 span#filename
 
-    div.row#completeContainer(hidden="true")
+    div.row#completeContainer(style="display: none;")
         div.col-xs-12
-            h3 Thank you!
+            h2 Thank you!
             p Your friend knows you received the file. You can close this page now.
-    div.row#errorContainer(hidden="true")
+    div.row#errorContainer(style="display: none;")
         div.col-xs-12
-            h3 Error
-            strong#errorMessage(class="text-danger")
+            h2 Error
+            strong.text-danger#errorMessage

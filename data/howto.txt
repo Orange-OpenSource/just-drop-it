@@ -1,0 +1,5 @@
+- downloaded word dictionnaries from http://wordnet.princeton.edu/wordnet/download/current-version/ 
+- extract words by running egrep -o "^[0-9]{8}\s[0-9]{2}\s[a-z]\s[0-9]{2}\s[a-zA-Z_]*\s" data.XXX
+- removed uppercase words with grep -Ev '^([A-Z]|.$)' XXX
+- only shorter words awk 'length($0)<6' data/noun > data/noun-short
+- filter uniq : sort -u
