@@ -33,7 +33,7 @@ var UriGenerator = function() {
 
     function oneFileLoadingReady() {
         if (that.adj.length != 0 && that.adv.length != 0 && that.noun.length != 0) {
-            debug("url generator is ready. have a sample = %s",this.generateUrl());
+            debug("url generator is ready. have a sample = %s", that.generateUrl());
         }
     }
 
