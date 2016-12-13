@@ -31,35 +31,35 @@ var UriGenerator = function() {
     this.noun = [];
     var that = this;
 
+    function oneFileLoadingReady() {
+        if (that.adj.length != 0 && that.adv.length != 0 && that.noun.length != 0) {
+            debug("url generator is ready. have a sample = %s",this.generateUrl());
+        }
+    }
+
     //async load of the file content in memory
     fs.readFile('data/adj-short', function(err, data) {
         if(err) {
             error(err);
         }
         that.adj = data.toString().split("\n");
-        that.oneFileLoadingReady();
+        oneFileLoadingReady();
     });
     fs.readFile('data/adv-short', function(err, data) {
         if(err) {
             error(err);
         }
         that.adv = data.toString().split("\n");
-        that.oneFileLoadingReady();
+        oneFileLoadingReady();
     });
     fs.readFile('data/noun-short', function(err, data) {
         if(err) {
             error(err);
         }
         that.noun = data.toString().split("\n");
-        that.oneFileLoadingReady();
+        oneFileLoadingReady();
     });
-}
-
-UriGenerator.prototype.oneFileLoadingReady = function() {
-    if (this.adj.length != 0 && this.adv.length != 0 && this.noun.length != 0) {
-        debug("url generator is ready. have a sample = %s",this.generateUrl());
-    }
-}
+};
 
 UriGenerator.prototype.generateUrl = function () {
     if (this.adj.length == 0 || this.adv.length == 0 || this.noun.length == 0){
@@ -70,7 +70,7 @@ UriGenerator.prototype.generateUrl = function () {
             this.adj[Math.floor(Math.random() * this.adj.length) + 1] + '-' +
             this.noun[Math.floor(Math.random() * this.noun.length) + 1];
     }
-}
+};
 
 
 

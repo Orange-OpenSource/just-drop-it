@@ -137,7 +137,7 @@ function wrapServer(app, server) {
 
                         sender.socket.emit('server_receiver_ready', receiverId);
                     }, function () {
-                        emitError(socket, 'unknown senderID' + senderId);
+                        emitError(socket, 'unknown senderID: ' + senderId);
                     });
                 });
             }
