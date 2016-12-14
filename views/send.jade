@@ -26,13 +26,13 @@ block extra_scripts
         script(src="/js/HackTimer.js")
         script(src="/js/HackTimerWorker.js")
         script(src="/js/socket.io-stream.js")
-        script(src="/ZeroClipboard.js")
+        script(src="/clipboard.js")
         script(src="/js/jdropit-send.js")
     else
         script(src="/js/HackTimer.silent.min.js")
         script(src="/js/HackTimerWorker.min.js")
         script(src="/js/socket.io-stream.min.js")
-        script(src="/ZeroClipboard.min.js")
+        script(src="/clipboard.min.js")
         script(src="/js/jdropit-send.min.js")
     script.
 
@@ -72,7 +72,7 @@ block content
             p.lead Tell your friend to go to this url:
             p.text-muted.text-xs-center.lead#generatedurl
             span.text-success.pull-xs-right.icon-checkbox-tick#clipboardcopyok(aria-hidden="true")
-            button.btn.btn-orange.pull-xs-right#copy-button(title="Click to copy url to clipboard") Copy to clipboard
+            button.btn.btn-orange.pull-xs-right#copy-button(title="Click to copy url to clipboard",data-clipboard-target="#generatedurl") Copy to clipboard
     div#transferContainer(style="display: none;")
         div.row.top-buffer
             div.col-xs-12

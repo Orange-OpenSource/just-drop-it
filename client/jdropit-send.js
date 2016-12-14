@@ -230,18 +230,13 @@ function sendFile(isLocal) {
     var senderHandler = new SenderHandler(isLocal);
 
     $("#clipboardcopyok").hide();
-    //____ Handling of copy to clipboard with zeroClipboard
-    var clip = new ZeroClipboard(document.getElementById("copy-button"));
-    clip.on("ready", function () {
-        clip.on("copy", function (event) {
-            var clipboard = event.clipboardData;
-            clipboard.setData("text/plain", 'http://' + senderHandler.receiverUrl);
-        });
-        clip.on("aftercopy", function () {
-            $("#clipboardcopyok").show(300);
-        });
-    });
 
+    var clipboard = new Clipboard('#copy-button');
+    clipboard.on('success', function(e) {
+        console.info('Copied to clipboard:', e.text);
+        $("#clipboardcopyok").show(300);
+        e.clearSelection();
+    });
 
     var dropZone = $('#drop-zone');
     //----- Handling drag and drop zone style
