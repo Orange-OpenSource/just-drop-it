@@ -29,8 +29,12 @@ var fs    = require("fs");
 
 debug.log = console.log.bind(console);
 
-var dumbQuotes = ["Let us ease your file transfer", "Make the world a better place", "Make transfer, not war",
-"Let's transfer become a pleasure", "Transfer is not fatality"];
+var dumbQuotes = ["Let us ease your file transfers",
+    "Making the world a better place",
+    "Make file transfers, not war",
+    "When transfers become pleasure",
+    "File transfer is not fatality",
+    "Helping humanity thrive"];
 
 /* GET home page. */
 router.get('/', function(req, res) {
