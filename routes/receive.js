@@ -40,9 +40,10 @@ router.get(router.servePagePath + ':id', function (req, res, next) {
         debug('receive - rendering receive for uri %s', uri);
         res.render('receive', {
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
+            jdropitVersion: global.DROP_IT_VERSION,
+            dumbContent : "",
             fileName: sender.fileName,
             fileSize: sender.fileSize,
-            jdropitVersion: global.DROP_IT_VERSION,
             senderId: sender.senderId
         });
     }, function () {

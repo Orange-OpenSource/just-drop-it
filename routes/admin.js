@@ -41,6 +41,7 @@ router.get('/', function(req, res) {
     res.render('admin', {title : "Just drop it Admin",
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
         jdropitVersion : global.DROP_IT_VERSION,
+        dumbContent : "",
         senders : senders});
 });
 

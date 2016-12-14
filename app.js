@@ -75,6 +75,8 @@ if (app.get('env') === 'development') {
         console.error(err);
         res.status(err.status || 500);
         res.render('error', {
+            dumbContent : "",
+            isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             jdropitVersion: global.DROP_IT_VERSION,
             message: err.message,
             sub_message: err.sub_message,
@@ -90,7 +92,9 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
+        dumbContent : "",
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
+        jdropitVersion : global.DROP_IT_VERSION,
         message: err.message,
         sub_message: err.sub_message,
         stack: err.stack
