@@ -73,12 +73,13 @@ html
     body
         include ./header
         main
+            div.alert.alert-warning#warning-window(style="display: none;")
+                                span.icon-Warningimportant(aria-hidden="true")
+                                span.sr-only Warning:
+                                span
+                                    | &nbsp; Don't close this window!
             div.container
-                div.alert.alert-warning#warning-window(style="display: none;")
-                    span.icon-Warningimportant(aria-hidden="true")
-                    span.sr-only Warning:
-                    span
-                        | &nbsp; Don't close this window!
+
                 include ./user_messages
                 block content
         include ./footer

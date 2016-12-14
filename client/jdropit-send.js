@@ -84,34 +84,7 @@ SenderHandler.prototype = {
 
 
         this.socket.on('server_receiver_ready', function (receiverId) {
-            $('#copyLinkContainer').hide();
-            $('#transfertMessage').html("Transfer in progress...");
-
-            //init container
-            var transferContainer = $('#transferContainer');
-            transferContainer.show();
-
-            var rowReceiverTemplate = $("#rowReceiverTemplate");
-            var newRow = rowReceiverTemplate.clone();
-            newRow.removeAttr("id");
-            newRow.show();
-            var linkRemove = newRow.find(".icon-delete");
-            linkRemove.on("click", function (e) {
-                e.preventDefault();
-                newRow.hide();
-            });
-            linkRemove.tooltip();
-
-            var pbContainer = newRow.children(".col-xs-7");
-            var transferProgressBar = pbContainer.find("progress");
-            var displayProgressBar = pbContainer.find(".text-xs-center");
-            displayProgressBar.attr("id", "progress-"+receiverId);
-            transferProgressBar.attr("aria-describedby", "progress-"+receiverId);
-            transferContainer.append(newRow);
-            that.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, displayProgressBar, linkRemove);
-
-            that.startUpload(receiverId);
-
+            that.receiverIsReady(receiverId);
         });
 
 
@@ -138,6 +111,18 @@ SenderHandler.prototype = {
         });
     },
 
+    setNavigationStep: function(step) {
+        $(".o-stepbar > ol > li").each(function (idx) {
+            if(step > idx) {
+                $(this).removeClass("current");
+                $(this).addClass("done");
+            }
+            else if(step == idx){
+                $(this).addClass("current");
+            }
+        });
+    },
+
     fileIsReady: function (fileToTransfert) {
         var sizeDisplay = fileToTransfert.size > (1024 * 1024) ? Math.round(fileToTransfert.size / 1024 / 1024) + " Mo" :
             fileToTransfert.size > 1024 ? Math.round(fileToTransfert.size / 1024) + " Ko" : fileToTransfert.size + " o";
@@ -153,6 +138,38 @@ SenderHandler.prototype = {
         $('#copyLinkContainer').show(500);
         $('#warning-window').show(500);
         $('#selectFileContainer').hide(500);
+        this.setNavigationStep(1);
+    },
+
+    receiverIsReady: function(receiverId) {
+        $('#copyLinkContainer').hide();
+        this.setNavigationStep(2);
+        $('#transfertMessage').html("Transfer in progress...");
+
+        //init container
+        var transferContainer = $('#transferContainer');
+        transferContainer.show();
+
+        var rowReceiverTemplate = $("#rowReceiverTemplate");
+        var newRow = rowReceiverTemplate.clone();
+        newRow.removeAttr("id");
+        newRow.show();
+        var linkRemove = newRow.find(".icon-delete");
+        linkRemove.on("click", function (e) {
+            e.preventDefault();
+            newRow.hide();
+        });
+        linkRemove.tooltip();
+
+        var pbContainer = newRow.children(".col-xs-8");
+        var transferProgressBar = pbContainer.find("progress");
+        var displayProgressBar = pbContainer.find(".text-xs-center");
+        displayProgressBar.attr("id", "progress-"+receiverId);
+        transferProgressBar.attr("aria-describedby", "progress-"+receiverId);
+        transferContainer.append(newRow);
+        this.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, displayProgressBar, linkRemove);
+
+        this.startUpload(receiverId);
     },
 
     startUpload: function (receiverId) {
