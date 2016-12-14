@@ -32,9 +32,7 @@ header(role="banner")
 
 script.
     function enableNotifications() {
-        if (jdNotif.isAlreadyGranted()) {
-            jdNotif.notify("Great!", "Notifications are enabled");
-        } else if(jdNotif.isNotificationAvailable()){
+        if(jdNotif.isNotificationAvailable() && !jdNotif.isAlreadyGranted()){
             var container = $(".notification-header").first();
             var dismiss = container.find(".dismiss-notification").first();
             container.show();
