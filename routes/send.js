@@ -42,7 +42,7 @@ router.get('/', function(req, res) {
     res.render('send', {
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
         jdropitVersion : global.DROP_IT_VERSION,
-        dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length) + 1]
+        dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)]
     });
 });
 
