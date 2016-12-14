@@ -66,9 +66,9 @@ UriGenerator.prototype.generateUrl = function () {
         error("url generation not ready: file are not all loaded");
         return null;
     } else {
-        return this.adv[Math.floor(Math.random() * this.adv.length) + 1] + '-' +
-            this.adj[Math.floor(Math.random() * this.adj.length) + 1] + '-' +
-            this.noun[Math.floor(Math.random() * this.noun.length) + 1];
+        return this.adv[Math.floor(Math.random() * this.adv.length)] + '-' +
+            this.adj[Math.floor(Math.random() * this.adj.length)] + '-' +
+            this.noun[Math.floor(Math.random() * this.noun.length)];
     }
 };
 
