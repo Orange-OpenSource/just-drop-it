@@ -161,7 +161,7 @@ SenderHandler.prototype = {
         });
         linkRemove.tooltip();
 
-        var pbContainer = newRow.children(".col-xs-7");
+        var pbContainer = newRow.children(".col-xs-8");
         var transferProgressBar = pbContainer.find("progress");
         var displayProgressBar = pbContainer.find(".text-xs-center");
         displayProgressBar.attr("id", "progress-"+receiverId);
