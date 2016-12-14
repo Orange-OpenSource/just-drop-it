@@ -50,8 +50,8 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 require("./ioserver")(app, server);
 //  Start the app on the specific interface (and port).
 server.listen(port, ipAddress, function () {
-    var mDate = new Date(Date.now());
-    debug('%s: Node server started on %s:%d ...', mDate, ipAddress == null ? "*" : ipAddress, port);
+    debug('%s: JustDropIt(%s) started on %s:%d ...',
+        new Date(Date.now()), global.DROP_IT_VERSION, ipAddress == null ? "*" : ipAddress, port);
 });
 
 

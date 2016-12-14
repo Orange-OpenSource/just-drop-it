@@ -29,12 +29,21 @@ var fs    = require("fs");
 
 debug.log = console.log.bind(console);
 
+var dumbQuotes = ["Let us ease your file transfers",
+    "Making the world a better place",
+    "Make file transfers, not war",
+    "When file transfer becomes pleasure",
+    "File transfer is not a fatality",
+    "Helping humanity thrive"];
+
 /* GET home page. */
 router.get('/', function(req, res) {
     debug('serving send');
     res.render('send', {
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-        jdropitVersion : global.DROP_IT_VERSION});
+        jdropitVersion : global.DROP_IT_VERSION,
+        dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)]
+    });
 });
 
 /* GET home page. */

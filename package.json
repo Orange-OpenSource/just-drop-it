@@ -1,6 +1,6 @@
 {
   "name": "Just-Drop-It",
-  "version": "1.0.0",
+  "version": "2.3.0",
   "description": "Simply beam files between two browsers",
   "keywords": [
     "Transfer",
@@ -30,7 +30,7 @@
     "uglify-js" : "~2.4.23",
     "boosted" : "~4.0.0-alpha.4",
     "tether" : "~1.1.1",
-    "zeroclipboard" :  "~2.2.0",
+    "clipboard" :  "~1.5.16",
     "jquery" : "1.11.2",
     "jquery-file-download" : "1.4.5"
 

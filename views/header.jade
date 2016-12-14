@@ -28,14 +28,11 @@ header(role="banner")
             div.row
                 div.col-xs-12
                     h1 Just drop it
-                        small &laquo;Let us ease your file transfer&raquo;
-
+                        small= dumbContent
 
 script.
     function enableNotifications() {
-        if (jdNotif.isAlreadyGranted()) {
-            jdNotif.notify("Great!", "Notifications are enabled");
-        } else if(jdNotif.isNotificationAvailable()){
+        if(jdNotif.isNotificationAvailable() && !jdNotif.isAlreadyGranted()){
             var container = $(".notification-header").first();
             var dismiss = container.find(".dismiss-notification").first();
             container.show();

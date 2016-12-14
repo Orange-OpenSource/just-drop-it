@@ -32,7 +32,7 @@ var javascript = require('./routes/javascript');
 
 var app = express();
 
-global.DROP_IT_VERSION=2.2;
+global.DROP_IT_VERSION=parseFloat(require("./package.json").version);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, path.join('node_modules', 'tether', 
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'boosted', 'dist'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery', 'dist','cdn'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery-file-download', 'src','Scripts'))));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'zeroclipboard', 'dist'))));
+app.use(express.static(path.join(__dirname, path.join('node_modules', 'clipboard', 'dist'))));
 
 var receiveUriPath = '/receive';
 app.use('/', send);
@@ -75,6 +75,8 @@ if (app.get('env') === 'development') {
         console.error(err);
         res.status(err.status || 500);
         res.render('error', {
+            dumbContent : "",
+            isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             jdropitVersion: global.DROP_IT_VERSION,
             message: err.message,
             sub_message: err.sub_message,
@@ -90,7 +92,9 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
+        dumbContent : "",
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
+        jdropitVersion : global.DROP_IT_VERSION,
         message: err.message,
         sub_message: err.sub_message,
         stack: err.stack

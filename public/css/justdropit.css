@@ -111,7 +111,7 @@ header {
 }
 
 main {
-    padding: 1.5rem 0px 1.1rem;
+    padding: 2rem 0px 1.1rem;
 }
 
 main em {
@@ -211,6 +211,8 @@ input[type='file'] {
 	display: inline;
 }
 
+/*to add margin between rows*/
+.top-buffer { margin-top:30px; }
 
 
 
