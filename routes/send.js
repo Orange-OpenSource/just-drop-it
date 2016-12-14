@@ -32,8 +32,8 @@ debug.log = console.log.bind(console);
 var dumbQuotes = ["Let us ease your file transfers",
     "Making the world a better place",
     "Make file transfers, not war",
-    "When transfers become pleasure",
-    "File transfer is not fatality",
+    "When file transfer become pleasure",
+    "File transfer is not a fatality",
     "Helping humanity thrive"];
 
 /* GET home page. */
