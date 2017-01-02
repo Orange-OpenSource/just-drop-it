@@ -24,15 +24,20 @@ It couldn't be more simple (but you will need a running  instance of just-drop-i
 
 ## How to run it
 
-### on any computer
-You will need both [npm](https://www.npmjs.com/) and [node.js](https://nodejs.org/) if you want to run it.
-
+### On any computer
+#### With node JS
+Download and install [node.js v0.10](https://nodejs.org/download/release/latest-v0.10.x/). Then:
 * Download the source code
-* run `npm install` to download the needed dependencies 
-* `node server.js` will start node-js server
+* Download the needed dependencies (first time only): `npm install` 
+* Start node-js server: `npm start`
+
+##### With docker
+We provide our own docker image to deploy node js.
+- Build the image (first time): `docker build -t just-drop-it .` (add `--build-arg HTTP_PROXY=http://proxy-host:<proxy-port> --build-arg HTTPS_PROXY=proxy-host:<proxy-port>` if you are running behind a proxy)
+- Run the image (first time): `docker run --name just-drop-it -p 8080:8080 -d  just-drop-it` (next time you will just have to start it with `docker start just-drop-it`)
 
 ### on an openshift instance
-just-drop-it should work on [openshift] (http://openshift.redhat.com/) instances. Juste create a node-js 0.10 app and synchronize its git repository with our.
+just-drop-it should work on [openshift2](http://openshift.redhat.com/) instances. Just create a node-js v0.10 app and synchronize its git repository with our.
 
 ## From a technical point of view
 More details on our implementation, to be updated.
