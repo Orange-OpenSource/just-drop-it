@@ -37,7 +37,7 @@ We provide our own docker image to deploy node js.
 - Run the image (first time): `docker run --name just-drop-it -p 8080:8080 -d  just-drop-it` (next time you will just have to start it with `docker start just-drop-it`)
 
 ### on an openshift instance
-just-drop-it should work on [openshift3](http://openshift.redhat.com/) instances. Just create a node-js v4 app and synchronize its git repository with our.
+just-drop-it should work on [openshift3](http://openshift.redhat.com/) instances. Just create a node-js v6 app and synchronize its git repository with our.
 
 ## From a technical point of view
 More details on our implementation, to be updated.

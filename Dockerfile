@@ -1,4 +1,4 @@
-FROM node:4
+FROM node:6
 
 # Create app directory
 RUN mkdir -p /opt/app-root/src
