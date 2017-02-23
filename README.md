@@ -26,7 +26,7 @@ It couldn't be more simple (but you will need a running  instance of just-drop-i
 
 ### On any computer
 #### With node JS
-Download and install [node.js v4](https://nodejs.org/download/release/latest-v4.x/). Then:
+Download and install [node.js v6](https://nodejs.org/download/release/latest-v6.x/). Then:
 * Download the source code
 * Download the needed dependencies (first time only): `npm install` 
 * Start node-js server: `npm start`
