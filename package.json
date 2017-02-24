@@ -1,6 +1,6 @@
 {
   "name": "Just-Drop-It",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Simply beam files between two browsers",
   "keywords": [
     "Transfer",
@@ -40,7 +40,8 @@
     "mocha": "~2.2.5",
     "mockery": "~1.4.0",
     "should": "~7.0.0",
-    "request": "~2.58.0"
+    "request": "~2.58.0",
+    "conventional-changelog-cli": "~1.2.0"
   },
   "bundleDependencies": [],
   "private": true,

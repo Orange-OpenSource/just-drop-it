@@ -1,3 +1,14 @@
+<a name="2.4.0"></a>
+# 2.4.0 (2017-02-24)
+
+
+### Features
+
+* **server:** Allow to be run in docker by providing a docker file ([ad39ded](https://github.com/Orange-OpenSource/just-drop-it/commit/ad39ded))
+* **server:** Update to nodejs 6 ([4aec631](https://github.com/Orange-OpenSource/just-drop-it/commit/4aec631)), closes [#16](https://github.com/Orange-OpenSource/just-drop-it/issues/16)
+
+
+
 <a name="2.3.0"></a>
 # 2.3.0 (2016-12-14)
 
