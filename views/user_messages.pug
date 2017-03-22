@@ -1,0 +1,21 @@
+script.
+    function appendError(message) {
+        var rowDiv = $("<div>", {role:"alert"}).addClass("alert alert-danger alert-dismissible fade in");
+        var buttonProperties = {type : "button"};
+        buttonProperties["data-dismiss"] = "alert";
+        buttonProperties["aria-label"] = "Close";
+        var spanProperties = {};
+        spanProperties["aria-hidden"] = "true";
+        rowDiv.append(
+                $("<button>",buttonProperties)
+                    .addClass("close")
+                    .append($("<span>", spanProperties)
+                            .html("&times;"))
+        );
+        rowDiv.append(message);
+        var userMessages = $("#userMessages");
+        userMessages.empty();
+        userMessages.append(rowDiv);
+    }
+div#userMessages
+
