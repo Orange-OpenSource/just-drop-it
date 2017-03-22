@@ -36,7 +36,7 @@ global.DROP_IT_VERSION=parseFloat(require("./package.json").version);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.use(favicon(__dirname + '/public/images/favicon.png'));
 app.use(logger('dev'));
