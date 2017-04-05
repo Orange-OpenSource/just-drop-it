@@ -41,6 +41,7 @@ router.get(router.servePagePath + ':id', function (req, res, next) {
         res.render('receive', {
             isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
             jdropitVersion: global.DROP_IT_VERSION,
+            infoMessage : typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
             dumbContent : "",
             fileName: sender.fileName,
             fileSize: sender.fileSize,
