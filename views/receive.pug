@@ -32,6 +32,7 @@ block extra_scripts
         window.onload = function(){
             receiverHandler = new ReceiverHandler(#{isLocal}, "#{senderId}","#{fileName}",#{fileSize});
             enableNotifications();
+            handleInfoMessage();
         }
 block content
     div.row#transferContainer

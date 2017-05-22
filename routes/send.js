@@ -38,10 +38,11 @@ var dumbQuotes = ["Let us ease your file transfers",
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    debug('serving send');
+    debug('serving view');
     res.render('send', {
         isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
         jdropitVersion : global.DROP_IT_VERSION,
+        infoMessage : typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
         dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)]
     });
 });
