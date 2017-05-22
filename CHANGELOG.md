@@ -1,3 +1,13 @@
+<a name="2.5.0"></a>
+# 2.5.0 (2017-05-22)
+
+
+### Features
+
+* **server:** Allow possibility to display a user message got from environment properties ([54afb3b](https://github.com/Orange-OpenSource/just-drop-it/commit/54afb3b))
+
+
+
 <a name="2.4.0"></a>
 # 2.4.0 (2017-02-24)
 
