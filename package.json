@@ -35,7 +35,10 @@
     "jquery-file-download" : "1.4.5"
 
   },
-  "scripts": { "test": "mocha " },
+  "scripts": {
+    "start": "",
+    "test": "mocha "
+  },
   "devDependencies": {
     "mocha": "~3.2.0",
     "mockery": "~2.0.0",
