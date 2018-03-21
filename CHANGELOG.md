@@ -1,3 +1,13 @@
+<a name="2.6.0"></a>
+# 2.6.0 (2018-03-21)
+
+
+### Bug Fixes
+
+* **server:** Fix jquery vulnerability ([2b4c08f](https://github.com/Orange-OpenSource/just-drop-it/commit/2b4c08f)), closes [#22](https://github.com/Orange-OpenSource/just-drop-it/issues/22)
+
+
+
 <a name="2.5.0"></a>
 # 2.5.0 (2017-05-22)
 
