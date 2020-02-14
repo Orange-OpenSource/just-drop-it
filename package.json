@@ -1,5 +1,5 @@
 {
-  "name": "Just-Drop-It",
+  "name": "just-drop-it",
   "version": "2.5.0",
   "description": "Simply beam files between two browsers",
   "keywords": [
@@ -8,31 +8,37 @@
     "application",
     "socket-io"
   ],
-  "author": {
-    "name": "Arnaud Ruffin",
-    "email": "arnaud.ruffin@orange.com"
-  },
+  "contributors": [
+    {
+      "name": "Arnaud Ruffin",
+      "email": "arnaud.ruffin@orange.com"
+    },
+    {
+      "name": "Benjamin Einaudi",
+      "email": "antechrestos@gmail.com"
+    }
+  ],
   "engines": {
     "node": ">= 0.10.0",
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "browserify"  : "14.1.0",
+    "browserify": "14.1.0",
     "body-parser": "1.17.1",
     "debug": "2.6.9",
     "express": "4.15.2",
     "pug": "2.0.0-beta11",
-    "morgan": "1.8.1",
+    "morgan": "1.9.1",
     "serve-favicon": "2.4.1",
     "socket.io": "1.7.3",
     "socket.io-client": "1.7.3",
     "socket.io-stream": "0.9.1",
-    "uglify-js" : "2.8.14",
-    "boosted" : "4.0.0-alpha.4",
-    "tether" : "1.1.1",
-    "clipboard" :  "1.6.1",
-    "jquery" : "3.3.1",
-    "jquery-file-download" : "1.4.6"
+    "uglify-js": "2.8.14",
+    "boosted": "4.0.0-alpha.4",
+    "tether": "1.1.1",
+    "clipboard": "1.6.1",
+    "jquery": "3.3.1",
+    "jquery-file-download": "1.4.6"
   },
   "scripts": {
     "start": "",
