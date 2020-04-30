@@ -29,7 +29,7 @@
     "clipboard": "1.6.1",
     "debug": "2.6.9",
     "express": "^4.17.1",
-    "jquery": "3.4.0",
+    "jquery": "3.5.0",
     "jquery-file-download": "1.4.6",
     "morgan": "1.9.1",
     "pug": "^2.0.4",
