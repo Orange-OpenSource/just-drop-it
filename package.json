@@ -17,22 +17,22 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "browserify"  : "14.1.0",
-    "body-parser": "1.17.1",
+    "body-parser": "^1.19.0",
+    "boosted": "4.0.0-alpha.4",
+    "browserify": "14.1.0",
+    "clipboard": "1.6.1",
     "debug": "2.6.3",
-    "express": "4.15.2",
+    "express": "^4.17.1",
+    "jquery": "^3.5.1",
+    "jquery-file-download": "1.4.6",
+    "morgan": "^1.10.0",
     "pug": "2.0.0-beta11",
-    "morgan": "1.8.1",
-    "serve-favicon": "2.4.1",
+    "serve-favicon": "^2.5.0",
     "socket.io": "1.7.3",
     "socket.io-client": "1.7.3",
     "socket.io-stream": "0.9.1",
-    "uglify-js" : "2.8.14",
-    "boosted" : "4.0.0-alpha.4",
-    "tether" : "1.1.1",
-    "clipboard" :  "1.6.1",
-    "jquery" : "3.3.1",
-    "jquery-file-download" : "1.4.6"
+    "tether": "1.1.1",
+    "uglify-js": "2.8.14"
   },
   "scripts": {
     "start": "",
