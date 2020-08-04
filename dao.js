@@ -21,7 +21,7 @@
  */
 
 
-var debug = require('debug')('app:dao');
+let debug = require('debug')('app:dao');
 debug.log = console.log.bind(console);
 
 function Receiver(sender, receiverId, socket) {
@@ -117,7 +117,7 @@ Sender.prototype.clean = function () {
 };
 
 
-var Dao = function () {
+let Dao = function () {
     this.senders = {};
 };
 

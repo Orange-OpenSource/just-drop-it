@@ -20,47 +20,59 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var io = require('socket.io');
-var ss = require('socket.io-stream');
-var dao = require("./dao")
-var debug = require('debug')('app:ioserver');
-var error = require('debug')('app:ioserver');
+let io = require('socket.io');
+let ss = require('socket.io-stream');
+let dao = require("./dao")
+let debug = require('debug')('app:ioserver');
+let error = require('debug')('app:ioserver');
 debug.log = console.log.bind(console);
-var uriGenerator = require("./url-generator");
+let uriGenerator = require("./url-generator");
 
 
-exports = module.exports = wrapServer;
+exports = module.exports = new IoServerWrapper();
 
-function wrapServer(app, server) {
-    var socketIoServer = io.listen(server);
-    var sendNamespace = "/send";
-    var receiveNamespace = '/receive';
 
-    // on socket connections
-    function extractId(originNamespace, socket) {
-        debug("%s - new client - %s", originNamespace, socket.id);
-        if (socket.id.indexOf(originNamespace + "#") == 0) {
-            return socket.id.substring(originNamespace.length + 1);
-        } else {
-            var errorMsg = 'Invalid id received: ' + socket.id;
-            error(errorMsg);
-            socket.emit('alert', errorMsg);
-            return null;
-        }
+function IoServerWrapper() {
+    this.sendNamespace = "/send";
+    this.receiveNamespace = '/receive';
+}
+
+IoServerWrapper.prototype._extractId = function(originNamespace, socket) {
+    debug("%s - new client - %s", originNamespace, socket.id);
+    if (socket.id.indexOf(originNamespace + "#") == 0) {
+        return socket.id.substring(originNamespace.length + 1);
+    } else {
+        let errorMsg = 'Invalid id received: ' + socket.id;
+        error(errorMsg);
+        socket.emit('alert', errorMsg);
+        return null;
     }
+}
 
-    function emitError(socket, errorMessage) {
-        error(errorMessage);
-        socket.emit('alert', errorMessage);
-    }
+IoServerWrapper.prototype.extractSenderId = function (socket){
+    return this._extractId(this.sendNamespace, socket);
+}
 
-    function routingError(socket) {
-        emitError(socket, 'routing error');
-    }
+IoServerWrapper.prototype.extractReceiverId = function (socket){
+    return this._extractId(this.receiveNamespace, socket);
+}
 
-    socketIoServer.of(sendNamespace).on('connection',
+IoServerWrapper.prototype.emitError = function (socket, errorMessage) {
+    error(errorMessage);
+    socket.emit('alert', errorMessage);
+}
+
+IoServerWrapper.prototype.routingError = function(socket) {
+    this.emitError(socket, 'routing error');
+}
+
+IoServerWrapper.prototype.wrapServer = function (app, server) {
+    let socketIoServer = io.listen(server);
+    let serverWrapper = this;
+
+    socketIoServer.of(serverWrapper.sendNamespace).on('connection',
         function (socket) {
-            var senderId = extractId(sendNamespace, socket);
+            let senderId = serverWrapper.extractSenderId(socket);
             if (senderId != null) {
                 dao.createSender(senderId, socket, function () {
                     socket.on("snd_file_ready", function (info) {
@@ -72,7 +84,7 @@ function wrapServer(app, server) {
                             debug("Generated uri "+ sender.uri);
                             socket.emit('server_rcv_url_generated', app.receiverServePagePath + sender.uri);
                         }, function () {
-                            routingError(socket);
+                            serverWrapper.routingError(socket);
                         });
 
                     });
@@ -86,7 +98,7 @@ function wrapServer(app, server) {
                             receiver.stream = stream;
                             receiver.socket.emit('server_stream_ready', app.receiverDownloadPath + senderId + "/" + receiverId);
                         }, function () {
-                            routingError(socket);
+                            serverWrapper.routingError(socket);
                         });
 
                     });
@@ -101,10 +113,10 @@ function wrapServer(app, server) {
                             dao.removeSender(senderId, function () {
                                 debug("%s sender disconnect", socket.id);
                             }, function () {
-                                routingError(socket);
+                                serverWrapper.routingError(socket);
                             });
                         }, function () {
-                            routingError(socket);
+                            serverWrapper.routingError(socket);
                         });
 
                     });
@@ -113,9 +125,9 @@ function wrapServer(app, server) {
 
         });
 
-    socketIoServer.of(receiveNamespace).on('connection',
+    socketIoServer.of(serverWrapper.receiveNamespace).on('connection',
         function (socket) {
-            var receiverId = extractId(receiveNamespace, socket);
+            let receiverId = serverWrapper.extractReceiverId(socket);
             if (receiverId != null) {
                 socket.on('rcv_sender', function (senderId) {
                     debug("%s/%s receiver", senderId, receiverId);
@@ -131,13 +143,13 @@ function wrapServer(app, server) {
                                         sender.socket.emit('server_receiver_left', receiverId);
 
                                 }, function () {
-                                    routingError(socket);
+                                    serverWrapper.routingError(socket);
                                 });
                         });
 
                         sender.socket.emit('server_receiver_ready', receiverId);
                     }, function () {
-                        emitError(socket, 'unknown senderID: ' + senderId);
+                        serverWrapper.emitError(socket, 'unknown senderID: ' + senderId);
                     });
                 });
             }
