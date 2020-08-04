@@ -20,14 +20,13 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var should = require('should');
-var mockery = require('mockery');
-var io = require('socket.io-client');
-var ss = require('socket.io-stream');
-var stream = require('stream');
-var request = require('request');
-
-var defaultDebugMode = "app:*";
+let should = require('should');
+let mockery = require('mockery');
+let io = require('socket.io-client');
+let ss = require('socket.io-stream');
+let stream = require('stream');
+let request = require('request');
+let defaultDebugMode = "app:*";
 if (typeof process.env.DEBUG == "undefined") {
     console.log("Adding DEBUG variable to " + defaultDebugMode);
     process.env.DEBUG = defaultDebugMode;
@@ -35,23 +34,24 @@ if (typeof process.env.DEBUG == "undefined") {
     console.log("DEBUG already set to " + defaultDebugMode);
 }
 
-var host = "localhost";
-var port = 8081;
+let host = "localhost";
+let port = 8081;
 
-var urlConnection = "http://" + host + ":" + port;
+let urlConnection = "http://" + host + ":" + port;
 
 function log(msg) {
     console.log("\n" + msg + "\n");
 }
 
-var app = require('../app');
-var http = require('http');
+let app = require('../app');
+let http = require('http');
 
-var fakeUri = 'test-download';
+let fakeUri = 'test-download';
 
 describe('Transfer test', function () {
     var httpServer = null;
 
+    var ioServerWrapper = null
     before(function (done) {
         mockery.enable(); // Active mockery au debut des tests
         mockery.warnOnUnregistered(false);
@@ -63,7 +63,8 @@ describe('Transfer test', function () {
         });
 
         httpServer = http.createServer(app);
-        require("../ioserver")(app, httpServer);
+        ioServerWrapper = require("../ioserver");
+        ioServerWrapper.wrapServer(app, httpServer);
         httpServer.listen(port, host, function () {
 
             done();
@@ -99,8 +100,7 @@ describe('Transfer test', function () {
     });
 
     function buildConnection(uri) {
-        var result;
-        result = io(urlConnection+ uri, {'force new connection': true});
+        let result = io(urlConnection+ uri, {'force new connection': true});
 
         result.on('error', function () {
             should.not.exist("Connection error");
@@ -108,7 +108,7 @@ describe('Transfer test', function () {
 
         result.shouldNotAlert = function () {
             result.on('alert', function (msg) {
-                socket.close(true);
+                result.close(true);
                 should.not.exist(msg);
             });
             return result;
@@ -116,13 +116,13 @@ describe('Transfer test', function () {
         return result;
     }
 
-    var fileName = "toto.jpg";
-    var transmittedData = "Some data to transmit";
-    var size = transmittedData.length;
+    let fileName = "toto.jpg";
+    let transmittedData = "Some data to transmit";
+    let size = transmittedData.length;
 
     describe("Connection", function () {
         it('should connect', function (done) {
-            var socket = buildConnection("");
+            let socket = buildConnection("");
             socket.on('connect', function () {
                 log("connection done on " + urlConnection);
                 socket.close(true);
@@ -134,7 +134,7 @@ describe('Transfer test', function () {
 
     describe('Sender', function () {
         it('should receive url ready', function (done) {
-            var socket = buildConnection("/send").shouldNotAlert();
+            let socket = buildConnection("/send").shouldNotAlert();
 
 
             socket.on('connect', function () {
@@ -153,8 +153,8 @@ describe('Transfer test', function () {
 
     describe('Receiver', function () {
         it('should receive unknown sender (bad sender)', function (done) {
-            var socket = buildConnection("/receive");
-            var unknownSenderId = 'unknown';
+            let socket = buildConnection("/receive");
+            let unknownSenderId = 'unknown';
             socket.on('alert', function (msg) {
                 socket.close(true);
                 should(msg).be.equal('unknown senderID: '+unknownSenderId);
@@ -168,21 +168,21 @@ describe('Transfer test', function () {
 
     describe('Sender/receiver', function () {
         function buildUntilStreamReady(onStreamReady, data) {
-            var sender = buildConnection('/send').shouldNotAlert();
+            let sender = buildConnection('/send').shouldNotAlert();
 
             sender.on('connect', function () {
                 sender.emit('snd_file_ready', {
                     size: size,
                     name: fileName
                 });
-                var senderId = sender.id;
+                let senderId = ioServerWrapper.extractSenderId(sender);
 
                 sender.on('server_rcv_url_generated', function (url) {
                     log('server_rcv_url_generated: ' + url);
-                    var receiver = buildConnection("/receive").shouldNotAlert();
-                    var receiverId;
+                    let receiver = buildConnection("/receive").shouldNotAlert();
+                    let receiverId;
                     receiver.on('connect', function () {
-                        receiverId = receiver.id;
+                        receiverId = ioServerWrapper.extractReceiverId(receiver);
                         receiver.emit('rcv_sender', senderId);
                     });
 
@@ -195,11 +195,11 @@ describe('Transfer test', function () {
 
                     sender.on('server_receiver_ready', function (receiverId) {
                         log('server_receiver_ready: ' + receiverId);
-                        var ssStream = ss.createStream();
+                        let ssStream = ss.createStream();
                         ss(sender).emit('snd_send_file', ssStream, receiverId);
                         //should(receiverId).be.equal(receiver.id); receiver.id may be undefined since conection may be not done
                         if (typeof data != "undefined") {
-                            var fakeStream = new stream();
+                            let fakeStream = new stream();
                             fakeStream.pipe = function (dest) {
                                 dest.write(data);
                                 log('data transmitted: ' + data.length);
@@ -219,7 +219,7 @@ describe('Transfer test', function () {
 
         it('should notify receiver left', function (done) {
             buildUntilStreamReady(function (sender, receiver) {
-                var receiverId = receiver.id;
+                let receiverId = ioServerWrapper.extractReceiverId(receiver);
                 sender.on('server_receiver_left', function (disconnectedReceiverId) {
                     should(disconnectedReceiverId).be.equal(receiverId);
                     sender.close(true);
@@ -244,7 +244,7 @@ describe('Transfer test', function () {
 
         it('should transmit to the receiver', function (done) {
             buildUntilStreamReady(function (sender, receiver, urlStream) {
-                should(urlStream).be.equal(app.receiverDownloadPath + sender.id + '/' + receiver.id);
+                should(urlStream).be.equal(app.receiverDownloadPath + ioServerWrapper.extractSenderId(sender) + '/' + ioServerWrapper.extractReceiverId(receiver));
                 sender.close(true);
                 receiver.close(true);
                 done();
@@ -269,7 +269,7 @@ describe('Transfer test', function () {
                         data.push(chunk);
                     }).on('complete', function(response,body){
                         should(response.statusCode).be.equal(200);
-                        var dataReceived = data.join('');
+                        let dataReceived = data.join('');
                         should(dataReceived).be.equal(transmittedData);
                         sender.close(true);
                         receiver.close(true);

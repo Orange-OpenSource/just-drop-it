@@ -20,17 +20,17 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-var send = require('./routes/send');
-var receive = require('./routes/receive');
-var admin = require('./routes/admin');
-var javascript = require('./routes/javascript');
+let express = require('express');
+let path = require('path');
+let favicon = require('serve-favicon');
+let logger = require('morgan');
+let bodyParser = require('body-parser');
+let send = require('./routes/send');
+let receive = require('./routes/receive');
+let admin = require('./routes/admin');
+let javascript = require('./routes/javascript');
 
-var app = express();
+let app = express();
 
 global.DROP_IT_VERSION=parseFloat(require("./package.json").version);
 
@@ -49,7 +49,7 @@ app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery', 
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery-file-download', 'src','Scripts'))));
 app.use(express.static(path.join(__dirname, path.join('node_modules', 'clipboard', 'dist'))));
 
-var receiveUriPath = '/receive';
+let receiveUriPath = '/receive';
 app.use('/', send);
 app.use(receiveUriPath, receive);
 app.use('/admin', admin);
@@ -59,7 +59,7 @@ app.use('/js', javascript);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     console.log("not found");
-    var err = new Error('Not Found');
+    let err = new Error('Not Found');
     err.status = 404;
     err.sub_message = "";
     next(err);

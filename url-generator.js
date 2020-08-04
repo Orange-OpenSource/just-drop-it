@@ -19,13 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
-var fs = require('fs');
-var debug = require('debug')('app:url-generator');
-var error = require('debug')('app:url-generator');
+let fs = require('fs');
+let debug = require('debug')('app:url-generator');
+let error = require('debug')('app:url-generator');
 debug.log = console.log.bind(console);
 
 
-var UriGenerator = function() {
+let UriGenerator = function() {
     this.adj = [];
     this.adv = [];
     this.noun = [];

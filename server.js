@@ -47,7 +47,7 @@ var ipAddress = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 //------------------------
-require("./ioserver")(app, server);
+require("./ioserver").wrapServer(app, server);
 //  Start the app on the specific interface (and port).
 server.listen(port, ipAddress, function () {
     debug('%s: JustDropIt(%s) started on %s:%d ...',
