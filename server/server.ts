@@ -21,6 +21,13 @@
  */
 
 
+import * as http from "http";
+import {App} from "./app";
+
+import Debug from "debug";
+const debug = Debug("app:server");
+const error = Debug("app:server");
+
 export class Server {
 
     start() {
@@ -33,24 +40,23 @@ export class Server {
             console.log("DEBUG already set to " + process.env.DEBUG);
         }
 
-        const http = require('http');
 
-        const debug = require('debug')('app:server');
-        const error = require('debug')('app:server');
-        const app = require("./app");
 
         debug.log = console.log.bind(console);
 
-        const server = http.createServer(app);
+        const applicationWrapper = new App();
+        const server = http.createServer(applicationWrapper.app);
 
         //retrieve openshift variables
-        const ipAddress = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP var, using ANY') || null;
-        const port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+        const ipAddress : string|undefined = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP var, using ANY') || undefined;
+        const port : number = process.env.OPENSHIFT_NODEJS_PORT as unknown as number || 8080;
 
         //------------------------
-        require("./ioserver").wrapServer(app, server);
+        require("./ioserver").wrapServer(applicationWrapper.app, server);
         //  Start the app on the specific interface (and port).
-        server.listen(port, ipAddress, function () {
+
+
+        server.listen(port, ipAddress, () => {
             debug('%s: JustDropIt(%s) started on %s:%d ...',
                 new Date(Date.now()), process.env.npm_package_version, ipAddress == null ? "*" : ipAddress, port);
         });
