@@ -7,7 +7,7 @@
  * entered into with Orange.
  */
 
-import {Server} from "./server/server";
+import {DropServer} from "./server/dropServer";
 
-const server = new Server();
+const server = new DropServer();
 server.start();

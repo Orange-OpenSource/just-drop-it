@@ -25,10 +25,11 @@ import * as http from "http";
 import {App} from "./app";
 
 import Debug from "debug";
+import {Server} from "http";
 const debug = Debug("app:server");
 const error = Debug("app:server");
 
-export class Server {
+export class DropServer {
 
     start() {
 
@@ -45,7 +46,7 @@ export class Server {
         debug.log = console.log.bind(console);
 
         const applicationWrapper = new App();
-        const server = http.createServer(applicationWrapper.app);
+        const server: Server = http.createServer(applicationWrapper.app);
 
         //retrieve openshift variables
         const ipAddress : string|undefined = process.env.OPENSHIFT_NODEJS_IP || error('No OPENSHIFT_NODEJS_IP var, using ANY') || undefined;

@@ -24,13 +24,6 @@
 let debug = require('debug')('app:dao');
 debug.log = console.log.bind(console);
 
-function Receiver(sender, receiverId, socket) {
-    debug('Receiver - init - %s', receiverId);
-    this.sender = sender;
-    this.receiverId = receiverId;
-    this.socket = socket;
-    this.endNotified = false;
-}
 
 
 Receiver.prototype.notifySent = function (percent) {
@@ -63,30 +56,10 @@ Receiver.prototype.completed = function () {
 
 
 
-Receiver.prototype._clean = function () {
-    debug('Receiver - clean - %s', this.receiverId);
-    //clean resources
-    if (typeof this.clean == "function")
-        this.clean();
-};
-
-//set this function to clean resources
-Receiver.prototype.clean = null;
 
 
-function Sender(senderId, socket) {
-    debug('Sender - init - %s', senderId);
-    this.senderId = senderId;
-    this.socket = socket;
-    this.receivers = {};
-}
 
-Sender.prototype.addReceiver = function (receiverId, socket) {
-    debug('Sender - addReceiver - %s', receiverId);
-    var result = new Receiver(this, receiverId, socket);
-    this.receivers[receiverId] = result;
-    return result;
-};
+
 
 Sender.prototype.eachReceiver = function (callback) {
     for (var receiverIds in this.receivers) {
@@ -96,25 +69,7 @@ Sender.prototype.eachReceiver = function (callback) {
     }
 };
 
-Sender.prototype.removeReceiver = function (receiverId) {
-    var receiver = this.receivers[receiverId];
-    if (typeof receiver != "undefined") {
-        debug('Sender - removeReceiver - %s', receiverId);
-        receiver._clean();
-        delete  this.receivers[receiverId];
-        return true;
-    } else
-        return false;
-};
 
-Sender.prototype.clean = function () {
-    debug('Sender - clean - %s', this.senderId);
-    //clean resources
-    this.eachReceiver(function (receiver) {
-        receiver._clean();
-    });
-    this.receivers = {};
-};
 
 
 let Dao = function () {
