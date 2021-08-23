@@ -43,7 +43,7 @@ function log(msg) {
     console.log("\n" + msg + "\n");
 }
 
-let app = require('../app');
+let app = require('../server/app');
 let http = require('http');
 
 let fakeUri = 'test-download';
@@ -63,7 +63,7 @@ describe('Transfer test', function () {
         });
 
         httpServer = http.createServer(app);
-        ioServerWrapper = require("../ioserver");
+        ioServerWrapper = require("../server/ioserver");
         ioServerWrapper.wrapServer(app, httpServer);
         httpServer.listen(port, host, function () {
 

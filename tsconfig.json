@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    /* to generate es6 javascript */
+    "target": "es6",
+    /* generate javascript with classic 'require' import */
+    "module": "commonjs",
+    /* to be able to import JS module as in TS */
+    "esModuleInterop": true,
+    "strict": true,
+    /* allow you to forget type definition, useful to be compliant with JS */
+    "noImplicitAny": true,
+    /* prevents you from forgetting to return at the end of a function */
+    "noImplicitReturns": true,
+    /* never forget a break statement between cases in a switch block */
+    "noFallthroughCasesInSwitch": true,
+    /* map js to ts file, useful for debugging */
+    "sourceMap": true,
+    /* List of library files to be included in the compilation */
+    "lib": ["es6"],
+    "resolveJsonModule": true
+  },
+
+  "include": [
+    "./server/**/*", "./config/**/*"
+  ]
+}

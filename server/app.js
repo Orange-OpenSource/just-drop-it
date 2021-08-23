@@ -25,14 +25,14 @@ let path = require('path');
 let favicon = require('serve-favicon');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
-let send = require('./routes/send');
-let receive = require('./routes/receive');
-let admin = require('./routes/admin');
-let javascript = require('./routes/javascript');
+let send = require('../routes/send');
+let receive = require('../routes/receive');
+let admin = require('../routes/admin');
+let javascript = require('../routes/javascript');
 
 let app = express();
 
-global.DROP_IT_VERSION=parseFloat(require("./package.json").version);
+global.DROP_IT_VERSION=parseFloat(require("../package.json").version);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -43,11 +43,14 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'tether', 'dist'))));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'boosted', 'dist'))));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery', 'dist'))));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'jquery-file-download', 'src','Scripts'))));
-app.use(express.static(path.join(__dirname, path.join('node_modules', 'clipboard', 'dist'))));
+
+
+app.use(express.static(__dirname + '/../node_modules/boosted/dist'));
+app.use(express.static(__dirname + '/../node_modules/tether/dist'));
+app.use(express.static(__dirname + '/../node_modules/jquery/dist'));
+app.use(express.static(__dirname + '/../node_modules/jquery-file-download/src/Scripts'));
+app.use(express.static(__dirname + '/../node_modules/clipboard/dist'));
+
 
 let receiveUriPath = '/receive';
 app.use('/', send);

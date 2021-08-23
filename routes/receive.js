@@ -25,7 +25,7 @@ var debug = require('debug')('app:routes:receive');
 var router = express.Router();
 var error = require('debug')('app:routes:receive');
 
-var dao = require("../dao");
+var dao = require("../server/dao");
 
 
 router.servePagePath = '/';

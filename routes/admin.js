@@ -23,7 +23,7 @@
 var express = require('express');
 var debug = require('debug')('app:routes:admin');
 var router = express.Router();
-var dao    = require("../dao");
+var dao    = require("../server/dao");
 
 
 debug.log = console.log.bind(console);
