@@ -66,7 +66,7 @@ IoServerWrapper.prototype.routingError = function(socket) {
     this.emitError(socket, 'routing error');
 }
 
-IoServerWrapper.prototype.wrapServer = function (app, server) {
+IoServerWrapper.prototype.wrapServer = function (servePath, downloadPath, server) {
     let socketIoServer = io.listen(server);
     let serverWrapper = this;
 
@@ -82,7 +82,7 @@ IoServerWrapper.prototype.wrapServer = function (app, server) {
                             sender.uri = uriGenerator.generateUrl();
 
                             debug("Generated uri "+ sender.uri);
-                            socket.emit('server_rcv_url_generated', app.receiverServePagePath + sender.uri);
+                            socket.emit('server_rcv_url_generated', servePath + sender.uri);
                         }, function () {
                             serverWrapper.routingError(socket);
                         });
@@ -96,7 +96,7 @@ IoServerWrapper.prototype.wrapServer = function (app, server) {
                             debug("%s/%s Expose stream for receiver size=%d", senderId, receiverId, receiver.sender.fileSize);
                             //notifying receiver
                             receiver.stream = stream;
-                            receiver.socket.emit('server_stream_ready', app.receiverDownloadPath + senderId + "/" + receiverId);
+                            receiver.socket.emit('server_stream_ready', downloadPath + senderId + "/" + receiverId);
                         }, function () {
                             serverWrapper.routingError(socket);
                         });

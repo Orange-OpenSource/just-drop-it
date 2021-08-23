@@ -34,8 +34,8 @@ import {Express, NextFunction, Request, Response} from "express";
 export class App {
 
     app: Express
-    private receiverServePagePath: string;
-    private receiverDownloadPath: string;
+    receiverServePagePath: string;
+    receiverDownloadPath: string;
 
     constructor() {
         this.app = express();

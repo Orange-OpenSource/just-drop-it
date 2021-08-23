@@ -52,7 +52,7 @@ export class Server {
         const port : number = process.env.OPENSHIFT_NODEJS_PORT as unknown as number || 8080;
 
         //------------------------
-        require("./ioserver").wrapServer(applicationWrapper.app, server);
+        require("./ioserver").wrapServer(applicationWrapper.receiverServePagePath, applicationWrapper.receiverDownloadPath, server);
         //  Start the app on the specific interface (and port).
 
 
