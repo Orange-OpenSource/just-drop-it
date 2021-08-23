@@ -43,7 +43,7 @@
   },
   "scripts": {
     "start": "ts-node index.ts",
-    "start-dev": " DEBUG=* ts-node index.ts",
+    "start-dev": " DEBUG=app* ts-node index.ts",
     "test": "mocha --require ts-node/register --ui bdd  test/test_transfert.ts"
   },
   "devDependencies": {

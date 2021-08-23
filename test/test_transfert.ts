@@ -20,6 +20,8 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {Server} from "http";
+
 let should = require('should');
 let mockery = require('mockery');
 let io = require('socket.io-client');
@@ -39,18 +41,19 @@ let port = 8081;
 
 let urlConnection = "http://" + host + ":" + port;
 
-function log(msg) {
+function log(msg: string) {
     console.log("\n" + msg + "\n");
 }
 
 import {App} from "../server/app";
+
 let http = require('http');
 let fakeUri = 'test-download';
 
 describe('Transfer test', function () {
-    let httpServer = null;
+    let httpServer: Server | undefined;
 
-    let ioServerWrapper = null;
+    let ioServerWrapper: any = null;
 
     const appWrapper = new App();
     const app = appWrapper.app;
@@ -67,7 +70,7 @@ describe('Transfer test', function () {
         httpServer = http.createServer(app);
         ioServerWrapper = require("../server/ioserver");
         ioServerWrapper.wrapServer(appWrapper.receiverServePagePath, appWrapper.receiverDownloadPath, httpServer);
-        httpServer.listen(port, host, function () {
+        httpServer?.listen(port, host, function () {
             done();
         });
     });
@@ -99,7 +102,7 @@ describe('Transfer test', function () {
         }
     });
 
-    function buildConnection(uri) {
+    function buildConnection(uri: string) {
         let result = io(urlConnection + uri, {'force new connection': true});
 
         result.on('error', function () {
@@ -107,7 +110,7 @@ describe('Transfer test', function () {
         });
 
         result.shouldNotAlert = function () {
-            result.on('alert', function (msg) {
+            result.on('alert', function (msg: string) {
                 result.close(true);
                 should.not.exist(msg);
             });
@@ -143,7 +146,7 @@ describe('Transfer test', function () {
                     name: fileName
                 });
             });
-            socket.on('server_rcv_url_generated', function (url) {
+            socket.on('server_rcv_url_generated', function (url: any) {
                 should(url).be.equal(appWrapper.receiverServePagePath + fakeUri);
                 socket.close(true);
                 done();
@@ -155,7 +158,7 @@ describe('Transfer test', function () {
         it('should receive unknown sender (bad sender)', function (done) {
             let socket = buildConnection("/receive");
             let unknownSenderId = 'unknown';
-            socket.on('alert', function (msg) {
+            socket.on('alert', function (msg: string) {
                 socket.close(true);
                 should(msg).be.equal('unknown senderID: ' + unknownSenderId);
                 done();
@@ -167,7 +170,7 @@ describe('Transfer test', function () {
     });
 
     describe('Sender/receiver', function () {
-        function buildUntilStreamReady(onStreamReady, data) {
+        function buildUntilStreamReady(onStreamReady: any, data: any) {
             let sender = buildConnection('/send').shouldNotAlert();
 
             sender.on('connect', function () {
@@ -177,7 +180,7 @@ describe('Transfer test', function () {
                 });
                 let senderId = ioServerWrapper.extractSenderId(sender);
 
-                sender.on('server_rcv_url_generated', function (url) {
+                sender.on('server_rcv_url_generated', function (url: string) {
                     log('server_rcv_url_generated: ' + url);
                     let receiver = buildConnection("/receive").shouldNotAlert();
                     let receiverId;
@@ -187,20 +190,20 @@ describe('Transfer test', function () {
                     });
 
 
-                    receiver.on('server_stream_ready', function (urlStream) {
+                    receiver.on('server_stream_ready', function (urlStream: string) {
                         log('stream_ready: ' + urlStream);
                         onStreamReady(sender, receiver, urlStream);
 
                     });
 
-                    sender.on('server_receiver_ready', function (receiverId) {
+                    sender.on('server_receiver_ready', function (receiverId: string) {
                         log('server_receiver_ready: ' + receiverId);
                         let ssStream = ss.createStream();
                         ss(sender).emit('snd_send_file', ssStream, receiverId);
-                        //should(receiverId).be.equal(receiver.id); receiver.id may be undefined since conection may be not done
+                        //should(receiverId).be.equal(receiver.id); receiver.id may be undefined since connection may be not done
                         if (typeof data != "undefined") {
                             let fakeStream = new stream();
-                            fakeStream.pipe = function (dest) {
+                            fakeStream.pipe = function (dest:any) {
                                 dest.write(data);
                                 log('data transmitted: ' + data.length);
                                 return dest;
@@ -217,9 +220,9 @@ describe('Transfer test', function () {
         }
 
         it('should notify receiver left', function (done) {
-            buildUntilStreamReady(function (sender, receiver) {
+            buildUntilStreamReady(function (sender:any, receiver:any) {
                 let receiverId = ioServerWrapper.extractReceiverId(receiver);
-                sender.on('server_receiver_left', function (disconnectedReceiverId) {
+                sender.on('server_receiver_left', function (disconnectedReceiverId:string) {
                     should(disconnectedReceiverId).be.equal(receiverId);
                     sender.close(true);
                     done();
@@ -230,7 +233,7 @@ describe('Transfer test', function () {
         });
 
         it('should notify sender left', function (done) {
-            buildUntilStreamReady(function (sender, receiver) {
+            buildUntilStreamReady(function (sender:any, receiver:any) {
                 receiver.on('server_sender_left', function () {
                     receiver.close(true);
                     done();
@@ -242,7 +245,7 @@ describe('Transfer test', function () {
 
 
         it('should transmit to the receiver', function (done) {
-            buildUntilStreamReady(function (sender, receiver, urlStream) {
+            buildUntilStreamReady(function (sender:any, receiver:any, urlStream:string) {
                 should(urlStream).be.equal(appWrapper.receiverDownloadPath + ioServerWrapper.extractSenderId(sender) + '/' + ioServerWrapper.extractReceiverId(receiver));
                 sender.close(true);
                 receiver.close(true);
@@ -251,22 +254,22 @@ describe('Transfer test', function () {
         });
 
         it('should transmit data to the receiver', function (done) {
-            buildUntilStreamReady(function (sender, receiver, urlStream) {
-                var data = [];
+            buildUntilStreamReady(function (sender:any, receiver:any, urlStream:string) {
+                let data: string[] = [];
                 request
                     .get(urlConnection + urlStream)
-                    .on('error', function (err) {
+                    .on('error', function () {
                         should.not.exist("Connection error");
                         sender.close(true);
                         receiver.close(true);
                         done();
                     })
-                    .on('response', function (response) {
+                    .on('response', function () {
 
                     })
-                    .on('data', function (chunk) {
+                    .on('data', function (chunk: any) {
                         data.push(chunk);
-                    }).on('complete', function (response, body) {
+                    }).on('complete', function (response: any) {
                     should(response.statusCode).be.equal(200);
                     let dataReceived = data.join('');
                     should(dataReceived).be.equal(transmittedData);
