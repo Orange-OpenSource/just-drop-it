@@ -43,30 +43,31 @@ function log(msg) {
     console.log("\n" + msg + "\n");
 }
 
-let app = require('../server/app');
+import {App} from "../server/app";
 let http = require('http');
-
 let fakeUri = 'test-download';
 
 describe('Transfer test', function () {
-    var httpServer = null;
+    let httpServer = null;
 
-    var ioServerWrapper = null
+    let ioServerWrapper = null;
+
+    const appWrapper = new App();
+    const app = appWrapper.app;
     before(function (done) {
         mockery.enable(); // Active mockery au debut des tests
         mockery.warnOnUnregistered(false);
         //Mock url-generator
         mockery.registerMock('./url-generator', {
-            generateUrl : function(){
+            generateUrl: function () {
                 return fakeUri;
             }
         });
 
         httpServer = http.createServer(app);
         ioServerWrapper = require("../server/ioserver");
-        ioServerWrapper.wrapServer(app, httpServer);
+        ioServerWrapper.wrapServer(appWrapper.receiverServePagePath, appWrapper.receiverDownloadPath, httpServer);
         httpServer.listen(port, host, function () {
-
             done();
         });
     });
@@ -90,8 +91,7 @@ describe('Transfer test', function () {
                 mockery.disable();
                 done();
             });
-        }
-        else {
+        } else {
             log("httpServer is null");
             mockery.deregisterAll();
             mockery.disable();
@@ -100,7 +100,7 @@ describe('Transfer test', function () {
     });
 
     function buildConnection(uri) {
-        let result = io(urlConnection+ uri, {'force new connection': true});
+        let result = io(urlConnection + uri, {'force new connection': true});
 
         result.on('error', function () {
             should.not.exist("Connection error");
@@ -144,7 +144,7 @@ describe('Transfer test', function () {
                 });
             });
             socket.on('server_rcv_url_generated', function (url) {
-                should(url).be.equal(app.receiverServePagePath + fakeUri);
+                should(url).be.equal(appWrapper.receiverServePagePath + fakeUri);
                 socket.close(true);
                 done();
             });
@@ -157,7 +157,7 @@ describe('Transfer test', function () {
             let unknownSenderId = 'unknown';
             socket.on('alert', function (msg) {
                 socket.close(true);
-                should(msg).be.equal('unknown senderID: '+unknownSenderId);
+                should(msg).be.equal('unknown senderID: ' + unknownSenderId);
                 done();
             });
 
@@ -214,7 +214,6 @@ describe('Transfer test', function () {
             });
 
 
-
         }
 
         it('should notify receiver left', function (done) {
@@ -226,7 +225,7 @@ describe('Transfer test', function () {
                     done();
                 });
                 receiver.close(true);
-            });
+            }, undefined);
 
         });
 
@@ -237,18 +236,18 @@ describe('Transfer test', function () {
                     done();
                 });
                 sender.close(true);
-            });
+            }, undefined);
 
         });
 
 
         it('should transmit to the receiver', function (done) {
             buildUntilStreamReady(function (sender, receiver, urlStream) {
-                should(urlStream).be.equal(app.receiverDownloadPath + ioServerWrapper.extractSenderId(sender) + '/' + ioServerWrapper.extractReceiverId(receiver));
+                should(urlStream).be.equal(appWrapper.receiverDownloadPath + ioServerWrapper.extractSenderId(sender) + '/' + ioServerWrapper.extractReceiverId(receiver));
                 sender.close(true);
                 receiver.close(true);
                 done();
-            });
+            }, undefined);
         });
 
         it('should transmit data to the receiver', function (done) {
@@ -267,14 +266,14 @@ describe('Transfer test', function () {
                     })
                     .on('data', function (chunk) {
                         data.push(chunk);
-                    }).on('complete', function(response,body){
-                        should(response.statusCode).be.equal(200);
-                        let dataReceived = data.join('');
-                        should(dataReceived).be.equal(transmittedData);
-                        sender.close(true);
-                        receiver.close(true);
-                        done();
-                    });
+                    }).on('complete', function (response, body) {
+                    should(response.statusCode).be.equal(200);
+                    let dataReceived = data.join('');
+                    should(dataReceived).be.equal(transmittedData);
+                    sender.close(true);
+                    receiver.close(true);
+                    done();
+                });
             }, transmittedData);
         });
 
