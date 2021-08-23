@@ -231,7 +231,7 @@ function sendFile(isLocal) {
 
     $("#clipboardcopyok").hide();
 
-    var clipboard = new Clipboard('#copy-button');
+    var clipboard = new ClipboardJS('#copy-button');
     clipboard.on('success', function(e) {
         console.info('Copied to clipboard:', e.text);
         $("#clipboardcopyok").show(300);
