@@ -23,7 +23,7 @@
 import {Server} from "http";
 
 let should = require('should');
-let mockery = require('mockery');
+
 let io = require('socket.io-client');
 let ss = require('socket.io-stream');
 let stream = require('stream');
@@ -46,6 +46,7 @@ function log(msg: string) {
 }
 
 import {App} from "../server/app";
+import {IoServerWrapper} from "../server/ioserver";
 
 let http = require('http');
 let fakeUri = 'test-download';
@@ -58,17 +59,9 @@ describe('Transfer test', function () {
     const appWrapper = new App();
     const app = appWrapper.app;
     before(function (done) {
-        mockery.enable(); // Active mockery au debut des tests
-        mockery.warnOnUnregistered(false);
-        //Mock url-generator
-        mockery.registerMock('./url-generator', {
-            generateUrl: function () {
-                return fakeUri;
-            }
-        });
 
         httpServer = http.createServer(app);
-        ioServerWrapper = require("../server/ioserver");
+        ioServerWrapper = new IoServerWrapper();
         ioServerWrapper.wrapServer(appWrapper.receiverServePagePath, appWrapper.receiverDownloadPath, httpServer);
         httpServer?.listen(port, host, function () {
             done();
@@ -90,14 +83,10 @@ describe('Transfer test', function () {
             log("closing httpServer");
             httpServer.close(function () {
                 log('server closed');
-                mockery.deregisterAll();
-                mockery.disable();
                 done();
             });
         } else {
             log("httpServer is null");
-            mockery.deregisterAll();
-            mockery.disable();
             done();
         }
     });
@@ -146,8 +135,9 @@ describe('Transfer test', function () {
                     name: fileName
                 });
             });
+            const regex = new RegExp(appWrapper.receiverServePagePath+".*-.*-.*");
             socket.on('server_rcv_url_generated', function (url: any) {
-                should(url).be.equal(appWrapper.receiverServePagePath + fakeUri);
+                should(url).match(regex)
                 socket.close(true);
                 done();
             });

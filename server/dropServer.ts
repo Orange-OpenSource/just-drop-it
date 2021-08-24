@@ -26,6 +26,7 @@ import {App} from "./app";
 
 import Debug from "debug";
 import {Server} from "http";
+import {IoServerWrapper} from "./ioserver";
 const debug = Debug("app:server");
 const error = Debug("app:server");
 
@@ -53,15 +54,14 @@ export class DropServer {
         const port : number = process.env.OPENSHIFT_NODEJS_PORT as unknown as number || 8080;
 
         //------------------------
-        require("./ioserver").wrapServer(applicationWrapper.receiverServePagePath, applicationWrapper.receiverDownloadPath, server);
+        const ioServer = new IoServerWrapper()
+        ioServer.wrapServer(applicationWrapper.receiverServePagePath, applicationWrapper.receiverDownloadPath, server);
         //  Start the app on the specific interface (and port).
-
 
         server.listen(port, ipAddress, () => {
             debug('%s: JustDropIt(%s) started on %s:%d ...',
                 new Date(Date.now()), process.env.npm_package_version, ipAddress == null ? "*" : ipAddress, port);
         });
-
 
     }
 }

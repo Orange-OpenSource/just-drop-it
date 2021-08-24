@@ -21,16 +21,11 @@
  */
 
 import {Server, Socket} from "socket.io";
-
 import Debug from "debug";
 import {Server as HTTPServer} from "http";
-
-
-import {FileSender, FileReceiver} from "./DAO";
-
+import {FileSender, FileReceiver, Dao} from "./dao";
 
 let ss = require('socket.io-stream');
-let dao = require("./dao")
 
 const debug = Debug("app:ioserver");
 const error = Debug("app:ioserver");
@@ -38,18 +33,16 @@ const error = Debug("app:ioserver");
 debug.log = console.log.bind(console);
 let uriGenerator = require("./url-generator");
 
-
 export class IoServerWrapper {
     sendNamespace = "/send";
     receiveNamespace = '/receive';
 
-    //socket = io();
+    dao = Dao.getInstance();
 
-
-    private _extractId(originNamespace: string, socket: Socket): string|undefined {
+    private static _extractId(originNamespace: string, socket: Socket): string|undefined {
         debug("%s - new client - %s", originNamespace, socket.id);
-        if (socket.id.indexOf(originNamespace + "#") == 0) {
-            return socket.id.substring(originNamespace.length + 1);
+        if( socket.id != undefined){
+            return socket.id
         } else {
             let errorMsg = 'Invalid id received: ' + socket.id;
             error(errorMsg);
@@ -59,11 +52,11 @@ export class IoServerWrapper {
     }
 
     extractSenderId(socket: Socket) {
-        return this._extractId(this.sendNamespace, socket);
+        return IoServerWrapper._extractId(this.sendNamespace, socket);
     }
 
     extractReceiverId(socket: Socket) {
-        return this._extractId(this.receiveNamespace, socket);
+        return IoServerWrapper._extractId(this.receiveNamespace, socket);
     }
 
     emitError(socket: Socket, errorMessage: string) {
@@ -77,15 +70,15 @@ export class IoServerWrapper {
 
     wrapServer(servePath: string, downloadPath: string, server: HTTPServer) {
         let socketIoServer = new Server(server, {});
-        let that = this;
+        let self = this;
 
         socketIoServer.of(this.sendNamespace).on('connection',
             function (socket) {
-                let senderId = that.extractSenderId(socket);
-                if (senderId != null) {
-                    dao.createSender(senderId, socket, function () {
+                let senderId = self.extractSenderId(socket);
+                if (senderId != undefined) {
+                    self.dao.createSender(senderId, socket, function () {
                         socket.on("snd_file_ready", function (info) {
-                            dao.getSender(senderId, function (sender: FileSender) {
+                            self.dao.getSender(senderId, function (sender: FileSender) {
                                 sender.fileName = info.name;
                                 sender.fileSize = info.size;
                                 sender.uri = uriGenerator.generateUrl();
@@ -93,7 +86,7 @@ export class IoServerWrapper {
                                 debug("Generated uri " + sender.uri);
                                 socket.emit('server_rcv_url_generated', servePath + sender.uri);
                             }, function () {
-                                that.routingError(socket);
+                                self.routingError(socket);
                             });
 
                         });
@@ -101,13 +94,13 @@ export class IoServerWrapper {
                         //ON SEND_FILE EVENT (stream)
                         ss(socket).on('snd_send_file', function (stream: any, receiverId: string) {
                             debug("%s/%s send file", senderId, receiverId);
-                            dao.getReceiver(senderId, receiverId, function (receiver: FileReceiver) {
+                            self.dao.getReceiver(senderId, receiverId, function (receiver: FileReceiver) {
                                 debug("%s/%s Expose stream for receiver size=%d", senderId, receiverId, receiver.sender.fileSize);
                                 //notifying receiver
                                 receiver.stream = stream;
                                 receiver.socket.emit('server_stream_ready', downloadPath + senderId + "/" + receiverId);
                             }, function () {
-                                that.routingError(socket);
+                                self.routingError(socket);
                             });
 
                         });
@@ -115,18 +108,18 @@ export class IoServerWrapper {
 
                         // DISCONNECT event
                         socket.on('disconnect', function () {
-                            dao.getSender(senderId, function (sender: FileSender) {
+                            self.dao.getSender(senderId, function (sender: FileSender) {
                                 sender.receivers.forEach((receiver) => {
                                     receiver.socket.emit('server_sender_left');
                                 })
 
-                                dao.removeSender(senderId, function () {
+                                self.dao.removeSender(senderId, function () {
                                     debug("%s sender disconnect", socket.id);
                                 }, function () {
-                                    that.routingError(socket);
+                                    self.routingError(socket);
                                 });
                             }, function () {
-                                that.routingError(socket);
+                                self.routingError(socket);
                             });
 
                         });
@@ -136,29 +129,29 @@ export class IoServerWrapper {
 
         socketIoServer.of(this.receiveNamespace).on('connection',
             function (socket) {
-                let receiverId = that.extractReceiverId(socket);
-                if (receiverId != null) {
+                let receiverId = self.extractReceiverId(socket);
+                if (receiverId != undefined) {
                     socket.on('rcv_sender', function (senderId) {
                         debug("%s/%s receiver", senderId, receiverId);
-                        dao.addReceiver(senderId, receiverId, socket, function (sender: FileSender) {
+                        self.dao.addReceiver(senderId, receiverId!, socket, function (sender: FileSender) {
                             debug("%s/%s receiver registered ", senderId, receiverId);
 
                             // DISCONNECT event
                             socket.on('disconnect', function () {
 
-                                dao.getSender(senderId, function (sender: FileSender) {
+                                self.dao.getSender(senderId, function (sender: FileSender) {
 
                                     if (sender.removeReceiver(receiverId))
                                         sender.socket.emit('server_receiver_left', receiverId);
 
                                 }, function () {
-                                    that.routingError(socket);
+                                    self.routingError(socket);
                                 });
                             });
 
                             sender.socket.emit('server_receiver_ready', receiverId);
                         }, function () {
-                            that.emitError(socket, 'unknown senderID: ' + senderId);
+                            self.emitError(socket, 'unknown senderID: ' + senderId);
                         });
                     });
                 }

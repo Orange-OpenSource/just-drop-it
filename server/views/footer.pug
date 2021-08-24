@@ -36,7 +36,7 @@ footer
                     a#whatsNewLink(data-toggle="modal" data-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
                         span.text-danger.icon-Discussion-more.big-icon.badge#whatsNewBadge
 script.
-    var wnHandler = new WhatsNewHandler(#{jdropitVersion},$("#whatsNewLink"),$("#whatsNewBadge"));
+    var wnHandler = new WhatsNewHandler("#{jdropitVersion}",$("#whatsNewLink"),$("#whatsNewBadge"));
     $("#whatsNewLink").click(function(){wnHandler.setAsRead()});
 include thirdparties
 include about

@@ -20,29 +20,11 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var debug = require('debug')('app:routes:admin');
-var router = express.Router();
-var dao    = require("../server/dao");
+export class DisplayError {
+    status: number|undefined;
+    sub_message: string|undefined;
+    constructor(message: string) {
 
+    }
 
-debug.log = console.log.bind(console);
-
-/* GET home page. */
-router.get('/', function(req, res) {
-    var senders = [];
-    dao.eachSenders(function(sender){
-        var senderObj = {id : sender.senderId, receivers : [], fileName: sender.fileName};
-        sender.eachReceiver(function(receiver){
-            senderObj.receivers.push(receiver.receiverId);
-        });
-        senders.push(senderObj);
-    });
-    res.render('admin', {title : "Just drop it Admin",
-        isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-        jdropitVersion : process.env.npm_package_version,
-        dumbContent : "",
-        senders : senders});
-});
-
-module.exports = router;
+}

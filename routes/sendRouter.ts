@@ -20,38 +20,42 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var path = require('path');
-var debug = require('debug')('app:routes:send');
-var router = express.Router();
-var fs    = require("fs");
+import Debug from "debug";
+import {Request, Response} from "express";
 
 
+const debug = Debug("app:routes:send");
 debug.log = console.log.bind(console);
 
-var dumbQuotes = ["Let us ease your file transfers",
+const dumbQuotes = ["Let us ease your file transfers",
     "Making the world a better place",
     "Make file transfers, not war",
     "When file transfer becomes pleasure",
     "File transfer is not a fatality",
     "Helping humanity thrive"];
 
-/* GET home page. */
-router.get('/', function(req, res) {
-    debug('serving view');
-    res.render('send', {
-        isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-        jdropitVersion : global.DROP_IT_VERSION,
-        infoMessage : typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
-        dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)]
-    });
-});
+export class SendRouter {
+    router = require('express').Router();
+    get(){
+        /* GET home page. */
+        this.router.get('/', function(req: Request, res: Response) {
+            debug('serving view');
+            res.render('send', {
+                isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
+                jdropitVersion : process.env.npm_package_version,
+                infoMessage : typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
+                dumbContent : dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)]
+            });
+        });
 
-/* GET home page. */
-router.get('/no_ie', function(req, res) {
-    debug('serving no ie');
-    res.render('no_ie', {title : "Sorry, your browser is not compatible"});
-});
+        /* GET home page. */
+        this.router.get('/no_ie', function(req: Request, res: Response) {
+            debug('serving no ie');
+            res.render('no_ie', {title : "Sorry, your browser is not compatible"});
+        });
 
+        return this.router
+    }
 
-module.exports = router;
+}
+

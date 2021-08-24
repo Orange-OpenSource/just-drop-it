@@ -20,22 +20,29 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {SendRouter} from "../routes/sendRouter";
+
 let express = require('express');
 let path = require('path');
 let favicon = require('serve-favicon');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
-let send = require('../routes/send');
-let receive = require('../routes/receive');
+
 let admin = require('../routes/admin');
 let javascript = require('../routes/javascript');
 import {Express, NextFunction, Request, Response} from "express";
+import {ReceiveRouter} from "../routes/receiveRouter";
 
 export class App {
 
     app: Express
-    receiverServePagePath: string;
-    receiverDownloadPath: string;
+
+    receiveRouter = new ReceiveRouter();
+    sendRouter = new SendRouter();
+
+    receiveUriPath = '/receive';
+    receiverServePagePath: string = this.receiveUriPath + this.receiveRouter.servePagePath;
+    receiverDownloadPath: string = this.receiveUriPath + this.receiveRouter.downloadPath;
 
     constructor() {
         this.app = express();
@@ -50,17 +57,14 @@ export class App {
         this.app.use(bodyParser.urlencoded({extended: false}));
         this.app.use(express.static(path.join(__dirname, 'public')));
 
-
         this.app.use(express.static(__dirname + '/../node_modules/boosted/dist'));
         this.app.use(express.static(__dirname + '/../node_modules/tether/dist'));
         this.app.use(express.static(__dirname + '/../node_modules/jquery/dist'));
         this.app.use(express.static(__dirname + '/../node_modules/jquery-file-download/src/Scripts'));
         this.app.use(express.static(__dirname + '/../node_modules/clipboard/dist'));
 
-
-        let receiveUriPath = '/receive';
-        this.app.use('/', send);
-        this.app.use(receiveUriPath, receive);
+        this.app.use('/', this.sendRouter.get());
+        this.app.use(this.receiveUriPath, this.receiveRouter.get());
         this.app.use('/admin', admin);
         this.app.use('/js', javascript);
 
@@ -112,8 +116,6 @@ export class App {
             });
         });
 
-        this.receiverServePagePath = receiveUriPath + receive.servePagePath;
-        this.receiverDownloadPath = receiveUriPath + receive.downloadPath;
 
     }
 }
