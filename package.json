@@ -42,9 +42,13 @@
     "uglify-js": "3.14.1"
   },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "ts-node index.ts",
     "start-dev": " DEBUG=app* ts-node index.ts",
     "test": "mocha --require ts-node/register --ui bdd  test/test_transfert.ts"
+  },
+  "resolutions": {
+    "debug": "4.3.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
