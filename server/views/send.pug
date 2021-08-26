@@ -45,7 +45,7 @@ block extra_scripts
 
 block content
 
-    div.row.top-buffer#selectFileContainer
+    div.row#selectFileContainer
         div.col-xs-12
             p Either drop a file below:
             div.upload-drop-zone#drop-zone Just drag and drop a file here
@@ -56,21 +56,23 @@ block content
     div.row.top-buffer#copyLinkContainer(style="display: none;")
         div.col-xs-12
             p.lead Tell your friend to go to this url:
-            p.text-muted.text-xs-center.lead#generatedurl
-            span.text-success.pull-xs-right.icon-checkbox-tick#clipboardcopyok(aria-hidden="true")
-            button.btn.btn-orange.pull-xs-right#copy-button(title="Click to copy url to clipboard",data-clipboard-target="#generatedurl") Copy to clipboard
+            p.text-muted.text-center.lead#generatedurl
+
+            span.text-success.float-end.icon-checkbox-tick#clipboardcopyok(aria-hidden="true",data-feather="check")
+            button.btn.btn-orange.float-end#copy-button(title="Click to copy url to clipboard",data-clipboard-target="#generatedurl") Copy to clipboard
+                i(data-feather="clipboard")
     div#transferContainer(style="display: none;")
         div.row.top-buffer
             div.col-xs-12
                 p.lead Each transfer will start as soon as your friends open the link.
-                p.text-muted.text-xs-center.lead#generatedurlreminder
+                p.text-muted.text-center.lead#generatedurlreminder
                 p &nbsp;
                     span#filename
         div#rowReceiverTemplate.row(style="display: none;")
             div.col-xs-1.offset-xs-1.text-right
                 span.icon-Adult.big-icon
             div.col-xs-8
-                div.text-xs-center#progressDisplay 0%
+                div.text-center#progressDisplay 0%
                 progress.progress(value="0" max="100" style="min-width: 2em;" aria-describedby="progressDisplay" aria-valuenow="0")
             div.col-xs-1
                 span.icon-delete.link-like.big-icon(style="display: none;" data-bs-toggle="tooltip" data-placement="right" title="remove line")

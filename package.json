@@ -29,6 +29,7 @@
     "clipboard": "2.0.8",
     "debug": "4.3.2",
     "express": "^4.17.1",
+    "feather-icons": "^4.28.0",
     "jquery": "3.5.0",
     "jquery-file-download": "1.4.6",
     "morgan": "1.9.1",

@@ -44,10 +44,8 @@ SenderHandler.prototype = {
 
         this.socket = io('/send', socketParams);
 
-
         this.socket.on('connect', function () {
             debug("connect - %s - %s", this.id, this.io.engine.transport.name);
-            appendError("test d'erreur");
 
             function handleError(errorMessage) {
                 appendError(errorMessage);
@@ -162,7 +160,7 @@ SenderHandler.prototype = {
 
         var pbContainer = newRow.children(".col-xs-8");
         var transferProgressBar = pbContainer.find("progress");
-        var displayProgressBar = pbContainer.find(".text-xs-center");
+        var displayProgressBar = pbContainer.find(".text-center");
         displayProgressBar.attr("id", "progress-"+receiverId);
         transferProgressBar.attr("aria-describedby", "progress-"+receiverId);
         transferContainer.append(newRow);
