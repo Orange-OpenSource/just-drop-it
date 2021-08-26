@@ -38,12 +38,10 @@ SenderHandler.prototype = {
     init: function (isLocal) {
         this.readWriteOpts = {highWaterMark: Math.pow(2, 19)};// 2 pow 10 = 1024
         this.receiverInfos = {};
-        var that = this;
+        const that = this;
 
-        var socketParams = {};
+        const socketParams = {path : "/_ws/socket.io/"};
 
-        if (!isLocal)//restriction on OPENSHIFT
-            socketParams.path = "/_ws/socket.io/";
         this.socket = io('/send', socketParams);
 
 
@@ -231,7 +229,7 @@ function sendFile(isLocal) {
 
     $("#clipboardcopyok").hide();
 
-    var clipboard = new Clipboard('#copy-button');
+    var clipboard = new ClipboardJS('#copy-button');
     clipboard.on('success', function(e) {
         console.info('Copied to clipboard:', e.text);
         $("#clipboardcopyok").show(300);

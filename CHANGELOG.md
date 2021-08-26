@@ -1,3 +1,13 @@
+<a name="2.7.0"></a>
+# 2.7.0 (2021-08-26)
+
+
+### Bug Fixes
+
+* **server:** Fixed a lot of vulnerabilities by upgrading most dependencies and adapting code. Introduced typescript. 
+
+
+
 <a name="2.6.0"></a>
 # 2.6.0 (2018-03-21)
 

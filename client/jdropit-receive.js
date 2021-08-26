@@ -80,12 +80,10 @@ ReceiverHandler.prototype.startDownload = function (url) {
 
 ReceiverHandler.prototype._init = function (isLocal, senderId) {
     $('#warning-window').show();
-    var that = this;
+    const that = this;
 
-    var socketParams = {};
+    const socketParams = {path : "/_ws/socket.io/"};
 
-    if (!isLocal)//restriction on OPENSHIFT
-        socketParams.path = "/_ws/socket.io/";
     this.socket = io('/receive', socketParams);
     this.socket.on('connect', function () {
         debug("connect - %s - %s", this.id, this.io.engine.transport.name);
