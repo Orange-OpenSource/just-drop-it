@@ -24,6 +24,7 @@ import {Server, Socket} from "socket.io";
 import Debug from "debug";
 import {Server as HTTPServer} from "http";
 import {FileSender, FileReceiver, Dao} from "./dao";
+import UrlGenerator from "./url-generator";
 
 let ss = require('socket.io-stream');
 
@@ -31,13 +32,14 @@ const debug = Debug("app:ioserver");
 const error = Debug("app:ioserver");
 
 debug.log = console.log.bind(console);
-let uriGenerator = require("./url-generator");
+
 
 export class IoServerWrapper {
     sendNamespace = "/send";
     receiveNamespace = '/receive';
 
     dao = Dao.getInstance();
+    uriGenerator = new UrlGenerator();
 
     private static _extractId(originNamespace: string, socket: Socket): string|undefined {
         debug("%s - new client - %s", originNamespace, socket.id);
@@ -81,7 +83,7 @@ export class IoServerWrapper {
                             self.dao.getSender(senderId, function (sender: FileSender) {
                                 sender.fileName = info.name;
                                 sender.fileSize = info.size;
-                                sender.uri = uriGenerator.generateUrl();
+                                sender.uri = self.uriGenerator.generateUrl();
 
                                 debug("Generated uri " + sender.uri);
                                 socket.emit('server_rcv_url_generated', servePath + sender.uri);
