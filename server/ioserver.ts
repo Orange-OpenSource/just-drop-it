@@ -70,7 +70,7 @@ export class IoServerWrapper {
     }
 
     wrapServer(servePath: string, downloadPath: string, server: HTTPServer) {
-        let socketIoServer = new Server(server, {});
+        let socketIoServer = new Server(server, {path: "/_ws/socket.io/"});
         let self = this;
 
         socketIoServer.of(this.sendNamespace).on('connection',

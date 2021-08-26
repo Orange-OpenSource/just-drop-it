@@ -40,7 +40,8 @@ export class JavascriptLibsRouter {
     private _routeLibrary(libName: string, sourceLoader: () => string, reloadOnLocal: boolean) {
         debug("preparing route for lib %s", libName)
         const source = sourceLoader();
-        const sourceMin = this.uglifyJS.minify(source, {fromString: true}).code;
+        const sourceMin = this.uglifyJS.minify(source).code;
+
         this.router.get('/' + libName + '.js', (req: Request, res: Response) => {
             debug("providing %s", libName);
             res.setHeader('Content-Type', 'application/javascript');
@@ -72,15 +73,11 @@ export class JavascriptLibsRouter {
 
         const browserify = require('browserify');
 
-        debug(servedFiles)
         servedFiles.forEach((path:string, libName: string) =>{
-            this._routeLibrary(libName, ( (libName) => {
-                return function () {
-                    return self.read(require.resolve(path), 'utf-8');
-                }
-            })(libName), true);
+            this._routeLibrary(libName,  () => {
+                return self.read(require.resolve(path), 'utf-8');
+            }, true);
         })
-
 
         const browserifyEngine = browserify([], {basedir: __dirname});
         for (let cpt = 0; cpt < commonLibraries.length; cpt++) {
