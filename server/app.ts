@@ -28,11 +28,10 @@ let favicon = require('serve-favicon');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 
-let admin = require('../routes/admin');
-let javascript = require('../routes/javascript');
 import {Express, NextFunction, Request, Response} from "express";
 import {ReceiveRouter} from "../routes/receiveRouter";
 import {AdminRouter} from "../routes/admin";
+import {JavascriptLibsRouter} from "../routes/javascriptLibsRouter";
 
 export class App {
 
@@ -67,7 +66,7 @@ export class App {
         this.app.use('/', this.sendRouter.get());
         this.app.use(this.receiveUriPath, this.receiveRouter.get());
         this.app.use('/admin', (new AdminRouter()).get());
-        this.app.use('/js', javascript);
+        this.app.use('/js', (new JavascriptLibsRouter()).get());
 
 
 // catch 404 and forward to error handler
@@ -88,7 +87,7 @@ export class App {
 // will print stacktrace
         if (this.app.get('env') === 'development') {
             console.log("enabling stacks");
-            this.app.use(function (err: any, req: Request, res: Response, next: NextFunction) {
+            this.app.use(function (err: any, req: Request, res: Response) {
                 console.error(err);
                 res.status(err.status || 500);
                 res.render('error', {
@@ -105,7 +104,7 @@ export class App {
 
 // production error handler
 // no stacktraces leaked to user
-        this.app.use(function (err: any, req: Request, res: Response, next: NextFunction) {
+        this.app.use(function (err: any, req: Request, res: Response) {
             res.status(err.status || 500);
             res.render('error', {
                 dumbContent: "",
