@@ -92,7 +92,7 @@ describe('Transfer test', function () {
     });
 
     function buildConnection(uri: string) {
-        let result = io(urlConnection + uri, {'force new connection': true});
+        let result = io(urlConnection + uri, {'force new connection': true, 'path': "/_ws/socket.io/"});
 
         result.on('error', function () {
             should.not.exist("Connection error");
