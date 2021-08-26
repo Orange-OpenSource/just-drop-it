@@ -26,7 +26,6 @@ import {Socket} from "socket.io";
 const debug = Debug("app:dao");
 debug.log = console.log.bind(console);
 
-//TODO : check if we can get rid of socket.io-client
 export class Dao {
 
     private static instance: Dao;
@@ -46,8 +45,6 @@ export class Dao {
     }
 
     senders = new Map<string, FileSender>();
-
-
 
     createSender(senderId: string, socket: Socket, callback: (created: FileSender) => void) {
         const result = new FileSender(senderId, socket);
@@ -165,8 +162,7 @@ export class FileReceiver {
     // an void function of nothing.
     clean: (() => void) | undefined = undefined;
 
-
-    constructor(readonly sender: FileSender, readonly receiverId: string, readonly socket: Socket) { // TODO remove socket rom Receiver object. Can retrieve it with its sender
+    constructor(readonly sender: FileSender, readonly receiverId: string, readonly socket: Socket) {
         debug('Receiver - init - %s', receiverId);
     }
 
