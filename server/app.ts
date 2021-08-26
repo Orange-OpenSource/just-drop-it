@@ -32,6 +32,7 @@ let admin = require('../routes/admin');
 let javascript = require('../routes/javascript');
 import {Express, NextFunction, Request, Response} from "express";
 import {ReceiveRouter} from "../routes/receiveRouter";
+import {AdminRouter} from "../routes/admin";
 
 export class App {
 
@@ -65,7 +66,7 @@ export class App {
 
         this.app.use('/', this.sendRouter.get());
         this.app.use(this.receiveUriPath, this.receiveRouter.get());
-        this.app.use('/admin', admin);
+        this.app.use('/admin', (new AdminRouter()).get());
         this.app.use('/js', javascript);
 
 

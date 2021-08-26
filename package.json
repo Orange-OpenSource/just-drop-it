@@ -44,7 +44,7 @@
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "ts-node index.ts",
-    "start-dev": " DEBUG=app* ts-node index.ts",
+    "start-dev": " DEBUG=app* ts-node-dev index.ts",
     "test": "mocha --require ts-node/register --ui bdd  test/test_transfert.ts"
   },
   "resolutions": {
@@ -58,7 +58,8 @@
     "conventional-changelog-cli": "^2.1.1",
     "mocha": "9.1.0",
     "request": "2.88.2",
-    "should": "11.2.1"
+    "should": "11.2.1",
+    "ts-node-dev": "^1.1.8"
   },
   "bundleDependencies": [],
   "private": true,

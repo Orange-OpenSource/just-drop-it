@@ -106,6 +106,10 @@ export class Dao {
             notFoundCallback()
         }
     };
+
+    eachSender(functionToApplyToAllSender: (receiver: FileSender) => void) {
+        [...this.senders.values()].forEach(functionToApplyToAllSender)
+    }
 }
 
 
@@ -143,13 +147,13 @@ export class FileSender {
     clean() {
         debug('Sender - clean - %s', this.senderId);
         //clean resources
-        this._eachReceiver(function (receiver) {
+        this.eachReceiver(function (receiver) {
             receiver.cleanIfPossible();
         });
         this.receivers.clear();
     }
 
-    private _eachReceiver(functionToApplyToAllReceiver: (receiver: FileReceiver) => void) {
+    eachReceiver(functionToApplyToAllReceiver: (receiver: FileReceiver) => void) {
         [...this.receivers.values()].forEach(functionToApplyToAllReceiver)
     }
 

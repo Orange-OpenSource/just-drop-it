@@ -33,7 +33,6 @@ const error = Debug("app:ioserver");
 
 debug.log = console.log.bind(console);
 
-
 export class IoServerWrapper {
     sendNamespace = "/send";
     receiveNamespace = '/receive';
