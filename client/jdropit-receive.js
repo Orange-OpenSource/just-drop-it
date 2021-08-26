@@ -41,7 +41,8 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
 
 ReceiverHandler.prototype.displayProgress = function (percent) {
     debug("displayProgress=%d", percent);
-    this.progressBar.attr('value', percent);
+    this.progressBar.attr('aria-valuenow', percent);
+    this.progressBar.width(percent+ '%')
     this.displayProgressBar.html(percent + '%');
 };
 
