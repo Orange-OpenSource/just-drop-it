@@ -47,6 +47,7 @@ SenderHandler.prototype = {
 
         this.socket.on('connect', function () {
             debug("connect - %s - %s", this.id, this.io.engine.transport.name);
+            appendError("test d'erreur");
 
             function handleError(errorMessage) {
                 appendError(errorMessage);
@@ -203,7 +204,7 @@ SenderHandler.prototype = {
         receiverInfo.deactivate(isError);
         var progressBarContainer = receiverInfo.progressBarContainer;
         var spanResultProperties = {};
-        spanResultProperties["data-toggle"] = "tooltip";
+        spanResultProperties["data-bs-toggle"] = "tooltip";
         spanResultProperties["data-placement"] = "right";
         spanResultProperties["title"] = isError? "Transfer failed" : "Transfer successful";
         var spanResult = $("<span>", spanResultProperties)

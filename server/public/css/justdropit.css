@@ -46,13 +46,13 @@
 -------------------------------------------------- */
 
 
-#warning-window {
-	position: fixed;
-	top: 0;
-	right: 0;
-	width: 20%;
-	z-index: 10;
-}
+/*#warning-window {*/
+/*	position: fixed;*/
+/*	top: 0;*/
+/*	right: 0;*/
+/*	width: 20%;*/
+/*	z-index: 10;*/
+/*}*/
 
 #inner-message {
 	margin: 0 auto;
@@ -146,12 +146,12 @@ button.btn-orange:hover {
     text-align: right;
 }
 
-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
-
+/*footer {*/
+/*    position: absolute;*/
+/*    bottom: 0;*/
+/*    width: 100%;*/
+/*}*/
+/**
 
 .footer-content {
     background-color: #000;
@@ -161,9 +161,16 @@ footer {
     text-align: center;
     padding: 0.2rem 0px 0px;
 }
-
+**/
+.footer-content {
+    background-color: #000;
+    color: #ffffff;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    padding: 0.2rem 0px 0px;
+}
 .footer-top {
-    padding: 0.5rem 0px 0px;
+    font-size: 0.875rem
 }
 
 .footer-bottom {
@@ -172,7 +179,7 @@ footer {
 
 
 .footer-bottom ul {
-    padding: 10px;
+    padding: 2px;
     margin: 0;
     text-align: center;
     list-style: none;

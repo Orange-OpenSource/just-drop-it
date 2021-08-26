@@ -44,29 +44,14 @@ block extra_scripts
         }
 
 block content
-    div.row
-        div.col-xs-12
-            nav.o-stepbar
-                    ol
-                        li.stepbar-item.current
-                            a.stepbar-link(title="Select your file")
-                                span.step-number 1
-                                span.step-title Select your file
-                        li.stepbar-item
-                            a.stepbar-link(title="Share it with your friends")
-                                span.step-number 2
-                                span.step-title Share it with your friends
-                        li.stepbar-item
-                            a.stepbar-link(title="Transfer")
-                                span.step-number 3
-                                span.step-title Transfer
 
     div.row.top-buffer#selectFileContainer
         div.col-xs-12
-            p.lead Either drop a file below:
+            p Either drop a file below:
             div.upload-drop-zone#drop-zone Just drag and drop a file here
             form.form-inline.float-xs-right#myform(action="")
-                label.lead(for="file") Or select it with the file explorer:&nbsp;
+                p Or select it with the file explorer:&nbsp;
+                label(for="file")
                 input#file(type="file")
     div.row.top-buffer#copyLinkContainer(style="display: none;")
         div.col-xs-12
@@ -88,7 +73,7 @@ block content
                 div.text-xs-center#progressDisplay 0%
                 progress.progress(value="0" max="100" style="min-width: 2em;" aria-describedby="progressDisplay" aria-valuenow="0")
             div.col-xs-1
-                span.icon-delete.link-like.big-icon(style="display: none;" data-toggle="tooltip" data-placement="right" title="remove line")
+                span.icon-delete.link-like.big-icon(style="display: none;" data-bs-toggle="tooltip" data-placement="right" title="remove line")
             div.col-xs-1
 
 

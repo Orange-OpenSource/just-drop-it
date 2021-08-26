@@ -20,18 +20,16 @@
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 
 doctype html
-html
+html.h-100
     head
         meta(charset="utf-8")
         meta(http-equiv="X-UA-Compatible" content="IE=edge")
         meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
         title Just drop it
         if isLocal
-            link(rel='stylesheet', href='/css/orangeIcons.css')
             link(rel='stylesheet', href='/css/boosted.css')
             link(rel='stylesheet', href='/css/tether.css')
         else
-            link(rel='stylesheet', href='/css/orangeIcons.min.css')
             link(rel='stylesheet', href='/css/boosted.min.css')
             link(rel='stylesheet', href='/css/tether.min.css')
         link(rel='stylesheet', href='/css/justdropit.css')
@@ -70,14 +68,16 @@ html
                 }
             }
         block extra_scripts
-    body
+    body.d-flex.flex-column.h-100
         include ./header.pug
-        main
+        main.flex-shrink-0
             div.alert.alert-warning#warning-window(style="display: none;")
-                                span.icon-Warningimportant(aria-hidden="true")
-                                span.sr-only Warning:
-                                span
-                                    | &nbsp; Don't close this window!
+                                span.alert-icon
+                                    span.visually-hidden Warning
+                                div
+                                    h4.alert-heading Don't close this window!
+                                    p Your browser needs be opened during the whole transfer.
+
             div.container
 
                 include ./user_messages.pug

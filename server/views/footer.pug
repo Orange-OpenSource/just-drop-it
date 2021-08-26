@@ -19,7 +19,14 @@
  You should have received a copy of the GNU General Public License
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 
-footer
+//- <footer class="footer mt-auto py-3 bg-light">
+//-   <div class="container">
+//-     <span class="text-muted">Place sticky footer content here.</span>
+//-   </div>
+//- </footer>
+
+footer.footer.mt-auto.py-3
+
     div.footer-content
         div.container(role="contentinfo")
             div.footer-top
@@ -27,13 +34,13 @@ footer
         div.footer-bottom
             ul
                 li
-                    a(data-toggle="modal" data-target=".modal:nth-of-type(1)" role="button") Third Parties
+                    a(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(1)" role="button") Third Parties
                 li .
                 li
-                    a(data-toggle="modal" data-target=".modal:nth-of-type(2)" role="button") About
+                    a(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(2)" role="button") About
                 li .
                 li
-                    a#whatsNewLink(data-toggle="modal" data-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
+                    a#whatsNewLink(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
                         span.text-danger.icon-Discussion-more.big-icon.badge#whatsNewBadge
 script.
     var wnHandler = new WhatsNewHandler("#{jdropitVersion}",$("#whatsNewLink"),$("#whatsNewBadge"));

@@ -22,8 +22,9 @@
     "node": ">=14.17.5"
   },
   "dependencies": {
+    "@popperjs/core": "^2.9.3",
     "body-parser": "^1.19.0",
-    "boosted": "4.0.0-alpha.4",
+    "boosted": "^5.0.2",
     "browserify": "17.0.0",
     "clipboard": "2.0.8",
     "debug": "4.3.2",
