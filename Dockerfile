@@ -1,4 +1,4 @@
-FROM node:13.1.0 AS build
+FROM node:14.17.5 AS build
 
 ARG NPM_REGISTRY="https://registry.npmjs.org/"
 
@@ -11,7 +11,7 @@ RUN     npm config set proxy $http_proxy                                        
         echo " - Installing dependencies"                                       && \
         npm install --registry=$NPM_REGISTRY  >/dev/null
 
-FROM node:13.1.0 AS runtime
+FROM node:14.17.5 AS runtime
 
 LABEL name="just drop it"                                      \
     description="Just Drop It"                                 \
