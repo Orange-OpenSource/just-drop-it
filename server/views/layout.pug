@@ -28,10 +28,8 @@ html.h-100
         title Just drop it
         if isLocal
             link(rel='stylesheet', href='/css/boosted.css')
-            link(rel='stylesheet', href='/css/tether.css')
         else
             link(rel='stylesheet', href='/css/boosted.min.css')
-            link(rel='stylesheet', href='/css/tether.min.css')
         link(rel='stylesheet', href='/css/justdropit.css')
 
         block extra_styles
@@ -43,14 +41,12 @@ html.h-100
         script(src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js")
         if isLocal
             script(src="/jquery.js")
-            script(src="/js/tether.js")
             script(src="/js/boosted.js")
             script(src="/js/common-libraries.js")
             script(src="/js/jdropit-whatsnew.js")
             script(src="/js/jdropit-notif.js")
         else
             script(src="/jquery.min.js")
-            script(src="/js/tether.min.js")
             script(src="/js/boosted.min.js")
             script(src="/js/common-libraries.min.js")
             script(src="/js/jdropit-whatsnew.min.js")
