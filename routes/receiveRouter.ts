@@ -90,7 +90,7 @@ export class ReceiveRouter {
                 const initSize = getNumberOfBytesSent();
                 const sendDate = false;
                 const HEAD_SIZE_WITHOUT_FILE_NAME = sendDate ? 246 : 209;
-                const CHECK_SEND_DELAY_IN_MS = 500;
+                const CHECK_SEND_DELAY_IN_MS = 100;
                 const TIMEOUT_IN_MS = 60 * 1000;
 
 
