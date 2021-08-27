@@ -46,14 +46,6 @@
 -------------------------------------------------- */
 
 
-/*#warning-window {*/
-/*	position: fixed;*/
-/*	top: 0;*/
-/*	right: 0;*/
-/*	width: 20%;*/
-/*	z-index: 10;*/
-/*}*/
-
 #inner-message {
 	margin: 0 auto;
 }
@@ -61,10 +53,6 @@
 a {
     color: #f16e00;
     text-decoration: none;
-}
-
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    color: #f16e00;
 }
 
 .error small {
@@ -77,6 +65,7 @@ header {
 }
 
 .header-content {
+    color: #f16e00;
 }
 
 .header-content h1 {
@@ -110,6 +99,11 @@ header {
     margin-right: 10px;
 }
 
+.modal h6 {
+    color: #f16e00;
+}
+
+
 main {
     padding: 2rem 0px 1.1rem;
 }
@@ -137,31 +131,13 @@ button.btn-orange:hover {
     color: #f16e00;
 }
 
-.big-icon {
-    font-size: 1.5rem;
-    font-style: normal;
-}
+
 
 .text-right {
     text-align: right;
 }
 
-/*footer {*/
-/*    position: absolute;*/
-/*    bottom: 0;*/
-/*    width: 100%;*/
-/*}*/
-/**
 
-.footer-content {
-    background-color: #000;
-    color: #ffffff;
-    margin: 4rem 0 0rem;
-    border-bottom: 1px solid #eee;
-    text-align: center;
-    padding: 0.2rem 0px 0px;
-}
-**/
 .footer-content {
     background-color: #000;
     color: #ffffff;
@@ -192,23 +168,6 @@ button.btn-orange:hover {
 }
 
 
-.modal-header {
-    background-color: #000;
-}
-
-.modal-title {
-    color: #f16e00;
-}
-
-.modal-header  .close{
-    color: #f16e00;
-    opacity: 1;
-}
-
-.modal-body a, h5 {
-    color: #222222;
-    font-style: italic;
-}
 /* Remove "no file selected" on file input
 --------- */
 

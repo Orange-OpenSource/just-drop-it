@@ -19,13 +19,16 @@
  You should have received a copy of the GNU General Public License
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 block modal_extra_scripts
-div.modal.fade(tabindex="-1" role="dialog" aria-hidden="true")
-    div.modal-dialog(role="document")
+div.modal.fade(tabindex="-1")
+    div.modal-dialog
         div.modal-content
-            div.modal-header.modal-header-dropit
-                button.close(type="button" data-dismiss="modal" aria-label="Close")
-                    span(aria-hidden="true") &times;
-                h4.modal-title
+            div.modal-header
+                h5.modal-title
                     block modal_title
+                button.btn-close(type="button" data-bs-dismiss="modal")
+                    span.visually-hidden Close
+
             div.modal-body
                 block modal_body
+            div.modal-footer
+                button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Close

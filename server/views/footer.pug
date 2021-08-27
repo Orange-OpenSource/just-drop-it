@@ -38,10 +38,10 @@ footer.footer.mt-auto.py-3
                 li .
                 li
                     a(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(2)" role="button") About
-                li .
-                li
-                    a#whatsNewLink(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
-                        span.text-danger.icon-Discussion-more.big-icon.badge#whatsNewBadge
+//-                 li .
+//-                 li
+//-                     a#whatsNewLink(data-bs-toggle="modal" data-bs-target=".modal:nth-of-type(3)" role="button") What's new&nbsp;
+//-                         span.text-danger.icon-Discussion-more.badge#whatsNewBadge
 script.
     var wnHandler = new WhatsNewHandler("#{jdropitVersion}",$("#whatsNewLink"),$("#whatsNewBadge"));
     $("#whatsNewLink").click(function(){wnHandler.setAsRead()});
