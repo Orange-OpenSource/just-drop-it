@@ -1,0 +1,185 @@
+/*
+ * just-drop-it
+ * Copyright (C) 2016 Orange
+ * Authors: Benjamin Einaudi  benjamin.einaudi@orange.com
+ *          Arnaud Ruffin arnaud.ruffin@orange.com
+ *
+ * This file is part of just-drop-it.
+ *
+ * just-drop-it is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* drag and drop style
+-------------------------------------------------- */
+
+
+.upload-drop-zone {
+	height: 200px;
+	border-width: 2px;
+	margin-bottom: 20px;
+}
+
+.upload-drop-zone {
+	color: #ccc;
+	border-style: dashed;
+	border-color: #ccc;
+	line-height: 200px;
+	text-align: center
+}
+
+.upload-drop-zone.drop {
+	color: #222;
+	border-color: #222;
+}
+/* dont close windows warning
+-------------------------------------------------- */
+
+
+#inner-message {
+	margin: 0 auto;
+}
+
+a {
+    color: #f16e00;
+    text-decoration: none;
+}
+
+.error small {
+    color: #222;
+}
+
+header {
+    width: 100%;
+    background-color: #000;
+}
+
+.header-content {
+    color: #f16e00;
+}
+
+.header-content h1 {
+    padding: 0.5rem 0px 0.2rem;
+}
+
+.header-content h1 small {
+    font-style: italic;
+    color: #ddd;
+    display: block;
+    font-size: 50%;
+}
+
+.notification-header {
+    text-align: center;
+    cursor : pointer;
+    color: #EFEFEF;
+    border-bottom: 1px solid #EFEFEF;
+}
+
+.notification-header em {
+    color: #f16e00;
+}
+
+.notification-header a {
+    color: #f16e00;
+}
+
+.dismiss-notification {
+    float: right;
+    margin-right: 10px;
+}
+
+.modal h6 {
+    color: #f16e00;
+}
+
+
+main {
+    padding: 2rem 0px 1.1rem;
+}
+
+main em {
+    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.btn-orange {
+    background-color: #222;
+    border-color: #222;
+    color: #EFEFEF;
+}
+
+button.btn-orange:hover {
+    background-color: #222;
+    border-color: #222;
+    color: #f16e00;
+}
+
+.link-like {
+    cursor: pointer;
+    color: #f16e00;
+}
+
+
+
+.text-right {
+    text-align: right;
+}
+
+
+.footer-content {
+    background-color: #000;
+    color: #ffffff;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    padding: 0.2rem 0px 0px;
+}
+.footer-top {
+    font-size: 0.875rem
+}
+
+.footer-bottom {
+    color: #ddd;
+}
+
+
+.footer-bottom ul {
+    padding: 2px;
+    margin: 0;
+    text-align: center;
+    list-style: none;
+}
+
+.footer-bottom ul > li {
+    display: inline;
+    margin-right: 20px;
+    font-size: 0.875rem;
+}
+
+
+/* Remove "no file selected" on file input
+--------- */
+
+
+input[type='file'] {
+	color: transparent;
+	display: inline;
+}
+
+/*to add margin between rows*/
+.top-buffer { margin-top:30px; }
+
+
+
+

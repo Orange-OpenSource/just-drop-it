@@ -60,3 +60,14 @@ uglify-js, JavaScript parser / mangler / compressor / beautifier toolkit http://
 Copyright 2012-2013 (c) Mihai Bazon <mihai.bazon@gmail.com>
 Licensed under the BSD license
 https://github.com/mishoo/UglifyJS2/blob/master/LICENSE
+
+ts-node, TypeScript execution engine and REPL for Node.js. https://github.com/TypeStrong/ts-node
+Copyright (c) 2014 Blake Embrey (hello@blakeembrey.com)
+Licensed under the MIT license.
+https://github.com/TypeStrong/ts-node/blob/main/LICENSE
+
+typescript https://github.com/microsoft/TypeScript
+Copyright (c) Microsoft
+Licensed under the Apache License 2.0
+https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt
+

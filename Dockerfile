@@ -1,17 +1,28 @@
-FROM node:6
+FROM node:14.17.5 AS build
 
-# Create app directory
-RUN mkdir -p /opt/app-root/src
-WORKDIR /opt/app-root/src
+ARG NPM_REGISTRY="https://registry.npmjs.org/"
 
+COPY    ./  /build/
+WORKDIR /build/
 
-# Install app dependencies
-COPY package.json /opt/app-root/src
-RUN npm install
+RUN     npm config set proxy $http_proxy                                        && \
+        npm config set https-proxy $https_proxy                                 && \
+        rm -rf node_modules/                                                    && \
+        echo " - Installing dependencies"                                       && \
+        npm install --registry=$NPM_REGISTRY  >/dev/null
 
-# Bundle app source
-COPY . /opt/app-root/src
+FROM node:14.17.5 AS runtime
+
+LABEL name="just drop it"                                      \
+    description="Just Drop It"                                 \
+    url="https://github.com/Orange-OpenSource/just-drop-it"    \
+    maintainer="no-one@neverland.com"
+
+COPY  --from=build /build/  /application/
+
+WORKDIR /application/
 
 EXPOSE 8080
+
 CMD [ "npm", "start" ]
 

@@ -1,0 +1,42 @@
+//-
+ just-drop-it
+ Copyright (C) 2016 Orange
+ Authors: Benjamin Einaudi  benjamin.einaudi@orange.com
+          Arnaud Ruffin arnaud.ruffin@orange.com
+
+ This file is part of just-drop-it.
+
+ just-drop-it is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
+extends modal_layout.pug
+block modal_title
+    | What's new
+block modal_body
+    h6 UI evolution
+    p Migration to boosted 4 and redesign of the UI... You saw it, right?
+    h6 User friendly url generation
+    p More readable, but it is random. We are not responsible if you get some nasty word associations!
+    h6 Increased transfer speed
+    p By handling sending process in web workers we increased transfer speed (especially when using chrome with a background tab)
+    h6 Error on http disconnections
+    p Sometimes http connections are force closed (by a proxy for instance) when lasting too long. We haven't figured any solution for that yet, but at least we will warn you if it happens.
+    h6 Multi-send support
+    p You are now able to send a file to multiple recipients at the same time. The generated link will work as long as you don't close your browser.
+    h6 IE support on reception
+    p Your friends suffering from Internet Explorer addiction will be able to <b>receive</b> files (not to send, we are not that nice).
+    h6 Open Source
+    p Our project is now hosted on&nbsp;
+        a(href="https://github.com/Orange-OpenSource/just-drop-it") GitHub
+        |   under&nbsp;
+        i
+            a(href="https://github.com/Orange-OpenSource/just-drop-it/blob/master/LICENSE") GPLv2 License
