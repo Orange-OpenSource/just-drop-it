@@ -43,7 +43,7 @@
     "uglify-js": "3.14.1"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
+    "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions",
     "start": "ts-node index.ts",
     "start-dev": " DEBUG=app* ts-node-dev index.ts",
     "test": "mocha --require ts-node/register --ui bdd  test/test_transfert.ts"
