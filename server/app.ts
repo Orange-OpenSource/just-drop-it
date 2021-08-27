@@ -58,7 +58,6 @@ export class App {
         this.app.use(express.static(path.join(__dirname, 'public')));
 
         this.app.use(express.static(__dirname + '/../node_modules/boosted/dist'));
-        this.app.use(express.static(__dirname + '/../node_modules/tether/dist'));
         this.app.use(express.static(__dirname + '/../node_modules/jquery/dist'));
         this.app.use(express.static(__dirname + '/../node_modules/jquery-file-download/src/Scripts'));
         this.app.use(express.static(__dirname + '/../node_modules/clipboard/dist'));

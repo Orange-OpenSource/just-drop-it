@@ -24,17 +24,23 @@ script.
         var rowDiv = $("<div>", {role: "alert"})
             .addClass("alert")
             .addClass(alert? "alert-danger": "alert-info")
-            .addClass("alert-dismissible fade in");
+            .addClass("alert-dismissible fade show");
+
+        //<span class="alert-icon"><span class="visually-hidden">Warning</span></span>
+        var iconSpan= $("<span>", {}).addClass("alert-icon")
+
+       rowDiv.append(iconSpan);
+
         var buttonProperties = {type: "button"};
-        buttonProperties["data-dismiss"] = "alert";
-        buttonProperties["aria-label"] = "Close";
-        var spanProperties = {};
-        spanProperties["aria-hidden"] = "true";
+        buttonProperties["data-bs-dismiss"] = "alert";
+
+        var closeButtonAccessibility =  $("<span>", {}).addClass("visually-hidden")
+
         rowDiv.append(
             $("<button>", buttonProperties)
-                .addClass("close")
-                .append($("<span>", spanProperties)
-                    .html("&times;"))
+                .addClass("btn-close")
+                .append(closeButtonAccessibility
+                    .html("close"))
         );
         rowDiv.append(message);
         var userMessages = $("#userMessages");

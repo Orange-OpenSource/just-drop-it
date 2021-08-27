@@ -40,10 +40,9 @@ SenderHandler.prototype = {
         this.receiverInfos = {};
         const that = this;
 
-        const socketParams = {path : "/_ws/socket.io/"};
+        const socketParams = {path: "/_ws/socket.io/"};
 
         this.socket = io('/send', socketParams);
-
 
         this.socket.on('connect', function () {
             debug("connect - %s - %s", this.id, this.io.engine.transport.name);
@@ -109,17 +108,7 @@ SenderHandler.prototype = {
         });
     },
 
-    setNavigationStep: function(step) {
-        $(".o-stepbar > ol > li").each(function (idx) {
-            if(step > idx) {
-                $(this).removeClass("current");
-                $(this).addClass("done");
-            }
-            else if(step == idx){
-                $(this).addClass("current");
-            }
-        });
-    },
+
 
     fileIsReady: function (fileToTransfert) {
         var sizeDisplay = fileToTransfert.size > (1024 * 1024) ? Math.round(fileToTransfert.size / 1024 / 1024) + " Mo" :
@@ -136,36 +125,30 @@ SenderHandler.prototype = {
         $('#copyLinkContainer').show(500);
         $('#warning-window').show(500);
         $('#selectFileContainer').hide(500);
-        this.setNavigationStep(1);
+
     },
 
-    receiverIsReady: function(receiverId) {
+    receiverIsReady: function (receiverId) {
         $('#copyLinkContainer').hide();
-        this.setNavigationStep(2);
+
         $('#transfertMessage').html("Transfer in progress...");
 
         //init container
-        var transferContainer = $('#transferContainer');
+        const transferContainer = $('#transferContainer');
         transferContainer.show();
 
-        var rowReceiverTemplate = $("#rowReceiverTemplate");
-        var newRow = rowReceiverTemplate.clone();
+        const rowReceiverTemplate = $("#rowReceiverTemplate");
+        const newRow = rowReceiverTemplate.clone();
         newRow.removeAttr("id");
         newRow.show();
-        var linkRemove = newRow.find(".icon-delete");
-        linkRemove.on("click", function (e) {
-            e.preventDefault();
-            newRow.hide();
-        });
-        linkRemove.tooltip();
 
-        var pbContainer = newRow.children(".col-xs-8");
-        var transferProgressBar = pbContainer.find("progress");
-        var displayProgressBar = pbContainer.find(".text-xs-center");
-        displayProgressBar.attr("id", "progress-"+receiverId);
-        transferProgressBar.attr("aria-describedby", "progress-"+receiverId);
+
+        const pbContainer = newRow.children(".col-8");
+        const transferProgressBar = pbContainer.find(".progress-bar");
+
+        transferProgressBar.attr("aria-describedby", "progress-" + receiverId);
         transferContainer.append(newRow);
-        this.receiverInfos[receiverId] = new ReceiverInfo(pbContainer, transferProgressBar, displayProgressBar, linkRemove);
+        this.receiverInfos[receiverId] = new ReceiverInfo(newRow, transferProgressBar);
 
         this.startUpload(receiverId);
     },
@@ -191,32 +174,26 @@ SenderHandler.prototype = {
 
     displayProgress: function (receiverId, percent) {
         debug("displayProgress - %s - %d", receiverId, percent);
-        var receiver = this.receiverInfos[receiverId];
+        const receiver = this.receiverInfos[receiverId];
         //update progress bar
-        receiver.progressBar.attr('value', percent);
         receiver.progressBar.attr('aria-valuenow', percent);
-        receiver.displayProgressBar.html(percent + '%');
+        receiver.progressBar.width(percent + '%')
+
+        receiver.progressBar.html(percent + '%');
     },
 
     transfertEnded: function (receiverId, isError, notif) {
-        var receiverInfo = this.receiverInfos[receiverId];
+        const receiverInfo = this.receiverInfos[receiverId];
         receiverInfo.deactivate(isError);
-        var progressBarContainer = receiverInfo.progressBarContainer;
-        var spanResultProperties = {};
-        spanResultProperties["data-toggle"] = "tooltip";
-        spanResultProperties["data-placement"] = "right";
-        spanResultProperties["title"] = isError? "Transfer failed" : "Transfer successful";
-        var spanResult = $("<span>", spanResultProperties)
-            .addClass(isError? "icon-Thumb-down" : "icon-Thumb-up")
-            .addClass("big-icon");
-        progressBarContainer.empty();
-        progressBarContainer.append($("<p>")
-            .addClass(isError ? "text-danger" : "text-success")
-            .append(spanResult)
-        );
-        spanResult.tooltip();
-        receiverInfo.removeLinkContainer.show();
+        receiverInfo.row.find("#state-progress").hide()
+        if (isError) {
+            //TODO show the error message somewhre... receiverInfo.row.find("#state-ko").prop('title', notif);
+            receiverInfo.row.find("#state-ko").show()
 
+        } else {
+            receiverInfo.row.find("#state-ok").show()
+
+        }
         jdNotif.notify("Transfer ended", notif);
 
     }
@@ -225,12 +202,12 @@ SenderHandler.prototype = {
 
 function sendFile(isLocal) {
 
-    var senderHandler = new SenderHandler(isLocal);
+    const senderHandler = new SenderHandler(isLocal);
 
     $("#clipboardcopyok").hide();
 
-    var clipboard = new ClipboardJS('#copy-button');
-    clipboard.on('success', function(e) {
+    const clipboard = new ClipboardJS('#copy-button');
+    clipboard.on('success', function (e) {
         console.info('Copied to clipboard:', e.text);
         $("#clipboardcopyok").show(300);
         e.clearSelection();
@@ -278,19 +255,17 @@ function sendFile(isLocal) {
 
 
 /******************************************************************/
-function ReceiverInfo(progressBarContainer, progressBar, displayProgressBar, removeLinkContainer) {
-    this.init(progressBarContainer, progressBar, displayProgressBar, removeLinkContainer);
+function ReceiverInfo(row, progressBar) {
+    this.init(row, progressBar);
 };
 
 ReceiverInfo.prototype = {
     constructor: ReceiverInfo,
-    init: function (progressBarContainer, progressBar, displayProgressBar, removeLinkContainer) {
+    init: function (row, progressBar) {
         this.active = false;
         this.stream = null;
         this.progressBar = progressBar;
-        this.displayProgressBar = displayProgressBar;
-        this.progressBarContainer = progressBarContainer;
-        this.removeLinkContainer = removeLinkContainer;
+        this.row = row;
     },
     activate: function (stream) {
         this.stream = stream;

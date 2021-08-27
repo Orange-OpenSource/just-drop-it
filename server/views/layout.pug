@@ -20,20 +20,16 @@
  along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
 
 doctype html
-html
+html.h-100
     head
         meta(charset="utf-8")
         meta(http-equiv="X-UA-Compatible" content="IE=edge")
         meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
         title Just drop it
         if isLocal
-            link(rel='stylesheet', href='/css/orangeIcons.css')
             link(rel='stylesheet', href='/css/boosted.css')
-            link(rel='stylesheet', href='/css/tether.css')
         else
-            link(rel='stylesheet', href='/css/orangeIcons.min.css')
             link(rel='stylesheet', href='/css/boosted.min.css')
-            link(rel='stylesheet', href='/css/tether.min.css')
         link(rel='stylesheet', href='/css/justdropit.css')
 
         block extra_styles
@@ -42,16 +38,15 @@ html
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         //script(src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js")
         //script(src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js")
         if isLocal
             script(src="/jquery.js")
-            script(src="/js/tether.js")
             script(src="/js/boosted.js")
             script(src="/js/common-libraries.js")
             script(src="/js/jdropit-whatsnew.js")
             script(src="/js/jdropit-notif.js")
         else
             script(src="/jquery.min.js")
-            script(src="/js/tether.min.js")
             script(src="/js/boosted.min.js")
             script(src="/js/common-libraries.min.js")
             script(src="/js/jdropit-whatsnew.min.js")
@@ -69,22 +64,26 @@ html
                     return this.replace(/^\s+|\s+$/g, '');
                 }
             }
+
         block extra_scripts
-    body
+    body.d-flex.flex-column.h-100
         include ./header.pug
-        main
+        main.flex-shrink-0
             div.alert.alert-warning#warning-window(style="display: none;")
-                                span.icon-Warningimportant(aria-hidden="true")
-                                span.sr-only Warning:
-                                span
-                                    | &nbsp; Don't close this window!
+                                span.alert-icon
+                                    span.visually-hidden Warning
+                                div
+                                    h4.alert-heading Don't close this window!
+                                    p Your browser needs be opened during the whole transfer.
+
             div.container
 
                 include ./user_messages.pug
                 block content
         include ./footer.pug
 
-
+    script.
+        feather.replace()
 
 
 

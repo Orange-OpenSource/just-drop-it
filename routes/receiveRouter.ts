@@ -37,22 +37,22 @@ export class ReceiveRouter {
 
     dao = Dao.getInstance();
 
-    get(){
+    get() {
         let self = this;
-        self.router.get(this.servePagePath + ':id', function (req: Request, res: Response, next: NextFunction) {
+        self.router.get(this.servePagePath + ':id', (req: Request, res: Response, next: NextFunction) => {
             const uri = req.params.id;
-            self.dao.getSenderFromUri(uri, function (sender) {
+            self.dao.getSenderFromUri(uri, (sender) => {
                 debug('receive - rendering receive for uri %s', uri);
                 res.render('receive', {
                     isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
                     jdropitVersion: process.env.npm_package_version,
-                    infoMessage : typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
-                    dumbContent : "",
+                    infoMessage: typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
+                    dumbContent: "",
                     fileName: sender.fileName,
                     fileSize: sender.fileSize,
                     senderId: sender.senderId
                 });
-            }, function () {
+            }, () => {
                 error('receive - file not found %s', uri);
                 const err = new DisplayError('Unknown transfer reference');
                 err.status = 404;
@@ -62,20 +62,20 @@ export class ReceiveRouter {
         });
 
 
-        this.router.get(self.downloadPath + ':id/:receiverId', function (req: Request, res: Response, next: NextFunction) {
+        this.router.get(self.downloadPath + ':id/:receiverId', (req: Request, res: Response, next: NextFunction) => {
             const fileId = req.params.id;
             const receiverId = req.params.receiverId;
 
-            function getNumberOfBytesSent() {
+            const getNumberOfBytesSent = () => {
                 //req.socket or res.connection
                 const socket = req.socket;
-                return socket.bytesWritten + socket.bufferSize;
+                return socket.bytesWritten + socket.writableLength;
             }
 
-            function encodeFileName(fileName: string) {
-                var result = [];
-                for (var cpt = 0; cpt < fileName.length; cpt++) {
-                    var currentChar = fileName[cpt];
+            const encodeFileName = (fileName: string) => {
+                const result = [];
+                for (let cpt = 0; cpt < fileName.length; cpt++) {
+                    const currentChar = fileName[cpt];
                     if ((currentChar >= 'a' && currentChar <= 'z') || (currentChar >= 'A' && currentChar <= 'Z') || (currentChar >= '0' && currentChar <= '9')
                         || currentChar == '.' || currentChar == '_' || currentChar == '(' || currentChar == ')' || currentChar == '[' || currentChar == ']' || currentChar == ' ') {
                         result.push(currentChar);
@@ -85,7 +85,7 @@ export class ReceiveRouter {
             }
 
 
-            self.dao.getReceiver(fileId, receiverId, function (receiver) {
+            self.dao.getReceiver(fileId, receiverId, (receiver) => {
                 debug('download - serving file %s', fileId);
                 const initSize = getNumberOfBytesSent();
                 const sendDate = false;
@@ -111,7 +111,7 @@ export class ReceiveRouter {
 
 
                 receiver.stream.pipe(res);
-                function getBodyWritten() {
+                const getBodyWritten = () => {
                     return getNumberOfBytesSent() - headSize - initSize;
                 }
 
@@ -120,20 +120,20 @@ export class ReceiveRouter {
                 let numberOfCycleSameSize = 0;
                 debug("download - %s  - after head - %d sent", receiverId, getNumberOfBytesSent());
 
-                function sendPercent(percent: number) {
+                const sendPercent = (percent: number) => {
                     if (percent > lastPercentSent) {
                         receiver.notifySent(percent);
                         lastPercentSent = percent;
                     }
                 }
 
-                function notifySent() {
+                const notifySent = () => {
                     const nbBytesSent = getBodyWritten();
                     //Having a NaN here means the interval has not been cleared properly when it should have been
-                    if(isNaN(nbBytesSent)){
+                    if (isNaN(nbBytesSent)) {
                         error("download - %s - task of notification has not been cleared properly", receiverId);
                         clearInterval(intervalId);
-                    }else {
+                    } else {
                         debug("%s  - running - %d sent", receiverId, nbBytesSent);
                         if (nbBytesSent > lastNumberOfBytesSent) {
                             numberOfCycleSameSize = 0;
@@ -153,7 +153,7 @@ export class ReceiveRouter {
 
                 const intervalId = setInterval(notifySent, CHECK_SEND_DELAY_IN_MS);
 
-                receiver.clean = function () {
+                receiver.clean = () => {
                     clearInterval(intervalId);
                     const nbBytesSent = getBodyWritten();
                     if (!isNaN(nbBytesSent) && nbBytesSent < receiver.sender.fileSize! && res.socket != null) {
@@ -165,7 +165,7 @@ export class ReceiveRouter {
                 };
 
 
-                res.on('finish', function () {
+                res.on('finish', () => {
                     debug("download - finish - event - %s", receiverId);
                     const nbBytesSent = getBodyWritten();
                     if (nbBytesSent < receiver.sender.fileSize!) {
@@ -177,16 +177,16 @@ export class ReceiveRouter {
                         receiver.completed();
                     }
                 });
-                res.on('close', function () {
+                res.on('close', () => {
                     error("download - %s - connection closed by other part", receiverId);
                     receiver.disconnected();
                 });
 
-            }, function () {
+            }, () => {
                 error('download - file not found or not prepared: %s/%s', fileId, receiverId);
                 const err = new DisplayError('Unknown transfer reference');
                 err.status = 404;
-                err.sub_message = fileId+"/"+receiverId;
+                err.sub_message = fileId + "/" + receiverId;
                 next(err);
             });
         });

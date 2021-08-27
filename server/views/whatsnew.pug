@@ -22,19 +22,19 @@ extends modal_layout.pug
 block modal_title
     | What's new
 block modal_body
-    h5 UI evolution
+    h6 UI evolution
     p Migration to boosted 4 and redesign of the UI... You saw it, right?
-    h5 User friendly url generation
+    h6 User friendly url generation
     p More readable, but it is random. We are not responsible if you get some nasty word associations!
-    h5 Increased transfer speed
+    h6 Increased transfer speed
     p By handling sending process in web workers we increased transfer speed (especially when using chrome with a background tab)
-    h5 Error on http disconnections
+    h6 Error on http disconnections
     p Sometimes http connections are force closed (by a proxy for instance) when lasting too long. We haven't figured any solution for that yet, but at least we will warn you if it happens.
-    h5 Multi-send support
+    h6 Multi-send support
     p You are now able to send a file to multiple recipients at the same time. The generated link will work as long as you don't close your browser.
-    h5 IE support on reception
+    h6 IE support on reception
     p Your friends suffering from Internet Explorer addiction will be able to <b>receive</b> files (not to send, we are not that nice).
-    h5 Open Source
+    h6 Open Source
     p Our project is now hosted on&nbsp;
         a(href="https://github.com/Orange-OpenSource/just-drop-it") GitHub
         |   under&nbsp;
