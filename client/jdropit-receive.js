@@ -20,6 +20,7 @@
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 "use strict";
 var debug = require('debug')('justdropit:receive'),
     io = require('socket.io-client');
@@ -30,8 +31,7 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
     this.filename = fileName,
         this.filesize = fileSize,
         this.socket = null,
-        this.progressBar = $("#progress"),
-        this.displayProgressBar = $("#progress-display"),
+        this.progressBar = $(".progress-bar"),
         this.totalTries = 0,
         this._init(isLocal, senderId);
     //TODO debug filename
@@ -42,8 +42,8 @@ function ReceiverHandler(isLocal, senderId, fileName, fileSize) {
 ReceiverHandler.prototype.displayProgress = function (percent) {
     debug("displayProgress=%d", percent);
     this.progressBar.attr('aria-valuenow', percent);
-    this.progressBar.width(percent+ '%')
-    this.displayProgressBar.html(percent + '%');
+    this.progressBar.width(percent + '%')
+    this.progressBar.html(percent + '%');
 };
 
 ReceiverHandler.prototype.downloadComplete = function () {
@@ -59,6 +59,8 @@ ReceiverHandler.prototype.downloadComplete = function () {
 
 
 ReceiverHandler.prototype.downloadError = function (notif, message) {
+    debug("downloadError");
+    debug(notif);
     jdNotif.notify("Oh no!", notif);
     $("#errorMessage").html(message);
     $('#errorContainer').show(500);
@@ -73,9 +75,11 @@ ReceiverHandler.prototype.startDownload = function (url) {
     this.totalTries++;
     var that = this;
     $('#filename').html(this.filename + " (" + Math.round(this.filesize / 1024 / 1024) + " Mo)");
-    $.fileDownload(url).fail(function () {
+    $.fileDownload(url).fail(function (error) {
+        debug("error during file download");
+        debug(error)
         appendError("Error while downloading file " + that.filename);
-    });
+    })
 };
 
 
@@ -109,12 +113,13 @@ ReceiverHandler.prototype._init = function (isLocal, senderId) {
     });
 
     this.socket.on('server_transfer_complete', function () {
+        // fix #48.
         that.downloadComplete();
     });
     this.socket.on('server_transfer_timeout', function () {
         that.downloadError("Download failed", "You did not download the file");
     });
     this.socket.on('server_transfer_disconnected', function () {
-        that.downloadError("Download failed", "You did not download the file");
+        that.downloadComplete();
     });
 };

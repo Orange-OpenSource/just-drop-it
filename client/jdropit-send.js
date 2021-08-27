@@ -174,7 +174,7 @@ SenderHandler.prototype = {
 
     displayProgress: function (receiverId, percent) {
         debug("displayProgress - %s - %d", receiverId, percent);
-        var receiver = this.receiverInfos[receiverId];
+        const receiver = this.receiverInfos[receiverId];
         //update progress bar
         receiver.progressBar.attr('aria-valuenow', percent);
         receiver.progressBar.width(percent + '%')
