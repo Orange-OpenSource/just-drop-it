@@ -182,10 +182,11 @@ export class ReceiveRouter {
                     // to avoid unsync when client receiver is closing too fast: when receiving a close event, wait a few for last timer event. If sent = 100%, act as if normal completion
                     setTimeout(() => {
 
-                        if(lastPercentSent != 100){
+                        if(lastPercentSent < 99){
                             receiver.disconnected();
                         }else{
                             debug("unsync workaround")
+                            sendPercent(100);
                             receiver.completed();
                         }
                         },1000
