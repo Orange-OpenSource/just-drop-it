@@ -19,38 +19,40 @@
  * You should have received a copy of the GNU General Public License
  * along with just-drop-it.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import Debug from "debug";
-import {Request, Response} from "express";
-import Utils from "../server/utils";
 
-
-const debug = Debug("app:routes:send");
+const debug = Debug("app:utils");
 debug.log = console.log.bind(console);
 
-export class SendRouter {
-    router = require('express').Router();
+export default class Utils {
 
-    get() {
-        /* GET home page. */
-        this.router.get('/', function (req: Request, res: Response) {
-            debug('serving view');
-            res.render('send', {
-                isLocal: Utils.isDevDeployment(),
-                jdropitVersion: Utils.getVersion(),
-                infoMessage: Utils.getUserMessage(),
-                dumbContent: Utils.getADumbQuote()
-            });
-        });
+    static getVersion(): string {
+        return process.env.npm_package_version || "unknown";
+    }
 
-        /* GET home page. */
-        this.router.get('/no_ie', function (req: Request, res: Response) {
-            debug('serving no ie');
-            res.render('no_ie', {title: "Sorry, your browser is not compatible"});
-        });
+    static isDevDeployment(): boolean {
+        return process.env.NODE_ENV !== "production";
+    }
 
-        return this.router
+    static getUserMessage() : string  {
+        return  process.env.USER_INFO_MESSAGE || "";
+    }
+
+    static getADumbQuote() : string {
+        const dumbQuotes = ["Let us ease your file transfers",
+            "Making the world a better place",
+            "Make file transfers, not war",
+            "When file transfer becomes pleasure",
+            "File transfer is not a fatality",
+            "Helping humanity thrive"];
+        return  dumbQuotes[Math.floor(Math.random() * dumbQuotes.length)];
     }
 
 }
+
+
+
+
+
+
 

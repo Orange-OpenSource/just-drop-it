@@ -32,6 +32,7 @@ import {Express, NextFunction, Request, Response} from "express";
 import {ReceiveRouter} from "../routes/receiveRouter";
 import {AdminRouter} from "../routes/admin";
 import {JavascriptLibsRouter} from "../routes/javascriptLibsRouter";
+import Utils from "./utils";
 
 export class App {
 
@@ -91,8 +92,8 @@ export class App {
                 res.status(err.status || 500);
                 res.render('error', {
                     dumbContent: "",
-                    isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-                    jdropitVersion: process.env.npm_package_version,
+                    isLocal: Utils.isDevDeployment(),
+                    jdropitVersion: Utils.getVersion(),
                     message: err.message,
                     sub_message: err.sub_message,
                     error: err
@@ -107,8 +108,8 @@ export class App {
             res.status(err.status || 500);
             res.render('error', {
                 dumbContent: "",
-                isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-                jdropitVersion: process.env.npm_package_version,
+                isLocal: Utils.isDevDeployment(),
+                jdropitVersion: Utils.getVersion(),
                 message: err.message,
                 sub_message: err.sub_message,
                 stack: err.stack

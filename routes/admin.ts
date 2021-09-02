@@ -23,6 +23,7 @@
 import Debug from "debug";
 import {Dao, FileReceiver, FileSender} from "../server/dao";
 import {Request, Response} from "express";
+import Utils from "../server/utils";
 
 const debug = Debug("app:routes:admin");
 debug.log = console.log.bind(console);
@@ -32,15 +33,15 @@ export class AdminRouter {
 
     dao = Dao.getInstance();
 
-    get(){
+    get() {
         const self = this;
-        this.router.get('/', function(req: Request, res: Response) {
+        this.router.get('/', function (req: Request, res: Response) {
 
 
-            const senders : Object[]= [];
+            const senders: Object[] = [];
             self.dao.eachSender((sender) => {
-                const receivers: String[] =[];
-                const senderUIObject = {id : sender.senderId, receivers : receivers, fileName: sender.fileName};
+                const receivers: String[] = [];
+                const senderUIObject = {id: sender.senderId, receivers: receivers, fileName: sender.fileName};
                 sender.eachReceiver((receiver: FileReceiver) => {
                     senderUIObject.receivers.push(receiver.receiverId);
                 });
@@ -48,13 +49,14 @@ export class AdminRouter {
             })
 
 
-
             debug([...self.dao.senders.values()])
-            res.render('admin', {title : "Just drop it Admin",
-                isLocal : typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-                jdropitVersion : process.env.npm_package_version,
-                dumbContent : "",
-                senders :senders });
+            res.render('admin', {
+                title: "Just drop it Admin",
+                isLocal: Utils.isDevDeployment(),
+                jdropitVersion: Utils.getVersion(),
+                dumbContent: "",
+                senders: senders
+            });
         });
 
         return this.router;

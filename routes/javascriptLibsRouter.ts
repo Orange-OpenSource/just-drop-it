@@ -25,6 +25,7 @@ import * as Buffer from "buffer";
 
 import Debug from "debug";
 import {Request, Response} from "express";
+import Utils from "../server/utils";
 
 const debug = Debug("app:routes:javascript");
 debug.log = console.log.bind(console);
@@ -34,7 +35,7 @@ export class JavascriptLibsRouter {
 
     read = require('fs').readFileSync;
 
-    isLocal: boolean = typeof process.env.OPENSHIFT_NODEJS_IP === "undefined";
+    isLocal: boolean = Utils.isDevDeployment();
     uglifyJS = require("uglify-js");
 
     private _routeLibrary(libName: string, sourceLoader: () => string, reloadOnLocal: boolean) {
