@@ -24,6 +24,7 @@ import Debug from "debug";
 import {Dao} from "../server/dao";
 import {NextFunction, Request, Response} from "express";
 import {DisplayError} from "./displayError";
+import Utils from "../server/utils";
 
 const debug = Debug("app:routes:receive");
 const error = Debug("app:routes:receive");
@@ -44,9 +45,9 @@ export class ReceiveRouter {
             self.dao.getSenderFromUri(uri, (sender) => {
                 debug('receive - rendering receive for uri %s', uri);
                 res.render('receive', {
-                    isLocal: typeof process.env.OPENSHIFT_NODEJS_IP === "undefined",
-                    jdropitVersion: process.env.npm_package_version,
-                    infoMessage: typeof process.env.USER_INFO_MESSAGE === "undefined" ? "" : process.env.USER_INFO_MESSAGE,
+                    isLocal: Utils.isDevDeployment(),
+                    jdropitVersion: Utils.getVersion(),
+                    infoMessage: Utils.getUserMessage(),
                     dumbContent: "",
                     fileName: sender.fileName,
                     fileSize: sender.fileSize,
