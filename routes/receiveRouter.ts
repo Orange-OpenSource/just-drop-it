@@ -142,7 +142,7 @@ export class ReceiveRouter {
                                 const percent = Math.floor((nbBytesSent * 100) / receiver.sender.fileSize!);
                                 sendPercent(percent);
                             }
-                        } else if (nbBytesSent == receiver.sender.fileSize || nbBytesSent < receiver.sender.fileSize!
+                        } else if (nbBytesSent >= receiver.sender.fileSize! || nbBytesSent < receiver.sender.fileSize!
                             && ++numberOfCycleSameSize == Math.floor(TIMEOUT_IN_MS / CHECK_SEND_DELAY_IN_MS)) {
                             //download is completed or user is in timeout. Forcing close of response
                             //that will trigger the finish/end event
@@ -179,7 +179,17 @@ export class ReceiveRouter {
                 });
                 res.on('close', () => {
                     error("download - %s - connection closed by other part", receiverId);
-                    receiver.disconnected();
+                    // to avoid unsync when client receiver is closing too fast: when receiving a close event, wait a few for last timer event. If sent = 100%, act as if normal completion
+                    setTimeout(() => {
+
+                        if(lastPercentSent != 100){
+                            receiver.disconnected();
+                        }else{
+                            debug("unsync workaround")
+                            receiver.completed();
+                        }
+                        },1000
+                    );
                 });
 
             }, () => {
