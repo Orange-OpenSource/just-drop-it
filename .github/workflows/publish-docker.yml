@@ -43,5 +43,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: orange-opensource/just-drop-it:${{github.ref_name}}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
