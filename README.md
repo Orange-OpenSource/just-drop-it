@@ -1,5 +1,7 @@
 # Just Drop It
 
+> ⚠️ **Please note that this project has been archived and is no longer maintained**
+
 [![Build Status](https://travis-ci.org/Orange-OpenSource/just-drop-it.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/just-drop-it)
 
 just-drop-it allows you to simply and instantly send a file to a friend, whatever your network configuration (proxies, VPN, and such). Just open your browser, drop the file in it and send the generated link to your friend : the file will be beamed to him without being stored on any platform.
